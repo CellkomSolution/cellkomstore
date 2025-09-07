@@ -8,11 +8,13 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetFooter,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 import { Separator } from "./ui/separator";
 import Image from "next/image";
+import Link from "next/link";
 
 const formatRupiah = (amount: number) => {
   return new Intl.NumberFormat("id-ID", {
@@ -87,7 +89,11 @@ export function CartSheet() {
                         <span>Total</span>
                         <span>{formatRupiah(totalPrice)}</span>
                     </div>
-                    <Button size="lg" className="w-full">Checkout</Button>
+                    <SheetClose asChild>
+                      <Button size="lg" className="w-full" asChild>
+                        <Link href="/checkout">Checkout</Link>
+                      </Button>
+                    </SheetClose>
                 </div>
             </SheetFooter>
           </>
