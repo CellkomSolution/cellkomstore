@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Facebook, Instagram, Twitter, Youtube, Linkedin, Mail, Phone } from 'lucide-react';
+import { Separator } from './ui/separator'; // Menambahkan import untuk Separator
 
 export function Footer() {
   return (
