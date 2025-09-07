@@ -13,20 +13,20 @@ import Autoplay from "embla-carousel-autoplay";
 
 const carouselImages = [
   {
-    src: "https://placehold.co/1200x480/3b82f6/ffffff?text=Promo+Gila-Gilaan!",
-    alt: "Promo 1",
+    src: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?q=80&w=1200&auto=format&fit=crop",
+    alt: "Diskon Elektronik Besar-besaran",
   },
   {
-    src: "https://placehold.co/1200x480/10b981/ffffff?text=Gratis+Ongkir",
-    alt: "Promo 2",
+    src: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200&auto=format&fit=crop",
+    alt: "Fashion Sale Akhir Pekan",
   },
   {
-    src: "https://placehold.co/1200x480/f97316/ffffff?text=Cashback+Spesial",
-    alt: "Promo 3",
+    src: "https://images.unsplash.com/photo-1526178613552-2b45c6c302f0?q=80&w=1200&auto=format&fit=crop",
+    alt: "Promo Kebutuhan Rumah Tangga",
   },
   {
-    src: "https://placehold.co/1200x480/ec4899/ffffff?text=Produk+Terbaru",
-    alt: "Promo 4",
+    src: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?q=80&w=1200&auto=format&fit=crop",
+    alt: "Produk Kecantikan Terbaru",
   },
 ];
 
