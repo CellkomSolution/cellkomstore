@@ -2,20 +2,12 @@
 
 import * as React from "react";
 import { notFound } from "next/navigation";
-import { mockProducts, flashSaleProducts } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, ShieldCheck, Truck, Store } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import type { Product } from "@/lib/mock-data";
-
-// Helper function to find a product in any of our mock data arrays
-function getProductById(id: number): Product | undefined {
-  const allProducts = [...mockProducts, ...flashSaleProducts];
-  // Remove duplicates in case a product is in both lists
-  const uniqueProducts = Array.from(new Map(allProducts.map(p => [p.id, p])).values());
-  return uniqueProducts.find((p) => p.id === id);
-}
+import { getProductById } from "@/lib/supabase-queries"; // Import fungsi Supabase
 
 const formatRupiah = (amount: number) => {
   return new Intl.NumberFormat("id-ID", {
@@ -27,20 +19,37 @@ const formatRupiah = (amount: number) => {
 };
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  // Menggunakan React.use() untuk membungkus params
   const unwrappedParams = React.use(params);
   const { id } = unwrappedParams;
   const { addItem } = useCart();
-  const productId = parseInt(id, 10);
   
-  if (isNaN(productId)) {
-      notFound();
+  const [product, setProduct] = React.useState<Product | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchProduct() {
+      setIsLoading(true);
+      const fetchedProduct = await getProductById(id);
+      if (fetchedProduct) {
+        setProduct(fetchedProduct);
+      } else {
+        notFound(); // If product not found, trigger Next.js notFound
+      }
+      setIsLoading(false);
+    }
+    fetchProduct();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <p>Memuat detail produk...</p>
+      </div>
+    );
   }
-  
-  const product = getProductById(productId);
 
   if (!product) {
-    notFound();
+    return null; // notFound() will handle this
   }
 
   const handleAddToCart = () => {

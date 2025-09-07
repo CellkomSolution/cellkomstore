@@ -1,9 +1,13 @@
 import { Zap, ChevronRight } from "lucide-react";
-import { flashSaleProducts } from "@/lib/mock-data";
 import { ProductCard } from "./product-card";
 import { CountdownTimer } from "./countdown-timer";
+import { Product } from "@/lib/mock-data"; // Import Product interface
 
-export function FlashSale() {
+interface FlashSaleProps {
+  initialProducts: Product[];
+}
+
+export function FlashSale({ initialProducts }: FlashSaleProps) {
   // Set flash sale to end in 24 hours from now
   const saleEndDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
@@ -22,7 +26,7 @@ export function FlashSale() {
         </a>
       </div>
       <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
-        {flashSaleProducts.map((product) => (
+        {initialProducts.map((product) => (
           <div key={product.id} className="w-40 sm:w-48 flex-shrink-0">
             <ProductCard product={product} />
           </div>
