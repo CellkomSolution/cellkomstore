@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/context/session-context";
-import { createClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client"; // Mengimpor instance 'supabase' yang sudah dibuat
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,8 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export default function ProfilePage() {
   const { user, isLoading: isSessionLoading } = useSession();
   const router = useRouter();
-  const supabase = createClient();
+  // Menggunakan instance supabase yang sudah diimpor
+  // const supabase = createClient(); // Baris ini dihapus karena supabase sudah diimpor
 
   const [profile, setProfile] = React.useState<ProfileFormValues | null>(null);
   const [isProfileLoading, setIsProfileLoading] = React.useState(true);
