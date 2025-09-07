@@ -1,0 +1,61 @@
+import { Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import type { Product } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
+
+interface ProductCardProps {
+  product: Product;
+}
+
+export function ProductCard({ product }: ProductCardProps) {
+  const formatRupiah = (amount: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const discountPercentage = product.originalPrice
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
+
+  return (
+    <Card className="overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
+      <a href="#" className="block">
+        <CardContent className="p-0">
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-full h-48 object-cover"
+          />
+          <div className="p-4 space-y-2">
+            <h3 className="font-medium text-sm h-10 leading-tight text-foreground line-clamp-2">
+              {product.name}
+            </h3>
+            <p className="font-bold text-lg text-foreground">
+              {formatRupiah(product.price)}
+            </p>
+            {product.originalPrice && (
+              <div className="flex items-center gap-2">
+                <Badge variant="destructive" className="text-xs">{discountPercentage}%</Badge>
+                <span className="text-xs text-muted-foreground line-through">
+                  {formatRupiah(product.originalPrice)}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center text-xs text-muted-foreground pt-2">
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+              <span>{product.rating}</span>
+              <span className="mx-1">|</span>
+              <span>Terjual {product.soldCount}</span>
+            </div>
+            <p className="text-xs text-muted-foreground">{product.location}</p>
+          </div>
+        </CardContent>
+      </a>
+    </Card>
+  );
+}
