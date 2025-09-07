@@ -14,9 +14,8 @@ const categoryMap: { [key: string]: string } = {
   "kesehatan-kecantikan": "Kesehatan & Kecantikan",
 };
 
-export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const unwrappedParams = React.use(params);
-  const { slug } = unwrappedParams;
+export default function CategoryPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const categoryName = categoryMap[slug];
 
   const [products, setProducts] = React.useState<Product[]>([]);

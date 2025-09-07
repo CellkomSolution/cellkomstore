@@ -18,9 +18,8 @@ const formatRupiah = (amount: number) => {
   }).format(amount);
 };
 
-export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const unwrappedParams = React.use(params);
-  const { id } = unwrappedParams;
+export default function ProductDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const { addItem } = useCart();
   
   const [product, setProduct] = React.useState<Product | null>(null);
