@@ -1,12 +1,13 @@
 import { Smartphone, Laptop, Shirt, Gem, Heart, MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 
 const categories = [
-  { name: "Handphone & Tablet", icon: Smartphone },
-  { name: "Komputer & Laptop", icon: Laptop },
-  { name: "Pakaian Pria", icon: Shirt },
-  { name: "Perhiasan & Logam", icon: Gem },
-  { name: "Kesehatan & Kecantikan", icon: Heart },
-  { name: "Lihat Semua", icon: MoreHorizontal },
+  { name: "Handphone & Tablet", icon: Smartphone, slug: "handphone-tablet" },
+  { name: "Komputer & Laptop", icon: Laptop, slug: "komputer-laptop" },
+  { name: "Pakaian Pria", icon: Shirt, slug: "pakaian-pria" },
+  { name: "Perhiasan & Logam", icon: Gem, slug: "perhiasan-logam" },
+  { name: "Kesehatan & Kecantikan", icon: Heart, slug: "kesehatan-kecantikan" },
+  { name: "Lihat Semua", icon: MoreHorizontal, slug: "/" },
 ];
 
 export function CategoryIcons() {
@@ -14,8 +15,8 @@ export function CategoryIcons() {
     <div className="bg-card p-4 rounded-lg border">
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 text-center">
         {categories.map((category) => (
-          <a
-            href="#"
+          <Link
+            href={category.slug === "/" ? "/" : `/category/${category.slug}`}
             key={category.name}
             className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-accent transition-colors group"
           >
@@ -23,7 +24,7 @@ export function CategoryIcons() {
               <category.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
             <span className="text-xs font-medium text-foreground">{category.name}</span>
-          </a>
+          </Link>
         ))}
       </div>
     </div>

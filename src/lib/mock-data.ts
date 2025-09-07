@@ -7,6 +7,7 @@ export interface Product {
   location: string;
   rating: number;
   soldCount: string;
+  category: string;
 }
 
 export const mockProducts: Product[] = [
@@ -19,6 +20,7 @@ export const mockProducts: Product[] = [
     location: "Jakarta Pusat",
     rating: 4.9,
     soldCount: "1rb+",
+    category: "handphone-tablet",
   },
   {
     id: 2,
@@ -28,6 +30,7 @@ export const mockProducts: Product[] = [
     location: "Surabaya",
     rating: 5.0,
     soldCount: "500+",
+    category: "komputer-laptop",
   },
   {
     id: 3,
@@ -38,6 +41,7 @@ export const mockProducts: Product[] = [
     location: "Bandung",
     rating: 4.8,
     soldCount: "750+",
+    category: "komputer-laptop",
   },
   {
     id: 4,
@@ -47,6 +51,7 @@ export const mockProducts: Product[] = [
     location: "Medan",
     rating: 4.9,
     soldCount: "200+",
+    category: "handphone-tablet",
   },
   {
     id: 5,
@@ -57,6 +62,7 @@ export const mockProducts: Product[] = [
     location: "Jakarta Selatan",
     rating: 4.7,
     soldCount: "10rb+",
+    category: "pakaian-pria",
   },
   {
     id: 6,
@@ -66,6 +72,7 @@ export const mockProducts: Product[] = [
     location: "Yogyakarta",
     rating: 5.0,
     soldCount: "1rb+",
+    category: "komputer-laptop",
   },
 ];
 
@@ -79,6 +86,7 @@ export const flashSaleProducts: Product[] = [
     location: "Jakarta Selatan",
     rating: 4.7,
     soldCount: "10rb+",
+    category: "pakaian-pria",
   },
   {
     id: 1,
@@ -89,6 +97,7 @@ export const flashSaleProducts: Product[] = [
     location: "Jakarta Pusat",
     rating: 4.9,
     soldCount: "1rb+",
+    category: "handphone-tablet",
   },
   {
     id: 3,
@@ -99,6 +108,7 @@ export const flashSaleProducts: Product[] = [
     location: "Bandung",
     rating: 4.8,
     soldCount: "750+",
+    category: "komputer-laptop",
   },
     {
     id: 4,
@@ -109,5 +119,6 @@ export const flashSaleProducts: Product[] = [
     location: "Medan",
     rating: 4.9,
     soldCount: "200+",
+    category: "handphone-tablet",
   },
 ];
