@@ -7,6 +7,7 @@ import type { Product } from "@/lib/mock-data";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useCart } from "@/context/cart-context";
+import Image from "next/image"; // Import Image component
 
 interface ProductCardProps {
   product: Product;
@@ -39,10 +40,13 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={`/product/${product.id}`} className="block flex flex-col flex-grow">
         <CardContent className="p-0 flex flex-col flex-grow">
           <div className="relative">
-            <img
+            <Image
               src={product.imageUrl}
               alt={product.name}
+              width={160} // Lebar default, sesuaikan jika perlu
+              height={192} // Tinggi default (h-48), sesuaikan jika perlu
               className="w-full h-48 object-cover"
+              priority // Tambahkan priority jika gambar ini penting untuk LCP
             />
              <Button 
                 size="sm" 

@@ -10,6 +10,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import Image from "next/image"; // Import Image component
 
 const carouselImages = [
   {
@@ -47,7 +48,14 @@ export function HeroCarousel() {
           <CarouselItem key={index}>
             <Card className="overflow-hidden rounded-lg">
               <CardContent className="flex aspect-[2.5/1] items-center justify-center p-0">
-                <img src={image.src} alt={image.alt} className="w-full h-full object-cover" />
+                <Image 
+                  src={image.src} 
+                  alt={image.alt} 
+                  width={1200} // Lebar asli gambar
+                  height={480} // Tinggi yang sesuai dengan rasio aspek 2.5/1 (1200 / 2.5)
+                  className="w-full h-full object-cover" 
+                  priority={index === 0} // Prioritaskan gambar pertama untuk LCP
+                />
               </CardContent>
             </Card>
           </CarouselItem>
