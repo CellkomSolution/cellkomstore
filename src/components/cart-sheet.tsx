@@ -15,15 +15,7 @@ import { useCart } from "@/context/cart-context";
 import { Separator } from "./ui/separator";
 import Image from "next/image";
 import Link from "next/link";
-
-const formatRupiah = (amount: number) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
+import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
 export function CartSheet() {
   const { items, totalItems, totalPrice, removeItem, updateItemQuantity } = useCart();
