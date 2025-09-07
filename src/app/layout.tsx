@@ -20,8 +20,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Blibli Clone",
-  description: "Blibli.com clone built with Next.js",
+  title: "Cellkom Store",
+  description: "Cellkom Store built with Next.js",
 };
 
 export default function RootLayout({

@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useSession } from "@/context/session-context"; // Import useSession
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import Image from "next/image"; // Import Image component
 
 export function Header() {
   const { searchQuery, setSearchQuery } = useSearch();
@@ -20,8 +21,8 @@ export function Header() {
       {/* Top bar */}
       <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300">
         <div className="container mx-auto px-4 py-1 flex justify-end space-x-4">
-          <a href="#" className="hover:underline">Jual di Blibli</a>
-          <a href="#" className="hover:underline">Blibli Ticket Rewards</a>
+          <a href="#" className="hover:underline">Jual di Cellkom Store</a>
+          <a href="#" className="hover:underline">Cellkom Ticket Rewards</a>
           <a href="#" className="hover:underline">Cek daftar pesanan</a>
         </div>
       </div>
@@ -30,10 +31,16 @@ export function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center gap-4">
           <div className="flex items-center gap-8">
-            <Link href="/" className="text-2xl font-bold text-blue-600">
-              blibli
+            <Link href="/" className="text-2xl font-bold text-primary">
+              <Image 
+                src="/teslogocellkom.png" 
+                alt="Cellkom Store Logo" 
+                width={120} // Sesuaikan lebar sesuai kebutuhan
+                height={30} // Sesuaikan tinggi sesuai kebutuhan
+                className="h-auto"
+              />
             </Link>
-            <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 cursor-pointer hover:text-blue-600">
+            <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 cursor-pointer hover:text-primary">
               <Menu className="h-5 w-5" />
               <span>Kategori</span>
             </div>

@@ -19,9 +19,9 @@
 
     --popover-foreground: 0 0% 3.9%;
 
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 0 84.2% 60.2%; /* Red primary color */
 
-    --primary-foreground: 0 0% 98%;
+    --primary-foreground: 0 0% 98%; /* White foreground for red primary */
 
     --secondary: 0 0% 96.1%;
 
@@ -43,7 +43,7 @@
 
     --input: 0 0% 89.8%;
 
-    --ring: 221.2 83.2% 53.3%;
+    --ring: 0 84.2% 60.2%; /* Red ring color */
 
     --chart-1: 12 76% 61%;
 
@@ -87,9 +87,9 @@
 
     --popover-foreground: 0 0% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 0 70% 50%; /* Darker red primary color */
 
-    --primary-foreground: 0 0% 9%;
+    --primary-foreground: 0 0% 9%; /* Black foreground for dark red primary */
 
     --secondary: 0 0% 14.9%;
 
@@ -111,7 +111,7 @@
 
     --input: 0 0% 14.9%;
 
-    --ring: 217.2 91.2% 59.8%;
+    --ring: 0 70% 50%; /* Darker red ring color */
 
     --chart-1: 220 70% 50%;
 

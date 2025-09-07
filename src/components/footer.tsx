@@ -1,7 +1,7 @@
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 
 const FooterLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <a href={href} className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:underline">
+  <a href={href} className="text-sm text-gray-600 dark:text-gray-400 hover:text-primary hover:underline">
     {children}
   </a>
 );
@@ -15,9 +15,9 @@ export function Footer() {
     <footer className="bg-gray-100 dark:bg-gray-900 border-t">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-          {/* Blibli Column */}
+          {/* Cellkom Store Column */}
           <div className="col-span-2 lg:col-span-1">
-            <h2 className="text-2xl font-bold text-blue-600 mb-4">blibli</h2>
+            <h2 className="text-2xl font-bold text-primary mb-4">Cellkom Store</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Pilihan tepat untuk belanja online.
             </p>
@@ -29,27 +29,27 @@ export function Footer() {
             <div className="flex flex-col space-y-2">
               <FooterLink href="#">Bantuan</FooterLink>
               <FooterLink href="#">Metode Pembayaran</FooterLink>
-              <FooterLink href="#">Blibli Ticket</FooterLink>
+              <FooterLink href="#">Cellkom Ticket</FooterLink>
               <FooterLink href="#">Hubungi Kami</FooterLink>
             </div>
           </div>
 
-          {/* Jelajahi Blibli */}
+          {/* Jelajahi Cellkom Store */}
           <div>
-            <FooterTitle>Jelajahi Blibli</FooterTitle>
+            <FooterTitle>Jelajahi Cellkom Store</FooterTitle>
             <div className="flex flex-col space-y-2">
-              <FooterLink href="#">Tentang Blibli</FooterLink>
+              <FooterLink href="#">Tentang Cellkom Store</FooterLink>
               <FooterLink href="#">Karir</FooterLink>
-              <FooterLink href="#">Blog Blibli</FooterLink>
-              <FooterLink href="#">Blibli Official Store</FooterLink>
+              <FooterLink href="#">Blog Cellkom Store</FooterLink>
+              <FooterLink href="#">Cellkom Official Store</FooterLink>
             </div>
           </div>
 
           {/* Kerjasama */}
           <div>
-            <FooterTitle>Kerjasama</FooterTitle>
+            <FooterTitle>Kerjasama</FooterTItle>
             <div className="flex flex-col space-y-2">
-              <FooterLink href="#">Jual di Blibli</FooterLink>
+              <FooterLink href="#">Jual di Cellkom Store</FooterLink>
               <FooterLink href="#">Affiliate Program</FooterLink>
             </div>
           </div>
@@ -58,17 +58,17 @@ export function Footer() {
           <div>
             <FooterTitle>Ikuti Kami</FooterTitle>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-500 hover:text-blue-600"><Facebook size={20} /></a>
-              <a href="#" className="text-gray-500 hover:text-blue-600"><Twitter size={20} /></a>
-              <a href="#" className="text-gray-500 hover:text-blue-600"><Instagram size={20} /></a>
-              <a href="#" className="text-gray-500 hover:text-blue-600"><Youtube size={20} /></a>
+              <a href="#" className="text-gray-500 hover:text-primary"><Facebook size={20} /></a>
+              <a href="#" className="text-gray-500 hover:text-primary"><Twitter size={20} /></a>
+              <a href="#" className="text-gray-500 hover:text-primary"><Instagram size={20} /></a>
+              <a href="#" className="text-gray-500 hover:text-primary"><Youtube size={20} /></a>
             </div>
           </div>
         </div>
       </div>
       <div className="bg-gray-200 dark:bg-gray-800">
         <div className="container mx-auto px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Blibli Kloningan. Dibuat dengan ❤️.</p>
+          <p>&copy; {new Date().getFullYear()} Cellkom Store. Dibuat dengan ❤️.</p>
         </div>
       </div>
     </footer>

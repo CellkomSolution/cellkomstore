@@ -31,7 +31,7 @@ export default function AuthPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-64px)] p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-blue-600">Selamat Datang di Blibli</CardTitle>
+          <CardTitle className="text-2xl font-bold text-primary">Selamat Datang di Cellkom Store</CardTitle>
           <CardDescription>Masuk atau daftar untuk melanjutkan</CardDescription>
         </CardHeader>
         <CardContent>
