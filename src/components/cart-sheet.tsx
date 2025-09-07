@@ -1,6 +1,6 @@
 "use client";
 
-import { ShoppingCart, Trash2 } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -24,7 +24,7 @@ const formatRupiah = (amount: number) => {
 };
 
 export function CartSheet() {
-  const { items, totalItems, totalPrice, removeItem } = useCart();
+  const { items, totalItems, totalPrice, removeItem, updateItemQuantity } = useCart();
 
   return (
     <Sheet>
@@ -48,7 +48,7 @@ export function CartSheet() {
             <div className="flex-1 overflow-y-auto -mx-6 px-6">
               <ul className="divide-y">
                 {items.map((item) => (
-                  <li key={item.id} className="flex items-center py-4">
+                  <li key={item.id} className="flex py-4">
                     <Image
                       src={item.imageUrl}
                       alt={item.name}
@@ -56,15 +56,26 @@ export function CartSheet() {
                       height={64}
                       className="rounded-md object-cover"
                     />
-                    <div className="ml-4 flex-1">
-                      <p className="font-medium text-sm line-clamp-2">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.quantity} x {formatRupiah(item.price)}
-                      </p>
+                    <div className="ml-4 flex flex-1 flex-col justify-between">
+                      <div>
+                        <p className="font-medium text-sm line-clamp-2">{item.name}</p>
+                        <p className="text-sm font-bold mt-1">{formatRupiah(item.price)}</p>
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center border rounded-md">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateItemQuantity(item.id, item.quantity - 1)}>
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateItemQuantity(item.id, item.quantity + 1)}>
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)}>
+                          <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                        </Button>
+                      </div>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
                   </li>
                 ))}
               </ul>
