@@ -27,11 +27,12 @@ const formatRupiah = (amount: number) => {
 };
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params; // Diperbaiki: Langsung destructure dari params
+  // Menggunakan React.use() untuk membungkus params
+  const unwrappedParams = React.use(Promise.resolve(params));
+  const { id } = unwrappedParams;
   const { addItem } = useCart();
   const productId = parseInt(id, 10);
   
-  // React needs to know this component is stateful from the start
   if (isNaN(productId)) {
       notFound();
   }
