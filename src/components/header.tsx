@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CartSheet } from "./cart-sheet";
 import { useSearch } from "@/context/search-context";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Header() {
   const { searchQuery, setSearchQuery } = useSearch();
@@ -46,7 +47,8 @@ export function Header() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             <CartSheet />
             <div className="hidden md:flex items-center gap-2">
               <Button variant="outline">Masuk</Button>
