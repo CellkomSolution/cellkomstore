@@ -26,9 +26,9 @@ const formatRupiah = (amount: number) => {
   }).format(amount);
 };
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
+export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   // Menggunakan React.use() untuk membungkus params
-  const unwrappedParams = React.use(Promise.resolve(params));
+  const unwrappedParams = React.use(params);
   const { id } = unwrappedParams;
   const { addItem } = useCart();
   const productId = parseInt(id, 10);

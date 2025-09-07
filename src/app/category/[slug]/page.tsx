@@ -13,8 +13,9 @@ const categoryMap: { [key: string]: string } = {
   "kesehatan-kecantikan": "Kesehatan & Kecantikan",
 };
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const { slug } = params; // Diperbaiki: Langsung destructure dari params
+export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
+  const unwrappedParams = React.use(params); // Unwrap the promise
+  const { slug } = unwrappedParams;
   const categoryName = categoryMap[slug];
 
   if (!categoryName) {
