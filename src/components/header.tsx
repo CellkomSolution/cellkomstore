@@ -70,6 +70,12 @@ export function Header() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href="/profile" className="cursor-pointer">
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Profil</span>
+                        </Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
                         <LogOut className="mr-2 h-4 w-4" />
                         <span>Keluar</span>
