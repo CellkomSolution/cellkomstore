@@ -4,8 +4,11 @@ import { Menu, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CartSheet } from "./cart-sheet";
+import { useSearch } from "@/context/search-context";
 
 export function Header() {
+  const { searchQuery, setSearchQuery } = useSearch();
+
   return (
     <header className="border-b sticky top-0 bg-background/95 backdrop-blur-sm z-50">
       {/* Top bar */}
@@ -34,8 +37,10 @@ export function Header() {
             <div className="relative">
               <Input
                 type="search"
-                placeholder="xiaomi redmi note 14 pro 5 g"
+                placeholder="Cari produk impianmu..."
                 className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             </div>
@@ -59,6 +64,8 @@ export function Header() {
                 type="search"
                 placeholder="Cari produk di sini..."
                 className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             </div>
