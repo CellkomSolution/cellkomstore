@@ -1,8 +1,9 @@
 "use client";
 
-import { Menu, Search, ShoppingCart, User } from "lucide-react";
+import { Menu, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CartSheet } from "./cart-sheet";
 
 export function Header() {
   return (
@@ -41,10 +42,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon">
-              <ShoppingCart className="h-6 w-6" />
-              <span className="sr-only">Keranjang Belanja</span>
-            </Button>
+            <CartSheet />
             <div className="hidden md:flex items-center gap-2">
               <Button variant="outline">Masuk</Button>
               <Button>Daftar</Button>

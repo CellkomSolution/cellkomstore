@@ -1,12 +1,19 @@
+"use client";
+
 import { notFound } from "next/navigation";
 import { mockProducts, flashSaleProducts } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, ShieldCheck, Truck, Store } from "lucide-react";
+import { useCart } from "@/context/cart-context";
+import type { Product } from "@/lib/mock-data";
 
 // Helper function to find a product in any of our mock data arrays
-function getProductById(id: number) {
-  return mockProducts.find((p) => p.id === id) || flashSaleProducts.find((p) => p.id === id);
+function getProductById(id: number): Product | undefined {
+  const allProducts = [...mockProducts, ...flashSaleProducts];
+  // Remove duplicates in case a product is in both lists
+  const uniqueProducts = Array.from(new Map(allProducts.map(p => [p.id, p])).values());
+  return uniqueProducts.find((p) => p.id === id);
 }
 
 const formatRupiah = (amount: number) => {
@@ -19,12 +26,23 @@ const formatRupiah = (amount: number) => {
 };
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
+  const { addItem } = useCart();
   const productId = parseInt(params.id, 10);
+  
+  // React needs to know this component is stateful from the start
+  if (isNaN(productId)) {
+      notFound();
+  }
+  
   const product = getProductById(productId);
 
   if (!product) {
     notFound();
   }
+
+  const handleAddToCart = () => {
+    addItem(product);
+  };
 
   const discountPercentage = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -71,7 +89,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            <Button size="lg" className="flex-1">Tambah ke Keranjang</Button>
+            <Button size="lg" className="flex-1" onClick={handleAddToCart}>Tambah ke Keranjang</Button>
             <Button size="lg" variant="outline" className="flex-1">Beli Langsung</Button>
           </div>
 
