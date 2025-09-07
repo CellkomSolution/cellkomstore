@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { useCart } from "@/context/cart-context";
 import Image from "next/image"; // Import Image component
+import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
 interface ProductCardProps {
   product: Product;
@@ -15,15 +16,6 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
-
-  const formatRupiah = (amount: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();

@@ -8,15 +8,7 @@ import { Star, ShieldCheck, Truck, Store } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import type { Product } from "@/lib/mock-data";
 import { getProductById } from "@/lib/supabase-queries"; // Import fungsi Supabase
-
-const formatRupiah = (amount: number) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
+import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const { id } = params;

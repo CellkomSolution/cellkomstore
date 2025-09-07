@@ -20,15 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-
-const formatRupiah = (amount: number) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
+import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nama harus diisi (min. 2 karakter)." }),
