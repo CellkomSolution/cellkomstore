@@ -1,14 +1,19 @@
 "use client";
 
-import { Menu, Search, User } from "lucide-react";
+import { Menu, Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CartSheet } from "./cart-sheet";
 import { useSearch } from "@/context/search-context";
 import { ThemeToggle } from "./theme-toggle";
+import Link from "next/link";
+import { useSession } from "@/context/session-context"; // Import useSession
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function Header() {
   const { searchQuery, setSearchQuery } = useSearch();
+  const { session, user, signOut, isLoading } = useSession(); // Use session context
 
   return (
     <header className="border-b sticky top-0 bg-background/95 backdrop-blur-sm z-50">
@@ -25,9 +30,9 @@ export function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center gap-4">
           <div className="flex items-center gap-8">
-            <a href="/" className="text-2xl font-bold text-blue-600">
+            <Link href="/" className="text-2xl font-bold text-blue-600">
               blibli
-            </a>
+            </Link>
             <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 cursor-pointer hover:text-blue-600">
               <Menu className="h-5 w-5" />
               <span>Kategori</span>
@@ -50,14 +55,45 @@ export function Header() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <CartSheet />
-            <div className="hidden md:flex items-center gap-2">
-              <Button variant="outline">Masuk</Button>
-              <Button>Daftar</Button>
-            </div>
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <User className="h-6 w-6" />
-              <span className="sr-only">Akun</span>
-            </Button>
+            {!isLoading && (
+              <>
+                {session ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>
+                            {user?.email ? user.email[0].toUpperCase() : <User className="h-5 w-5" />}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="sr-only">Akun</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Keluar</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <div className="hidden md:flex items-center gap-2">
+                    <Button variant="outline" asChild>
+                      <Link href="/auth">Masuk</Link>
+                    </Button>
+                    <Button asChild>
+                      <Link href="/auth">Daftar</Link>
+                    </Button>
+                  </div>
+                )}
+                <Button variant="ghost" size="icon" className="md:hidden" asChild>
+                  <Link href="/auth">
+                    <User className="h-6 w-6" />
+                    <span className="sr-only">Akun</span>
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
         <div className="mt-2 sm:hidden">

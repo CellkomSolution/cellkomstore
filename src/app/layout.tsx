@@ -7,6 +7,7 @@ import { CartProvider } from "@/context/cart-context";
 import { Toaster } from "@/components/ui/sonner";
 import { SearchProvider } from "@/context/search-context";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SessionProvider } from "@/context/session-context"; // Import SessionProvider
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,14 +40,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SearchProvider>
-            <CartProvider>
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-              <Toaster richColors />
-            </CartProvider>
-          </SearchProvider>
+          <SessionProvider> {/* Wrap with SessionProvider */}
+            <SearchProvider>
+              <CartProvider>
+                <Header />
+                <main className="flex-grow">{children}</main>
+                <Footer />
+                <Toaster richColors />
+              </CartProvider>
+            </SearchProvider>
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>
