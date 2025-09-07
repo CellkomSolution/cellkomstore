@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { supabase } from "@/integrations/supabase/client"; // Mengimpor instance 'supabase' yang sudah dibuat
+import { supabase } from "@/integrations/supabase/client";
 import { type Session, type User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
@@ -16,7 +16,6 @@ interface SessionContextType {
 const SessionContext = React.createContext<SessionContextType | undefined>(undefined);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-  // Menggunakan instance supabase yang sudah diimpor
   const [session, setSession] = React.useState<Session | null>(null);
   const [user, setUser] = React.useState<User | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -35,8 +34,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         } else {
           setSession(null);
           setUser(null);
-          if (pathname !== "/auth") {
-            router.push("/auth"); // Redirect unauthenticated users to auth page
+          // Only redirect to /auth if the user is unauthenticated AND not on the home page or auth page
+          if (pathname !== "/auth" && pathname !== "/") {
+            router.push("/auth");
           }
         }
         setIsLoading(false);
@@ -52,7 +52,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           router.push("/");
         }
       } else {
-        if (pathname !== "/auth") {
+        // Unauthenticated
+        // Only redirect to /auth if the user is unauthenticated AND not on the home page or auth page
+        if (pathname !== "/auth" && pathname !== "/") {
           router.push("/auth");
         }
       }
@@ -60,7 +62,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [pathname, router]); // Menghapus supabase dari dependency array karena sudah diimpor langsung
+  }, [pathname, router]);
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
