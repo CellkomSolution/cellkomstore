@@ -27,7 +27,7 @@ const formatRupiah = (amount: number) => {
 };
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const { id } = React.use(params);
+  const { id } = params; // Diperbaiki: Langsung destructure dari params
   const { addItem } = useCart();
   const productId = parseInt(id, 10);
   

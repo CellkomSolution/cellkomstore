@@ -14,7 +14,7 @@ const categoryMap: { [key: string]: string } = {
 };
 
 export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const { slug } = React.use(params);
+  const { slug } = params; // Diperbaiki: Langsung destructure dari params
   const categoryName = categoryMap[slug];
 
   if (!categoryName) {
