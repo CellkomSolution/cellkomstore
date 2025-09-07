@@ -11,8 +11,8 @@ export interface CartItem extends Product {
 interface CartContextType {
   items: CartItem[];
   addItem: (item: Product) => void;
-  removeItem: (itemId: number) => void;
-  updateItemQuantity: (itemId: number, quantity: number) => void;
+  removeItem: (itemId: string) => void; // Diperbarui ke string
+  updateItemQuantity: (itemId: string, quantity: number) => void; // Diperbarui ke string
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -36,12 +36,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     toast.success(`${product.name} ditambahkan ke keranjang!`);
   };
 
-  const removeItem = (itemId: number) => {
+  const removeItem = (itemId: string) => { // Diperbarui ke string
     setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
     toast.error("Item dihapus dari keranjang.");
   };
 
-  const updateItemQuantity = (itemId: number, quantity: number) => {
+  const updateItemQuantity = (itemId: string, quantity: number) => { // Diperbarui ke string
     if (quantity <= 0) {
       removeItem(itemId);
     } else {
