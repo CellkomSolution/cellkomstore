@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { mockProducts } from "@/lib/mock-data";
 import { ProductCard } from "@/components/product-card";
 import { notFound } from "next/navigation";
@@ -13,14 +14,15 @@ const categoryMap: { [key: string]: string } = {
 };
 
 export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const categoryName = categoryMap[params.slug];
+  const { slug } = React.use(params);
+  const categoryName = categoryMap[slug];
 
   if (!categoryName) {
     notFound();
   }
 
   const filteredProducts = mockProducts.filter(
-    (product) => product.category === params.slug
+    (product) => product.category === slug
   );
 
   return (

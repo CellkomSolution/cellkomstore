@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { notFound } from "next/navigation";
 import { mockProducts, flashSaleProducts } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
@@ -26,8 +27,9 @@ const formatRupiah = (amount: number) => {
 };
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
+  const { id } = React.use(params);
   const { addItem } = useCart();
-  const productId = parseInt(params.id, 10);
+  const productId = parseInt(id, 10);
   
   // React needs to know this component is stateful from the start
   if (isNaN(productId)) {
