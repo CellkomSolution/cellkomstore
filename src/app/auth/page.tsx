@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client"; // Mengimpor instance 'supabase' yang sudah dibuat
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useRouter } from "next/navigation";
@@ -9,7 +9,7 @@ import { useSession } from "@/context/session-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AuthPage() {
-  const supabase = createClient();
+  // Menggunakan instance supabase yang sudah diimpor
   const router = useRouter();
   const { session, isLoading } = useSession();
 

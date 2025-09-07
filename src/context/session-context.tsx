@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { createClient } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client"; // Mengimpor instance 'supabase' yang sudah dibuat
 import { type Session, type User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
@@ -16,7 +16,7 @@ interface SessionContextType {
 const SessionContext = React.createContext<SessionContextType | undefined>(undefined);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const supabase = createClient();
+  // Menggunakan instance supabase yang sudah diimpor
   const [session, setSession] = React.useState<Session | null>(null);
   const [user, setUser] = React.useState<User | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -60,7 +60,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [pathname, router, supabase.auth]);
+  }, [pathname, router]); // Menghapus supabase dari dependency array karena sudah diimpor langsung
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
