@@ -29,6 +29,21 @@ interface CarouselBanner {
 
 const carouselBanners: CarouselBanner[] = [
   {
+    productImageSrc: "https://images.unsplash.com/photo-1621609764095-f5285a59195f?q=80&w=600&auto=format&fit=crop", // Charger image
+    alt: "Redigo Cas Dua Perangkat Super Cepat",
+    logoSrc: "/redigo-logo.png",
+    productName: "Cas Dua Perangkat Super Cepat",
+    discountedPrice: 189000,
+    hashtag: "#NOBLABLADIBLIBLI",
+    leftPanelBgColor: "bg-blue-100 dark:bg-blue-950", // Light blue background
+  },
+  {
+    productImageSrc: "https://images.unsplash.com/photo-1508098682726-e2cd07717e0c?q=80&w=600&auto=format&fit=crop", // Stadium image
+    alt: "Premier League",
+    logoSrc: "/premier-league-logo.png",
+    leftPanelBgColor: "bg-purple-200 dark:bg-purple-950", // Light purple background
+  },
+  {
     productImageSrc: "https://plus.unsplash.com/premium_photo-1661764878654-f2ff0e1d265a?q=80&w=600&auto=format&fit=crop", // Example product image (vacuum cleaner)
     alt: "KV 01 Turbo DOUBLE BRUSH",
     logoSrc: "/kurumi-logo.png", // Assuming this logo exists in public
@@ -100,35 +115,35 @@ export function HeroCarousel() {
           {carouselBanners.map((banner, index) => (
             <CarouselItem key={index}>
               <Card className="overflow-hidden rounded-lg">
-                <CardContent className="flex aspect-[2.5/1] p-0 relative">
+                <CardContent className="flex aspect-[4/1] p-0 relative"> {/* Changed aspect ratio here */}
                   {/* Left panel for text content */}
-                  <div className={`relative w-2/3 md:w-1/2 flex flex-col justify-center p-4 md:p-8 lg:p-12 z-10 rounded-l-lg ${banner.leftPanelBgColor || 'bg-white dark:bg-gray-900'}`}>
+                  <div className={`relative w-2/3 md:w-1/2 flex flex-col justify-center p-3 md:p-6 lg:p-8 z-10 rounded-l-lg ${banner.leftPanelBgColor || 'bg-white dark:bg-gray-900'}`}>
                     {banner.logoSrc && (
                       <Image
                         src={banner.logoSrc}
                         alt="Brand Logo"
                         width={100}
                         height={30}
-                        className="h-auto mb-2"
+                        className="h-auto mb-1 md:mb-2"
                       />
                     )}
                     {banner.productName && (
-                      <h3 className="text-xl md:text-3xl font-bold leading-tight text-foreground">
+                      <h3 className="text-lg md:text-2xl font-bold leading-tight text-foreground"> {/* Adjusted text size */}
                         {banner.productName}
                       </h3>
                     )}
                     {banner.originalPrice && (
-                      <p className="text-sm md:text-base line-through text-muted-foreground mt-1">
+                      <p className="text-xs md:text-sm line-through text-muted-foreground mt-0.5"> {/* Adjusted text size */}
                         {formatRupiah(banner.originalPrice)}
                       </p>
                     )}
                     {banner.discountedPrice && (
-                      <p className="text-2xl md:text-4xl font-extrabold text-primary mt-1">
+                      <p className="text-xl md:text-3xl font-extrabold text-primary mt-0.5"> {/* Adjusted text size */}
                         {formatRupiah(banner.discountedPrice)}
                       </p>
                     )}
                     {banner.hashtag && (
-                      <p className="text-xs md:text-sm text-muted-foreground mt-2">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {banner.hashtag}
                       </p>
                     )}
@@ -144,7 +159,7 @@ export function HeroCarousel() {
                       priority={index === 0}
                     />
                     {banner.isNew && (
-                      <Badge variant="destructive" className="absolute top-8 right-8 rotate-12 text-sm px-3 py-1">
+                      <Badge variant="destructive" className="absolute top-4 right-4 rotate-12 text-xs px-2 py-0.5"> {/* Adjusted badge size/position */}
                         NEW
                       </Badge>
                     )}
