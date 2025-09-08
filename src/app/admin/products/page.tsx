@@ -6,15 +6,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getProducts } from "@/lib/supabase-queries";
 import { Product } from "@/lib/mock-data";
-import { Edit, Trash2, PlusCircle } from "lucide-react";
+import { Edit, Trash2, PlusCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { formatRupiah } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = React.useState<Product[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [productToDelete, setProductToDelete] = React.useState<Product | null>(null);
 
   React.useEffect(() => {
     async function fetchProducts() {
@@ -26,10 +41,45 @@ export default function AdminProductsPage() {
     fetchProducts();
   }, []);
 
-  // Placeholder for future delete functionality
-  const handleDeleteProduct = (productId: string) => {
-    console.log("Delete product:", productId);
-    // Implement actual delete logic here
+  const handleDeleteProduct = async () => {
+    if (!productToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      // Delete image from storage first
+      if (productToDelete.imageUrl) {
+        const imageUrlParts = productToDelete.imageUrl.split('/');
+        const fileName = imageUrlParts[imageUrlParts.length - 1];
+        const { error: storageError } = await supabase.storage
+          .from('product-images')
+          .remove([fileName]);
+
+        if (storageError) {
+          console.warn("Failed to delete product image from storage:", storageError.message);
+          // Don't throw error here, proceed with product deletion even if image deletion fails
+        }
+      }
+
+      // Delete product from database
+      const { error: dbError } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", productToDelete.id);
+
+      if (dbError) {
+        throw dbError;
+      }
+
+      setProducts((prevProducts) =>
+        prevProducts.filter((product) => product.id !== productToDelete.id)
+      );
+      toast.success("Produk berhasil dihapus!");
+    } catch (error: any) {
+      toast.error("Gagal menghapus produk: " + error.message);
+    } finally {
+      setIsDeleting(false);
+      setProductToDelete(null);
+    }
   };
 
   return (
@@ -108,10 +158,48 @@ export default function AdminProductsPage() {
                               <span className="sr-only">Edit</span>
                             </Link>
                           </Button>
-                          <Button variant="destructive" size="icon" onClick={() => handleDeleteProduct(product.id)}>
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Hapus</span>
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => setProductToDelete(product)}
+                                disabled={isDeleting}
+                              >
+                                {isDeleting && productToDelete?.id === product.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                                <span className="sr-only">Hapus</span>
+                              </Button>
+                            </AlertDialogTrigger>
+                            {productToDelete?.id === product.id && (
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tindakan ini tidak dapat dibatalkan. Ini akan menghapus produk{" "}
+                                    <span className="font-semibold">{productToDelete.name}</span>{" "}
+                                    secara permanen dari database Anda.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={handleDeleteProduct}
+                                    disabled={isDeleting}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    {isDeleting ? (
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : null}
+                                    Hapus
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            )}
+                          </AlertDialog>
                         </div>
                       </TableCell>
                     </TableRow>
