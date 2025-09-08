@@ -144,35 +144,34 @@ export interface Profile {
 }
 
 // Antarmuka untuk struktur data mentah yang dikembalikan oleh kueri Supabase
-interface RawProfileDataFromSupabase {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  avatar_url: string | null;
-  role: 'user' | 'admin';
-  users: { email: string | null } | null; // Diperbarui: Menggunakan 'users' bukan 'auth_users'
-}
+// Tidak lagi diperlukan karena email diambil langsung dari tabel profiles
+// interface RawProfileDataFromSupabase {
+//   id: string;
+//   first_name: string | null;
+//   last_name: string | null;
+//   avatar_url: string | null;
+//   role: 'user' | 'admin';
+//   users: { email: string | null } | null;
+// }
 
 export async function getAllProfiles(): Promise<Profile[]> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, avatar_url, role, users(email)"); // Diperbarui: Menggunakan 'users(email)'
+    .select("id, first_name, last_name, avatar_url, role, email"); // Mengambil email langsung dari profiles
 
   if (error) {
     console.error("Error fetching all profiles:", error.message || JSON.stringify(error, null, 2) || "Unknown error object.");
     return [];
   }
 
-  // Menggunakan type assertion untuk data mentah melalui 'unknown'
-  const rawData = data as unknown as RawProfileDataFromSupabase[];
-
-  return rawData.map(profile => ({
+  // Data sekarang sudah sesuai dengan interface Profile
+  return data.map(profile => ({
     id: profile.id,
     first_name: profile.first_name,
     last_name: profile.last_name,
     avatar_url: profile.avatar_url,
     role: profile.role,
-    email: profile.users?.email || null, // Diperbarui: Mengakses 'profile.users'
+    email: profile.email, // Mengakses email langsung dari objek profil
   }));
 }
 
