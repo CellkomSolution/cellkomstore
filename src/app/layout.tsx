@@ -5,7 +5,6 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { CartProvider } from "@/context/cart-context";
 import { Toaster } from "@/components/ui/sonner";
-import { SearchProvider } from "@/context/search-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "@/context/session-context"; // Import SessionProvider
 
@@ -41,14 +40,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SessionProvider> {/* Wrap with SessionProvider */}
-            <SearchProvider>
-              <CartProvider>
-                <Header />
-                <main className="flex-grow">{children}</main>
-                <Footer />
-                <Toaster richColors />
-              </CartProvider>
-            </SearchProvider>
+            <CartProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <Toaster richColors />
+            </CartProvider>
           </SessionProvider>
         </ThemeProvider>
       </body>

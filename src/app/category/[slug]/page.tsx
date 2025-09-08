@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { ProductCard } from "@/components/product-card";
+import { ProductGrid } from "@/components/product-grid";
 import { notFound } from "next/navigation";
-import { getProductsByCategory } from "@/lib/supabase-queries"; // Import fungsi Supabase
-import { Product } from "@/lib/mock-data"; // Import Product interface
+import { getProductsByCategory } from "@/lib/supabase-queries";
+import { Product } from "@/lib/mock-data";
 
 const categoryMap: { [key: string]: string } = {
   "handphone-tablet": "Handphone & Tablet",
@@ -28,8 +28,10 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       setProducts(fetchedProducts);
       setIsLoading(false);
     }
-    fetchProducts();
-  }, [slug]);
+    if (categoryName) {
+      fetchProducts();
+    }
+  }, [slug, categoryName]);
 
   if (!categoryName) {
     notFound();
@@ -37,28 +39,13 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-2">Kategori: {categoryName}</h1>
-      <p className="text-muted-foreground mb-6">
-        {isLoading ? "Memuat..." : `Menampilkan ${products.length} produk.`}
-      </p>
-      
-      {isLoading ? (
-        <div className="text-center py-12">
-          <p className="text-lg font-medium text-muted-foreground">Memuat produk...</p>
-        </div>
-      ) : products.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <p className="text-lg font-medium text-muted-foreground">
-            Oops! Belum ada produk di kategori ini.
-          </p>
-        </div>
-      )}
+      <ProductGrid
+        products={products}
+        title={`Kategori: ${categoryName}`}
+        isLoading={isLoading}
+        emptyStateMessage="Oops! Belum ada produk di kategori ini."
+        emptyStateDescription=""
+      />
     </div>
   );
 }

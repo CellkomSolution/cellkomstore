@@ -107,3 +107,29 @@ export async function getProductById(id: string): Promise<Product | null> {
     isFlashSale: data.is_flash_sale,
   };
 }
+
+export async function searchProducts(query: string): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .ilike("name", `%${query}%`)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error searching products:", error);
+    return [];
+  }
+
+  return data.map(item => ({
+    id: item.id,
+    name: item.name,
+    price: item.price,
+    originalPrice: item.original_price,
+    imageUrl: item.image_url,
+    location: item.location,
+    rating: item.rating,
+    soldCount: item.sold_count,
+    category: item.category,
+    isFlashSale: item.is_flash_sale,
+  }));
+}

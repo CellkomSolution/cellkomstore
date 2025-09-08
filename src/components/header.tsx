@@ -1,10 +1,11 @@
 "use client";
 
+import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Menu, Search, User, LogOut, LayoutGrid, MapPin, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CartSheet } from "./cart-sheet";
-import { useSearch } from "@/context/search-context";
 import { ThemeToggle } from "./theme-toggle";
 import Link from "next/link";
 import { useSession } from "@/context/session-context";
@@ -13,8 +14,15 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
 
 export function Header() {
-  const { searchQuery, setSearchQuery } = useSearch();
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const router = useRouter();
   const { session, user, signOut, isLoading } = useSession();
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormEvent>) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+  };
 
   return (
     <header className="border-b sticky top-0 bg-background/95 backdrop-blur-sm z-50">
@@ -55,7 +63,7 @@ export function Header() {
           </div>
 
           <div className="flex-1 max-w-xl hidden sm:flex">
-            <div className="relative flex w-full">
+            <form onSubmit={handleSearchSubmit} className="relative flex w-full">
               <Input
                 type="search"
                 placeholder="Cari produk impianmu..."
@@ -63,11 +71,11 @@ export function Header() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <Button className="rounded-l-none px-4">
+              <Button type="submit" className="rounded-l-none px-4">
                 <Search className="h-5 w-5" />
                 <span className="sr-only">Cari</span>
               </Button>
-            </div>
+            </form>
           </div>
 
           <div className="flex items-center gap-2">
@@ -121,7 +129,7 @@ export function Header() {
           </div>
         </div>
         <div className="mt-2 sm:hidden">
-            <div className="relative flex w-full">
+            <form onSubmit={handleSearchSubmit} className="relative flex w-full">
               <Input
                 type="search"
                 placeholder="Cari produk di sini..."
@@ -129,11 +137,11 @@ export function Header() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <Button className="rounded-l-none px-4">
+              <Button type="submit" className="rounded-l-none px-4">
                 <Search className="h-5 w-5" />
                 <span className="sr-only">Cari</span>
               </Button>
-            </div>
+            </form>
         </div>
       </div>
 

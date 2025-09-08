@@ -2,9 +2,9 @@ import { CategoryIcons } from "@/components/category-icons";
 import { FlashSale } from "@/components/flash-sale";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { ProductGrid } from "@/components/product-grid";
-import { FeatureBadges } from "@/components/feature-badges"; // Import the new component
+import { FeatureBadges } from "@/components/feature-badges";
 import { FeaturedBrands } from "@/components/featured-brands";
-import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase-queries"; // Import fungsi Supabase
+import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase-queries";
 
 export default async function Home() {
   const products = await getProducts();
@@ -20,11 +20,11 @@ export default async function Home() {
       <FeaturedBrands />
       {gadgetProducts.length > 0 && (
         <ProductGrid 
-          initialProducts={gadgetProducts} 
+          products={gadgetProducts} 
           title="Handphone & Tablet Populer" 
         />
       )}
-      <ProductGrid initialProducts={products} />
+      <ProductGrid products={products} title="Produk Pilihan Untukmu" />
     </div>
   );
 }
