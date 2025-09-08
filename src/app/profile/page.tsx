@@ -20,10 +20,12 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { AvatarUploader } from "@/components/avatar-uploader";
+import { Textarea } from "@/components/ui/textarea"; // Import Textarea
 
 const profileFormSchema = z.object({
   first_name: z.string().min(1, { message: "Nama depan tidak boleh kosong." }).optional().or(z.literal("")),
   last_name: z.string().min(1, { message: "Nama belakang tidak boleh kosong." }).optional().or(z.literal("")),
+  bio: z.string().max(500, { message: "Bio tidak boleh lebih dari 500 karakter." }).optional().or(z.literal("")), // Add bio field
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -44,6 +46,7 @@ export default function ProfilePage() {
     defaultValues: {
       first_name: "",
       last_name: "",
+      bio: "", // Default value for bio
     },
     mode: "onChange",
   });
@@ -60,7 +63,7 @@ export default function ProfilePage() {
         setIsProfileLoading(true);
         const { data, error } = await supabase
           .from("profiles")
-          .select("first_name, last_name, avatar_url")
+          .select("first_name, last_name, avatar_url, bio") // Select bio field
           .eq("id", user.id)
           .single();
 
@@ -69,7 +72,11 @@ export default function ProfilePage() {
           toast.error("Gagal memuat profil: " + error.message);
         } else if (data) {
           setProfile(data);
-          form.reset({ first_name: data.first_name || "", last_name: data.last_name || "" });
+          form.reset({ 
+            first_name: data.first_name || "", 
+            last_name: data.last_name || "",
+            bio: data.bio || "", // Set bio value
+          });
         }
         setIsProfileLoading(false);
       }
@@ -86,6 +93,7 @@ export default function ProfilePage() {
       .update({
         first_name: values.first_name,
         last_name: values.last_name,
+        bio: values.bio, // Update bio field
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
@@ -166,6 +174,23 @@ export default function ProfilePage() {
                     <FormLabel>Nama Belakang</FormLabel>
                     <FormControl>
                       <Input placeholder="Nama Belakang" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tentang Saya</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Ceritakan tentang diri Anda..."
+                        className="resize-y min-h-[80px]"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
