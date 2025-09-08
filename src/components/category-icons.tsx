@@ -1,7 +1,19 @@
 "use client";
 
-import * as React from "react";
-import Image from "next/image";
+import {
+  LayoutGrid,
+  Megaphone,
+  Receipt,
+  ShoppingBasket,
+  Smartphone,
+  HeartPulse,
+  Truck,
+  Shirt,
+  Gem,
+  Baby,
+  Car,
+} from "lucide-react";
+import Link from "next/link";
 import {
   Carousel,
   CarouselContent,
@@ -9,66 +21,61 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
-interface Category {
-  name: string;
-  icon: string;
-  slug: string;
-}
-
-const categories: Category[] = [
-  { name: "Handphone & Tablet", icon: "/icons/handphone.png", slug: "handphone-tablet" },
-  { name: "Komputer & Laptop", icon: "/icons/laptop.png", slug: "komputer-laptop" },
-  { name: "Pakaian Pria", icon: "/icons/pakaian-pria.png", slug: "pakaian-pria" },
-  { name: "Perhiasan & Logam", icon: "/icons/perhiasan.png", slug: "perhiasan-logam" },
-  { name: "Kesehatan & Kecantikan", icon: "/icons/kecantikan.png", slug: "kesehatan-kecantikan" },
-  { name: "Olahraga & Outdoor", icon: "/icons/olahraga.png", slug: "olahraga-outdoor" },
-  { name: "Rumah Tangga", icon: "/icons/rumah-tangga.png", slug: "rumah-tangga" },
-  { name: "Otomotif", icon: "/icons/otomotif.png", slug: "otomotif" },
-  { name: "Buku & Alat Tulis", icon: "/icons/buku.png", slug: "buku-alat-tulis" },
-  { name: "Mainan & Hobi", icon: "/icons/mainan.png", slug: "mainan-hobi" },
-  { name: "Makanan & Minuman", icon: "/icons/makanan.png", slug: "makanan-minuman" },
-  { name: "Ibu & Bayi", icon: "/icons/ibu-bayi.png", slug: "ibu-bayi" },
+const categories = [
+  { name: "Lihat semua", icon: LayoutGrid, slug: "/", badge: "Baru" },
+  { name: "Semua Promo", icon: Megaphone, slug: "/promo" },
+  { name: "Tagihan & Isi Ulang", icon: Receipt, slug: "/bills" },
+  { name: "Bliblimart", icon: ShoppingBasket, slug: "/bliblimart" },
+  { name: "Gadget & Elektronik", icon: Smartphone, slug: "/category/handphone-tablet" },
+  { name: "Sport & Wellness", icon: HeartPulse, slug: "/sports" },
+  { name: "Gratis ongkir cepat sampai", icon: Truck, slug: "/shipping-promo", badge: "Baru" },
+  { name: "Pakaian Pria", icon: Shirt, slug: "/category/pakaian-pria" },
+  { name: "Perhiasan & Logam", icon: Gem, slug: "/category/perhiasan-logam" },
+  { name: "Ibu & Anak", icon: Baby, slug: "/category/ibu-anak" },
+  { name: "Otomotif", icon: Car, slug: "/category/otomotif" },
 ];
 
 export function CategoryIcons() {
   return (
-    <div className="bg-gradient-to-br from-background to-card p-3 rounded-lg border">
+    <div className="bg-card p-3 rounded-lg border">
       <Carousel
         opts={{
           align: "start",
-          slidesToScroll: 4,
+          dragFree: true, // Allows for free scrolling like a list
         }}
         className="w-full"
       >
         <CarouselContent className="-ml-2">
           {categories.map((category, index) => (
-            <CarouselItem key={index} className="pl-2 basis-1/4 sm:basis-1/6 md:basis-1/8 lg:basis-1/10 xl:basis-[calc(100%/12)]">
-              <div className="p-1">
-                <Link href={`/category/${category.slug}`} className="flex flex-col items-center text-center group">
-                  <Card className="w-full aspect-square flex items-center justify-center p-2 rounded-lg transition-colors group-hover:bg-primary/10">
-                    <CardContent className="flex aspect-square items-center justify-center p-0">
-                      <Image
-                        src={category.icon}
-                        alt={category.name}
-                        width={48}
-                        height={48}
-                        className="h-10 w-10 md:h-12 md:w-12 object-contain"
-                      />
-                    </CardContent>
-                  </Card>
-                  <p className="mt-2 text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors line-clamp-2">
-                    {category.name}
-                  </p>
-                </Link>
-              </div>
+            <CarouselItem key={index} className="pl-2 basis-auto">
+              <Link
+                href={category.slug}
+                className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors group"
+              >
+                <div className="relative">
+                  <div className="w-10 h-10 bg-background rounded-lg flex items-center justify-center border group-hover:border-primary">
+                    <category.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                  </div>
+                  {category.badge && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-2 -right-3 text-[10px] px-1.5 py-0 leading-tight"
+                    >
+                      {category.badge}
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-xs font-medium text-foreground whitespace-nowrap">
+                  {category.name}
+                </span>
+              </Link>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-0 -translate-x-1/2" />
-        <CarouselNext className="right-0 translate-x-1/2" />
+        <CarouselPrevious className="hidden sm:flex -left-4" />
+        <CarouselNext className="hidden sm:flex -right-4" />
       </Carousel>
     </div>
   );
