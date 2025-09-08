@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Menambahkan AvatarImage
 import { useSession } from "@/context/session-context";
 import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin hook
 
