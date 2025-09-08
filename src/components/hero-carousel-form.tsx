@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import * => as React from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,26 +35,26 @@ const formSchema = z.object({
   type: z.enum(['full-banner', 'three-part'], { message: "Tipe slide harus dipilih." }),
   
   // Common fields
-  product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).nullable().optional(), // Diperbarui
+  product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).nullable().optional(),
   alt: z.string().min(3, { message: "Teks alternatif minimal 3 karakter." }),
-  logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().optional(), // Diperbarui
-  product_name: z.string().nullable().optional(), // Diperbarui
-  original_price: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).nullable().optional(), // Diperbarui
-  discounted_price: z.coerce.number().min(0, { message: "Harga diskon tidak boleh negatif." }).nullable().optional(), // Diperbarui
+  logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().optional(),
+  product_name: z.string().nullable().optional(),
+  original_price: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).nullable().optional(),
+  discounted_price: z.coerce.number().min(0, { message: "Harga diskon tidak boleh negatif." }).nullable().optional(),
   is_new: z.boolean().default(false).optional(),
-  hashtag: z.string().nullable().optional(), // Diperbarui
-  left_panel_bg_color: z.string().nullable().optional(), // Diperbarui
+  hashtag: z.string().nullable().optional(),
+  left_panel_bg_color: z.string().nullable().optional(),
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 
   // Three-part specific fields
-  left_peek_image_url: z.string().url({ message: "URL gambar peek kiri tidak valid." }).nullable().optional(), // Diperbarui
-  left_peek_alt: z.string().nullable().optional(), // Diperbarui
-  left_peek_bg_color: z.string().nullable().optional(), // Diperbarui
-  right_peek_image_url: z.string().url({ message: "URL gambar peek kanan tidak valid." }).nullable().optional(), // Diperbarui
-  right_peek_logo_url: z.string().url({ message: "URL logo peek kanan tidak valid." }).nullable().optional(), // Diperbarui
-  right_peek_alt: z.string().nullable().optional(), // Diperbarui
-  right_peek_bg_color: z.string().nullable().optional(), // Diperbarui
-  right_peek_hashtag: z.string().nullable().optional(), // Diperbarui
+  left_peek_image_url: z.string().url({ message: "URL gambar peek kiri tidak valid." }).nullable().optional(),
+  left_peek_alt: z.string().nullable().optional(),
+  left_peek_bg_color: z.string().nullable().optional(),
+  right_peek_image_url: z.string().url({ message: "URL gambar peek kanan tidak valid." }).nullable().optional(),
+  right_peek_logo_url: z.string().url({ message: "URL logo peek kanan tidak valid." }).nullable().optional(),
+  right_peek_alt: z.string().nullable().optional(),
+  right_peek_bg_color: z.string().nullable().optional(),
+  right_peek_hashtag: z.string().nullable().optional(),
 });
 
 interface HeroCarouselFormProps {
@@ -78,24 +78,24 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: initialData?.type || 'full-banner',
-      product_image_url: initialData?.product_image_url || null, // Diperbarui: default ke null
-      alt: initialData?.alt || "",
-      logo_url: initialData?.logo_url || null, // Diperbarui: default ke null
-      product_name: initialData?.product_name || null, // Diperbarui: default ke null
-      original_price: initialData?.original_price || null, // Diperbarui: default ke null
-      discounted_price: initialData?.discounted_price || null, // Diperbarui: default ke null
-      is_new: initialData?.is_new || false,
-      hashtag: initialData?.hashtag || null, // Diperbarui: default ke null
-      left_panel_bg_color: initialData?.left_panel_bg_color || null, // Diperbarui: default ke null
-      order: initialData?.order || 0,
-      left_peek_image_url: initialData?.left_peek_image_url || null, // Diperbarui: default ke null
-      left_peek_alt: initialData?.left_peek_alt || null, // Diperbarui: default ke null
-      left_peek_bg_color: initialData?.left_peek_bg_color || null, // Diperbarui: default ke null
-      right_peek_image_url: initialData?.right_peek_image_url || null, // Diperbarui: default ke null
-      right_peek_logo_url: initialData?.right_peek_logo_url || null, // Diperbarui: default ke null
-      right_peek_alt: initialData?.right_peek_alt || null, // Diperbarui: default ke null
-      right_peek_bg_color: initialData?.right_peek_bg_color || null, // Diperbarui: default ke null
-      right_peek_hashtag: initialData?.right_peek_hashtag || null, // Diperbarui: default ke null
+      product_image_url: initialData?.product_image_url ?? undefined, // Menggunakan undefined
+      alt: initialData?.alt ?? "",
+      logo_url: initialData?.logo_url ?? undefined, // Menggunakan undefined
+      product_name: initialData?.product_name ?? undefined, // Menggunakan undefined
+      original_price: initialData?.original_price ?? undefined, // Menggunakan undefined
+      discounted_price: initialData?.discounted_price ?? undefined, // Menggunakan undefined
+      is_new: initialData?.is_new ?? false,
+      hashtag: initialData?.hashtag ?? undefined, // Menggunakan undefined
+      left_panel_bg_color: initialData?.left_panel_bg_color ?? undefined, // Menggunakan undefined
+      order: initialData?.order ?? 0,
+      left_peek_image_url: initialData?.left_peek_image_url ?? undefined, // Menggunakan undefined
+      left_peek_alt: initialData?.left_peek_alt ?? undefined, // Menggunakan undefined
+      left_peek_bg_color: initialData?.left_peek_bg_color ?? undefined, // Menggunakan undefined
+      right_peek_image_url: initialData?.right_peek_image_url ?? undefined, // Menggunakan undefined
+      right_peek_logo_url: initialData?.right_peek_logo_url ?? undefined, // Menggunakan undefined
+      right_peek_alt: initialData?.right_peek_alt ?? undefined, // Menggunakan undefined
+      right_peek_bg_color: initialData?.right_peek_bg_color ?? undefined, // Menggunakan undefined
+      right_peek_hashtag: initialData?.right_peek_hashtag ?? undefined, // Menggunakan undefined
     },
   });
 
@@ -234,7 +234,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
             <FormItem>
               <FormLabel>Teks Alternatif (Alt Text)</FormLabel>
               <FormControl>
-                <Input placeholder="Deskripsi singkat gambar untuk aksesibilitas" {...field} />
+                <Input placeholder="Deskripsi singkat gambar untuk aksesibilitas" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormDescription>
                 Penting untuk SEO dan aksesibilitas.
@@ -251,7 +251,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
             <FormItem>
               <FormLabel>Urutan Tampilan</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="0" {...field} />
+                <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
               </FormControl>
               <FormDescription>
                 Angka yang lebih rendah akan muncul lebih dulu.
@@ -279,7 +279,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
             <FormItem>
               <FormLabel>Nama Produk/Judul</FormLabel>
               <FormControl>
-                <Input placeholder="Nama produk atau judul promosi" {...field} />
+                <Input placeholder="Nama produk atau judul promosi" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -293,7 +293,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
               <FormItem>
                 <FormLabel>Harga Asli (Opsional)</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="0" {...field} />
+                  <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
                 </FormControl>
                 <FormDescription>
                   Harga sebelum diskon.
@@ -309,7 +309,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
               <FormItem>
                 <FormLabel>Harga Diskon (Opsional)</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="0" {...field} />
+                  <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
                 </FormControl>
                 <FormDescription>
                   Harga setelah diskon.
@@ -347,7 +347,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
             <FormItem>
               <FormLabel>Hashtag (Opsional)</FormLabel>
               <FormControl>
-                <Input placeholder="#PROMODASYAT" {...field} />
+                <Input placeholder="#PROMODASYAT" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormDescription>
                 Teks kecil di bawah harga/judul.
@@ -363,7 +363,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
             <FormItem>
               <FormLabel>Warna Latar Belakang Panel Kiri (Opsional)</FormLabel>
               <FormControl>
-                <Input placeholder="bg-blue-100 dark:bg-blue-950" {...field} />
+                <Input placeholder="bg-blue-100 dark:bg-blue-950" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormDescription>
                 Kelas Tailwind CSS untuk warna latar belakang panel teks kiri (mis. `bg-red-100 dark:bg-red-900`).
@@ -388,7 +388,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
                 <FormItem>
                   <FormLabel>Teks Alternatif Peek Kiri (Opsional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Deskripsi gambar peek kiri" {...field} />
+                    <Input placeholder="Deskripsi gambar peek kiri" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -401,7 +401,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
                 <FormItem>
                   <FormLabel>Warna Latar Belakang Peek Kiri (Opsional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="bg-gray-100 dark:bg-gray-800" {...field} />
+                    <Input placeholder="bg-gray-100 dark:bg-gray-800" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormDescription>
                     Kelas Tailwind CSS untuk warna latar belakang peek kiri.
@@ -429,7 +429,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
                 <FormItem>
                   <FormLabel>Teks Alternatif Peek Kanan (Opsional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Deskripsi gambar peek kanan" {...field} />
+                    <Input placeholder="Deskripsi gambar peek kanan" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -442,7 +442,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
                 <FormItem>
                   <FormLabel>Warna Latar Belakang Peek Kanan (Opsional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="bg-purple-200 dark:bg-purple-950" {...field} />
+                    <Input placeholder="bg-purple-200 dark:bg-purple-950" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormDescription>
                     Kelas Tailwind CSS untuk warna latar belakang peek kanan.
@@ -458,7 +458,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
                 <FormItem>
                   <FormLabel>Hashtag Peek Kanan (Opsional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="#PROMOHEMAT" {...field} />
+                    <Input placeholder="#PROMOHEMAT" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormDescription>
                     Teks kecil di bawah peek kanan.

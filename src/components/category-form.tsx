@@ -24,7 +24,7 @@ import * as LucideIcons from "lucide-react"; // Import all Lucide icons
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama kategori minimal 3 karakter." }).max(50, { message: "Nama kategori maksimal 50 karakter." }),
   slug: z.string().min(3, { message: "Slug minimal 3 karakter." }).max(50, { message: "Slug maksimal 50 karakter." }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: "Slug harus berupa huruf kecil, angka, dan tanda hubung (tanpa spasi)." }),
-  icon_name: z.string().nullable().optional(), // Diperbarui: memungkinkan null dan opsional
+  icon_name: z.string().nullable().optional(), // Memungkinkan null dan opsional
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
@@ -40,15 +40,15 @@ export function CategoryForm({ initialData, onSubmit, loading = false }: Categor
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: initialData?.name || "",
-      slug: initialData?.slug || "",
-      icon_name: initialData?.icon_name || null, // Diperbarui: default ke null
-      order: initialData?.order || 0,
+      name: initialData?.name ?? "",
+      slug: initialData?.slug ?? "",
+      icon_name: initialData?.icon_name ?? undefined, // Menggunakan undefined untuk optional fields
+      order: initialData?.order ?? 0,
     },
   });
 
   // Function to render Lucide icon dynamically
-  const renderIcon = (iconName: string | null | undefined) => { // Diperbarui: menerima undefined
+  const renderIcon = (iconName: string | null | undefined) => {
     if (!iconName) return null;
     const IconComponent = (LucideIcons as any)[iconName];
     return IconComponent ? <IconComponent className="h-5 w-5 mr-2" /> : null;
@@ -64,7 +64,7 @@ export function CategoryForm({ initialData, onSubmit, loading = false }: Categor
             <FormItem>
               <FormLabel>Nama Kategori</FormLabel>
               <FormControl>
-                <Input placeholder="Contoh: Handphone & Tablet" {...field} />
+                <Input placeholder="Contoh: Handphone & Tablet" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormDescription>
                 Nama kategori yang akan ditampilkan.
@@ -80,7 +80,7 @@ export function CategoryForm({ initialData, onSubmit, loading = false }: Categor
             <FormItem>
               <FormLabel>Slug Kategori</FormLabel>
               <FormControl>
-                <Input placeholder="Contoh: handphone-tablet" {...field} />
+                <Input placeholder="Contoh: handphone-tablet" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormDescription>
                 Slug unik untuk URL (huruf kecil, tanpa spasi, gunakan tanda hubung).
@@ -98,7 +98,7 @@ export function CategoryForm({ initialData, onSubmit, loading = false }: Categor
               <FormControl>
                 <div className="flex items-center">
                   {renderIcon(field.value)}
-                  <Input placeholder="Contoh: Smartphone" {...field} />
+                  <Input placeholder="Contoh: Smartphone" {...field} value={field.value ?? ""} />
                 </div>
               </FormControl>
               <FormDescription>
@@ -115,7 +115,7 @@ export function CategoryForm({ initialData, onSubmit, loading = false }: Categor
             <FormItem>
               <FormLabel>Urutan Tampilan</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="0" {...field} />
+                <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
               </FormControl>
               <FormDescription>
                 Angka yang lebih rendah akan muncul lebih dulu.
