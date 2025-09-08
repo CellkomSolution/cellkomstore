@@ -143,6 +143,16 @@ export interface Profile {
   email: string | null; // Menambahkan email untuk tampilan
 }
 
+// Antarmuka untuk struktur data mentah yang dikembalikan oleh kueri Supabase
+interface RawProfileDataFromSupabase {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+  role: 'user' | 'admin';
+  auth_users: { email: string | null } | null; // Data yang digabungkan dari auth.users
+}
+
 export async function getAllProfiles(): Promise<Profile[]> {
   const { data, error } = await supabase
     .from("profiles")
@@ -153,7 +163,10 @@ export async function getAllProfiles(): Promise<Profile[]> {
     return [];
   }
 
-  return data.map(profile => ({
+  // Menggunakan type assertion untuk data mentah
+  const rawData = data as RawProfileDataFromSupabase[];
+
+  return rawData.map(profile => ({
     id: profile.id,
     first_name: profile.first_name,
     last_name: profile.last_name,
