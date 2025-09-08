@@ -10,9 +10,10 @@ import { getProductById } from "@/lib/supabase-queries";
 import { Product } from "@/lib/mock-data";
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Reusing skeleton for loading state
 
-export default function EditProductPage({ params }: { params: { id: string } }) {
+export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  // Menggunakan React.use() untuk meng-unwrap params
+  const { id } = React.use(params);
   const router = useRouter();
-  const { id } = params;
 
   const [initialData, setInitialData] = React.useState<Product | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
