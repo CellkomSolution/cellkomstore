@@ -44,7 +44,7 @@ const formSchema = z.object({
   is_new: z.boolean().default(false).optional(),
   hashtag: z.string().nullable().optional(),
   left_panel_bg_color: z.string().nullable().optional(),
-  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
+  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }), // Removed .default(0) from schema
 
   // Three-part specific fields
   left_peek_image_url: z.string().url({ message: "URL gambar peek kiri tidak valid." }).nullable().optional(),
@@ -86,7 +86,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
     is_new: initialData?.is_new ?? false,
     hashtag: initialData?.hashtag ?? null,
     left_panel_bg_color: initialData?.left_panel_bg_color ?? null,
-    order: initialData?.order ?? 0, // This should be fine as it's a number
+    order: initialData?.order ?? 0, // Provide default here for the now required field
     left_peek_image_url: initialData?.left_peek_image_url ?? null,
     left_peek_alt: initialData?.left_peek_alt ?? null,
     left_peek_bg_color: initialData?.left_peek_bg_color ?? null,
