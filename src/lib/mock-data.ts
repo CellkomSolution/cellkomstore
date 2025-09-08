@@ -9,6 +9,7 @@ export interface Product {
   soldCount: string;
   category: string;
   isFlashSale?: boolean; // Menambahkan properti isFlashSale
+  description?: string; // Menambahkan properti description
 }
 
 // Data mock telah dipindahkan ke Supabase, jadi kita tidak lagi mengekspor array ini.
