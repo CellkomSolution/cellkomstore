@@ -10,9 +10,9 @@ import type { Product } from "@/lib/mock-data";
 import { getProductById } from "@/lib/supabase-queries"; // Import fungsi Supabase
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
+export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   // Menggunakan React.use() untuk meng-unwrap params
-  const { id } = React.use(Promise.resolve(params));
+  const { id } = React.use(params);
   const { addItem } = useCart();
   
   const [product, setProduct] = React.useState<Product | null>(null);
