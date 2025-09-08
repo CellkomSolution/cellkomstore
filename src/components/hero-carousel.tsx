@@ -14,6 +14,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { FullCarouselSlide } from "./full-carousel-slide";
 import { ThreePartCarouselSlide } from "./three-part-carousel-slide";
 import { getHeroCarouselSlides, HeroCarouselSlide as SupabaseHeroCarouselSlide } from "@/lib/supabase-queries"; // Import from supabase-queries
+import { Loader2 } from "lucide-react"; // Import Loader2
 
 // Define types for the carousel slides based on Supabase data
 interface FullCarouselBannerProps {
