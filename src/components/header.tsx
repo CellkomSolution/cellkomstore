@@ -2,21 +2,18 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Menu, Search, User, LogOut, LayoutGrid, MapPin, Download } from "lucide-react";
+import { Menu, Search, LayoutGrid, MapPin, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CartSheet } from "./cart-sheet";
 import { ThemeToggle } from "./theme-toggle";
 import Link from "next/link";
-import { useSession } from "@/context/session-context";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
+import { UserAuthNav } from "./user-auth-nav"; // Import UserAuthNav
 
 export function Header() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const router = useRouter();
-  const { session, user, signOut, isLoading } = useSession();
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,51 +77,7 @@ export function Header() {
 
           <div className="flex items-center gap-2">
             <CartSheet />
-            {!isLoading && (
-              <>
-                {session ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="rounded-full">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>
-                            {user?.email ? user.email[0].toUpperCase() : <User className="h-5 w-5" />}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="sr-only">Akun</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href="/profile" className="cursor-pointer">
-                          <User className="mr-2 h-4 w-4" />
-                          <span>Profil</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Keluar</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <div className="hidden md:flex items-center gap-2">
-                    <Button variant="outline" asChild>
-                      <Link href="/auth">Masuk</Link>
-                    </Button>
-                    <Button asChild>
-                      <Link href="/auth">Daftar</Link>
-                    </Button>
-                  </div>
-                )}
-                <Button variant="ghost" size="icon" className="md:hidden" asChild>
-                  <Link href="/auth">
-                    <User className="h-6 w-6" />
-                    <span className="sr-only">Akun</span>
-                  </Link>
-                </Button>
-              </>
-            )}
+            <UserAuthNav /> {/* Menggunakan komponen UserAuthNav */}
             <ThemeToggle />
           </div>
         </div>
