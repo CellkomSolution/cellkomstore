@@ -17,7 +17,7 @@ const FeatureItem: React.FC<FeatureItemProps> = ({ icon: Icon, text }) => (
 
 export function FeatureBadges() {
   return (
-    <div className="bg-card p-4 rounded-lg border flex flex-wrap justify-around gap-4">
+    <div className="bg-card p-3 rounded-lg border flex items-center justify-around gap-4">
       <FeatureItem icon={ShieldCheck} text="Pasti ori" />
       <FeatureItem icon={RotateCcw} text="Retur alasan apa pun" />
       <FeatureItem icon={Clock} text="Jaminan tepat waktu" />
