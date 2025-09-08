@@ -283,3 +283,84 @@ export async function deleteHeroCarouselSlide(id: string): Promise<void> {
     throw error;
   }
 }
+
+// --- Category Management ---
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon_name: string | null;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getCategories(): Promise<Category[]> {
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .order("order", { ascending: true })
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
+  return data;
+}
+
+export async function getCategoryBySlug(slug: string): Promise<Category | null> {
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (error) {
+    console.error(`Error fetching category with slug ${slug}:`, error);
+    return null;
+  }
+  return data;
+}
+
+export async function createCategory(categoryData: Omit<Category, 'id' | 'created_at' | 'updated_at'>): Promise<Category | null> {
+  const { data, error } = await supabase
+    .from("categories")
+    .insert(categoryData)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating category:", error);
+    throw error;
+  }
+  return data;
+}
+
+export async function updateCategory(id: string, categoryData: Partial<Omit<Category, 'id' | 'created_at'>>): Promise<Category | null> {
+  const { data, error } = await supabase
+    .from("categories")
+    .update({ ...categoryData, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error(`Error updating category with ID ${id}:`, error);
+    throw error;
+  }
+  return data;
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("categories")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error(`Error deleting category with ID ${id}:`, error);
+    throw error;
+  }
+}
