@@ -37,14 +37,17 @@ interface CategoryFormProps {
 export function CategoryForm({ initialData, onSubmit, loading = false }: CategoryFormProps) {
   const router = useRouter();
 
+  // Explicitly define default values with the inferred schema type
+  const defaultValues: z.infer<typeof formSchema> = {
+    name: initialData?.name ?? "",
+    slug: initialData?.slug ?? "",
+    icon_name: initialData?.icon_name ?? null, // Use null for nullable optional fields
+    order: initialData?.order ?? 0,
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: initialData?.name ?? "",
-      slug: initialData?.slug ?? "",
-      icon_name: initialData?.icon_name ?? undefined, // Menggunakan undefined untuk optional fields
-      order: initialData?.order ?? 0,
-    },
+    defaultValues, // Pass the explicitly typed defaultValues
   });
 
   // Function to render Lucide icon dynamically

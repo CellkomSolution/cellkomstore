@@ -74,29 +74,32 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
   });
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
 
+  // Explicitly define default values with the inferred schema type
+  const defaultValues: z.infer<typeof formSchema> = {
+    type: initialData?.type || 'full-banner',
+    product_image_url: initialData?.product_image_url ?? null, // Use null for nullable optional fields
+    alt: initialData?.alt ?? "",
+    logo_url: initialData?.logo_url ?? null,
+    product_name: initialData?.product_name ?? null,
+    original_price: initialData?.original_price ?? null, // Use null
+    discounted_price: initialData?.discounted_price ?? null, // Use null
+    is_new: initialData?.is_new ?? false,
+    hashtag: initialData?.hashtag ?? null,
+    left_panel_bg_color: initialData?.left_panel_bg_color ?? null,
+    order: initialData?.order ?? 0, // This should be fine as it's a number
+    left_peek_image_url: initialData?.left_peek_image_url ?? null,
+    left_peek_alt: initialData?.left_peek_alt ?? null,
+    left_peek_bg_color: initialData?.left_peek_bg_color ?? null,
+    right_peek_image_url: initialData?.right_peek_image_url ?? null,
+    right_peek_logo_url: initialData?.right_peek_logo_url ?? null,
+    right_peek_alt: initialData?.right_peek_alt ?? null,
+    right_peek_bg_color: initialData?.right_peek_bg_color ?? null,
+    right_peek_hashtag: initialData?.right_peek_hashtag ?? null,
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      type: initialData?.type || 'full-banner',
-      product_image_url: initialData?.product_image_url ?? undefined, // Menggunakan undefined
-      alt: initialData?.alt ?? "",
-      logo_url: initialData?.logo_url ?? undefined, // Menggunakan undefined
-      product_name: initialData?.product_name ?? undefined, // Menggunakan undefined
-      original_price: initialData?.original_price ?? undefined, // Menggunakan undefined
-      discounted_price: initialData?.discounted_price ?? undefined, // Menggunakan undefined
-      is_new: initialData?.is_new ?? false,
-      hashtag: initialData?.hashtag ?? undefined, // Menggunakan undefined
-      left_panel_bg_color: initialData?.left_panel_bg_color ?? undefined, // Menggunakan undefined
-      order: initialData?.order ?? 0,
-      left_peek_image_url: initialData?.left_peek_image_url ?? undefined, // Menggunakan undefined
-      left_peek_alt: initialData?.left_peek_alt ?? undefined, // Menggunakan undefined
-      left_peek_bg_color: initialData?.left_peek_bg_color ?? undefined, // Menggunakan undefined
-      right_peek_image_url: initialData?.right_peek_image_url ?? undefined, // Menggunakan undefined
-      right_peek_logo_url: initialData?.right_peek_logo_url ?? undefined, // Menggunakan undefined
-      right_peek_alt: initialData?.right_peek_alt ?? undefined, // Menggunakan undefined
-      right_peek_bg_color: initialData?.right_peek_bg_color ?? undefined, // Menggunakan undefined
-      right_peek_hashtag: initialData?.right_peek_hashtag ?? undefined, // Menggunakan undefined
-    },
+    defaultValues, // Pass the explicitly typed defaultValues
   });
 
   const currentSlideType = form.watch("type");
@@ -315,9 +318,9 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
                   Harga setelah diskon.
                 </FormDescription>
                 <FormMessage />
-              </FormItem>
-            )}
-          />
+            </FormItem>
+          )}
+        />
         </div>
         <FormField
           control={form.control}
