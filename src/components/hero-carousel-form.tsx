@@ -44,7 +44,7 @@ const formSchema = z.object({
   is_new: z.boolean().default(false).optional(),
   hashtag: z.string().nullable().optional(),
   left_panel_bg_color: z.string().nullable().optional(),
-  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }), // Removed .default(0) from schema
+  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).optional().default(0), // Changed: Added .optional() and .default(0)
 
   // Three-part specific fields
   left_peek_image_url: z.string().url({ message: "URL gambar peek kiri tidak valid." }).nullable().optional(),
@@ -309,17 +309,17 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
             control={form.control}
             name="discounted_price"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Harga Diskon (Opsional)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
-                </FormControl>
-                <FormDescription>
-                  Harga setelah diskon.
-                </FormDescription>
-                <FormMessage />
-            </FormItem>
-          )}
+                <FormItem>
+                    <FormLabel>Harga Diskon (Opsional)</FormLabel>
+                    <FormControl>
+                        <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
+                    </FormControl>
+                    <FormDescription>
+                        Harga setelah diskon.
+                    </FormDescription>
+                    <FormMessage />
+                </FormItem>
+            )}
         />
         </div>
         <FormField
