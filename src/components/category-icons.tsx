@@ -1,64 +1,82 @@
-import { 
-  Smartphone, 
-  Laptop, 
-  Shirt, 
-  Gem, 
-  Heart, 
-  MoreHorizontal, 
-  Gamepad2, 
-  Baby, 
-  Home, 
-  Bike, 
-  Car, 
-  Ticket, 
-  ChevronRight 
+"use client";
+
+import {
+  LayoutGrid,
+  Megaphone,
+  Receipt,
+  ShoppingBasket,
+  Smartphone,
+  HeartPulse,
+  Truck,
+  Shirt,
+  Gem,
+  Baby,
+  Car,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Badge } from "@/components/ui/badge";
 
 const categories = [
-  { name: "Handphone & Tablet", icon: Smartphone, slug: "handphone-tablet" },
-  { name: "Komputer & Laptop", icon: Laptop, slug: "komputer-laptop" },
+  { name: "Lihat semua", icon: LayoutGrid, slug: "/", badge: "Baru" },
+  { name: "Semua Promo", icon: Megaphone, slug: "/promo" },
+  { name: "Tagihan & Isi Ulang", icon: Receipt, slug: "/bills" },
+  { name: "Bliblimart", icon: ShoppingBasket, slug: "/bliblimart" },
+  { name: "Gadget & Elektronik", icon: Smartphone, slug: "/gadgets" },
+  { name: "Sport & Wellness", icon: HeartPulse, slug: "/sports" },
+  { name: "Gratis ongkir cepat sampai", icon: Truck, slug: "/shipping-promo", badge: "Baru" },
   { name: "Pakaian Pria", icon: Shirt, slug: "pakaian-pria" },
   { name: "Perhiasan & Logam", icon: Gem, slug: "perhiasan-logam" },
-  { name: "Kesehatan & Kecantikan", icon: Heart, slug: "kesehatan-kecantikan" },
-  { name: "Mainan & Hobi", icon: Gamepad2, slug: "mainan-hobi" },
   { name: "Ibu & Anak", icon: Baby, slug: "ibu-anak" },
-  { name: "Rumah Tangga", icon: Home, slug: "rumah-tangga" },
-  { name: "Olahraga", icon: Bike, slug: "olahraga" },
   { name: "Otomotif", icon: Car, slug: "otomotif" },
-  { name: "Tiket & Voucher", icon: Ticket, slug: "tiket-voucher" },
-  { name: "Lihat Semua", icon: MoreHorizontal, slug: "/" },
 ];
 
 export function CategoryIcons() {
   return (
-    <div 
-      className="bg-card p-4 rounded-lg border"
-      style={{
-        backgroundImage: 'radial-gradient(hsl(var(--border)) 0.5px, transparent 0.5px)',
-        backgroundSize: '10px 10px',
-      }}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">Kategori Pilihan</h2>
-        <Link href="/" className="text-sm font-semibold text-primary hover:underline flex items-center">
-          Lihat Semua <ChevronRight className="h-4 w-4" />
-        </Link>
-      </div>
-      <div className="grid grid-cols-4 md:grid-cols-6 gap-4 text-center">
-        {categories.map((category) => (
-          <Link
-            href={category.slug === "/" ? "/" : `/category/${category.slug}`}
-            key={category.name}
-            className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-accent transition-colors group"
-          >
-            <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center mb-2 group-hover:bg-primary/10 border">
-              <category.icon className="h-6 w-6 text-primary" />
-            </div>
-            <span className="text-xs font-medium text-foreground leading-tight">{category.name}</span>
-          </Link>
-        ))}
-      </div>
+    <div className="bg-card p-3 rounded-lg border">
+      <Carousel
+        opts={{
+          align: "start",
+          dragFree: true, // Allows for free scrolling like a list
+        }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-2">
+          {categories.map((category, index) => (
+            <CarouselItem key={index} className="pl-2 basis-auto">
+              <Link
+                href={category.slug}
+                className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors group"
+              >
+                <div className="relative">
+                  <div className="w-10 h-10 bg-background rounded-lg flex items-center justify-center border group-hover:border-primary">
+                    <category.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                  </div>
+                  {category.badge && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-2 -right-3 text-[10px] px-1.5 py-0 leading-tight"
+                    >
+                      {category.badge}
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-xs font-medium text-foreground whitespace-nowrap">
+                  {category.name}
+                </span>
+              </Link>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="hidden sm:flex -left-4" />
+        <CarouselNext className="hidden sm:flex -right-4" />
+      </Carousel>
     </div>
   );
 }
