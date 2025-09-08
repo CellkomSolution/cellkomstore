@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight } from "lucide-react"; // Import Chevron icons
 
 interface FullCarouselBanner {
+  type?: "full-banner"; // Add a discriminator for FullCarouselBanner as well
   productImageSrc: string;
   alt: string;
   logoSrc?: string;
@@ -31,7 +32,7 @@ interface FullCarouselBanner {
 interface ThreePartCarouselSlide {
   type: "three-part"; // Discriminator
   leftPeek: {
-    imageSrc: string;
+    imageSrc?: string; // Make optional as per usage
     alt: string;
     bgColor?: string;
   };
@@ -72,6 +73,7 @@ const carouselSlides: CarouselContentItem[] = [
     },
   },
   {
+    type: "full-banner", // Explicitly set type
     productImageSrc: "https://plus.unsplash.com/premium_photo-1661764878654-f2ff0e1d265a?q=80&w=600&auto=format&fit=crop", // Example product image (vacuum cleaner)
     alt: "KV 01 Turbo DOUBLE BRUSH",
     logoSrc: "/kurumi-logo.png",
@@ -83,6 +85,7 @@ const carouselSlides: CarouselContentItem[] = [
     leftPanelBgColor: "bg-gray-50 dark:bg-gray-800",
   },
   {
+    type: "full-banner", // Explicitly set type
     productImageSrc: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?q=80&w=600&auto=format&fit=crop",
     alt: "Diskon Elektronik Besar-besaran",
     productName: "Diskon Elektronik Besar-besaran",
@@ -91,6 +94,7 @@ const carouselSlides: CarouselContentItem[] = [
     leftPanelBgColor: "bg-blue-50 dark:bg-blue-900",
   },
   {
+    type: "full-banner", // Explicitly set type
     productImageSrc: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=600&auto=format&fit=crop",
     alt: "Fashion Sale Akhir Pekan",
     productName: "Fashion Sale Akhir Pekan",
@@ -99,6 +103,7 @@ const carouselSlides: CarouselContentItem[] = [
     leftPanelBgColor: "bg-pink-50 dark:bg-pink-900",
   },
   {
+    type: "full-banner", // Explicitly set type
     productImageSrc: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?q=80&w=600&auto=format&fit=crop",
     alt: "Produk Kecantikan Terbaru",
     productName: "Produk Kecantikan Terbaru",
@@ -148,9 +153,9 @@ export function HeroCarousel() {
                     // Render 3-part layout
                     <div className="grid grid-cols-[1fr_4fr_1fr] gap-2 h-full w-full">
                       {/* Left Peek */}
-                      <div className={`relative flex items-center justify-center rounded-lg overflow-hidden ${slide.leftPeek.bgColor || 'bg-gray-100 dark:bg-gray-800'}`}>
-                        {slide.leftPeek.imageSrc && (
-                          <Image src={slide.leftPeek.imageSrc} alt={slide.leftPeek.alt} fill style={{ objectFit: 'cover' }} />
+                      <div className={`relative flex items-center justify-center rounded-lg overflow-hidden ${(slide as ThreePartCarouselSlide).leftPeek.bgColor || 'bg-gray-100 dark:bg-gray-800'}`}>
+                        {(slide as ThreePartCarouselSlide).leftPeek.imageSrc && (
+                          <Image src={(slide as ThreePartCarouselSlide).leftPeek.imageSrc!} alt={(slide as ThreePartCarouselSlide).leftPeek.alt} fill style={{ objectFit: 'cover' }} />
                         )}
                         <div className="absolute inset-0 flex items-center justify-center">
                           <ChevronLeft className="h-8 w-8 text-gray-500 opacity-70" />
@@ -158,93 +163,93 @@ export function HeroCarousel() {
                       </div>
 
                       {/* Main Banner (using FullCarouselBanner structure) */}
-                      <div className={`relative flex rounded-lg overflow-hidden ${slide.mainBanner.leftPanelBgColor || 'bg-white dark:bg-gray-900'}`}>
+                      <div className={`relative flex rounded-lg overflow-hidden ${(slide as ThreePartCarouselSlide).mainBanner.leftPanelBgColor || 'bg-white dark:bg-gray-900'}`}>
                         {/* Left text panel of main banner */}
                         <div className="w-1/2 flex flex-col justify-center p-3 md:p-6 lg:p-8">
-                          {slide.mainBanner.logoSrc && (
-                            <Image src={slide.mainBanner.logoSrc} alt="Brand Logo" width={100} height={30} className="h-auto mb-1 md:mb-2" />
+                          {(slide as ThreePartCarouselSlide).mainBanner.logoSrc && (
+                            <Image src={(slide as ThreePartCarouselSlide).mainBanner.logoSrc!} alt="Brand Logo" width={100} height={30} className="h-auto mb-1 md:mb-2" />
                           )}
-                          {slide.mainBanner.productName && (
+                          {(slide as ThreePartCarouselSlide).mainBanner.productName && (
                             <h3 className="text-lg md:text-2xl font-bold leading-tight text-foreground">
-                              {slide.mainBanner.productName}
+                              {(slide as ThreePartCarouselSlide).mainBanner.productName}
                             </h3>
                           )}
-                          {slide.mainBanner.originalPrice && (
+                          {(slide as ThreePartCarouselSlide).mainBanner.originalPrice && (
                             <p className="text-xs md:text-sm line-through text-muted-foreground mt-0.5">
-                              {formatRupiah(slide.mainBanner.originalPrice)}
+                              {formatRupiah((slide as ThreePartCarouselSlide).mainBanner.originalPrice!)}
                             </p>
                           )}
-                          {slide.mainBanner.discountedPrice && (
+                          {(slide as ThreePartCarouselSlide).mainBanner.discountedPrice && (
                             <p className="text-xl md:text-3xl font-extrabold text-primary mt-0.5">
-                              {formatRupiah(slide.mainBanner.discountedPrice)}
+                              {formatRupiah((slide as ThreePartCarouselSlide).mainBanner.discountedPrice!)}
                             </p>
                           )}
-                          {slide.mainBanner.hashtag && (
+                          {(slide as ThreePartCarouselSlide).mainBanner.hashtag && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              {slide.mainBanner.hashtag}
+                              {(slide as ThreePartCarouselSlide).mainBanner.hashtag}
                             </p>
                           )}
                         </div>
                         {/* Right image panel of main banner */}
                         <div className="w-1/2 relative flex items-center justify-end">
-                          <Image src={slide.mainBanner.productImageSrc} alt={slide.mainBanner.alt} width={600} height={480} className="h-full w-auto object-contain object-right" priority={index === 0} />
-                          {slide.mainBanner.isNew && (
+                          <Image src={(slide as ThreePartCarouselSlide).mainBanner.productImageSrc} alt={(slide as ThreePartCarouselSlide).mainBanner.alt} width={600} height={480} className="h-full w-auto object-contain object-right" priority={index === 0} />
+                          {(slide as ThreePartCarouselSlide).mainBanner.isNew && (
                             <Badge variant="destructive" className="absolute top-4 right-4 rotate-12 text-xs px-2 py-0.5">NEW</Badge>
                           )}
                         </div>
                       </div>
 
                       {/* Right Peek */}
-                      <div className={`relative flex items-center justify-center rounded-lg overflow-hidden ${slide.rightPeek.bgColor || 'bg-gray-100 dark:bg-gray-800'}`}>
-                        {slide.rightPeek.logoSrc && (
-                          <Image src={slide.rightPeek.logoSrc} alt={slide.rightPeek.alt} width={80} height={24} className="h-auto w-auto max-w-[80%] max-h-[80%]" />
+                      <div className={`relative flex items-center justify-center rounded-lg overflow-hidden ${(slide as ThreePartCarouselSlide).rightPeek.bgColor || 'bg-gray-100 dark:bg-gray-800'}`}>
+                        {(slide as ThreePartCarouselSlide).rightPeek.logoSrc && (
+                          <Image src={(slide as ThreePartCarouselSlide).rightPeek.logoSrc!} alt={(slide as ThreePartCarouselSlide).rightPeek.alt} width={80} height={24} className="h-auto w-auto max-w-[80%] max-h-[80%]" />
                         )}
-                        {slide.rightPeek.imageSrc && (
-                          <Image src={slide.rightPeek.imageSrc} alt={slide.rightPeek.alt} fill style={{ objectFit: 'cover' }} />
+                        {(slide as ThreePartCarouselSlide).rightPeek.imageSrc && (
+                          <Image src={(slide as ThreePartCarouselSlide).rightPeek.imageSrc!} alt={(slide as ThreePartCarouselSlide).rightPeek.alt} fill style={{ objectFit: 'cover' }} />
                         )}
                         <div className="absolute inset-0 flex items-center justify-center">
                           <ChevronRight className="h-8 w-8 text-gray-500 opacity-70" />
                         </div>
-                        {slide.rightPeek.hashtag && (
+                        {(slide as ThreePartCarouselSlide).rightPeek.hashtag && (
                           <p className="absolute bottom-2 text-xs text-muted-foreground">
-                            {slide.rightPeek.hashtag}
+                            {(slide as ThreePartCarouselSlide).rightPeek.hashtag}
                           </p>
                         )}
                       </div>
                     </div>
                   ) : (
                     // Render existing full banner layout
-                    <div className={`relative w-full flex rounded-lg overflow-hidden ${slide.leftPanelBgColor || 'bg-white dark:bg-gray-900'}`}>
+                    <div className={`relative w-full flex rounded-lg overflow-hidden ${(slide as FullCarouselBanner).leftPanelBgColor || 'bg-white dark:bg-gray-900'}`}>
                       {/* Left text panel */}
                       <div className="w-2/3 md:w-1/2 flex flex-col justify-center p-3 md:p-6 lg:p-8 z-10 rounded-l-lg">
-                        {slide.logoSrc && (
-                          <Image src={slide.logoSrc} alt="Brand Logo" width={100} height={30} className="h-auto mb-1 md:mb-2" />
+                        {(slide as FullCarouselBanner).logoSrc && (
+                          <Image src={(slide as FullCarouselBanner).logoSrc!} alt="Brand Logo" width={100} height={30} className="h-auto mb-1 md:mb-2" />
                         )}
-                        {slide.productName && (
+                        {(slide as FullCarouselBanner).productName && (
                           <h3 className="text-lg md:text-2xl font-bold leading-tight text-foreground">
-                            {slide.productName}
+                            {(slide as FullCarouselBanner).productName}
                           </h3>
                         )}
-                        {slide.originalPrice && (
+                        {(slide as FullCarouselBanner).originalPrice && (
                           <p className="text-xs md:text-sm line-through text-muted-foreground mt-0.5">
-                            {formatRupiah(slide.originalPrice)}
+                            {formatRupiah((slide as FullCarouselBanner).originalPrice!)}
                           </p>
                         )}
-                        {slide.discountedPrice && (
+                        {(slide as FullCarouselBanner).discountedPrice && (
                           <p className="text-xl md:text-3xl font-extrabold text-primary mt-0.5">
-                            {formatRupiah(slide.discountedPrice)}
+                            {formatRupiah((slide as FullCarouselBanner).discountedPrice!)}
                           </p>
                         )}
-                        {slide.hashtag && (
+                        {(slide as FullCarouselBanner).hashtag && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            {slide.hashtag}
+                            {(slide as FullCarouselBanner).hashtag}
                           </p>
                         )}
                       </div>
                       {/* Right image panel */}
                       <div className="relative w-1/3 md:w-1/2 flex items-center justify-end rounded-r-lg bg-white dark:bg-gray-900">
-                        <Image src={slide.productImageSrc} alt={slide.alt} width={600} height={480} className="h-full w-auto object-contain object-right" priority={index === 0} />
-                        {slide.isNew && (
+                        <Image src={(slide as FullCarouselBanner).productImageSrc} alt={(slide as FullCarouselBanner).alt} width={600} height={480} className="h-full w-auto object-contain object-right" priority={index === 0} />
+                        {(slide as FullCarouselBanner).isNew && (
                           <Badge variant="destructive" className="absolute top-4 right-4 rotate-12 text-xs px-2 py-0.5">NEW</Badge>
                         )}
                       </div>

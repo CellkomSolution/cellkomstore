@@ -18,7 +18,7 @@ export function Header() {
   const router = useRouter();
   const { session, user, signOut, isLoading } = useSession();
 
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormEvent>) => {
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
     router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);

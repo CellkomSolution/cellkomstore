@@ -11,7 +11,8 @@ import { getProductById } from "@/lib/supabase-queries"; // Import fungsi Supaba
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+  // Menggunakan React.use() untuk meng-unwrap params
+  const { id } = React.use(Promise.resolve(params));
   const { addItem } = useCart();
   
   const [product, setProduct] = React.useState<Product | null>(null);

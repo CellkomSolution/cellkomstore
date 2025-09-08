@@ -79,8 +79,7 @@ export default function AuthPage() {
                     brandAccent: 'hsl(var(--primary-foreground))',
                   },
                    radii: {
-                    borderRadius: 'var(--radius)',
-                    buttonBorderRadius: 'var(--radius)',
+                    buttonBorderRadius: 'var(--radius)', // Corrected property name
                   },
                 },
               },
