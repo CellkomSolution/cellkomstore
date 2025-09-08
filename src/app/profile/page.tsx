@@ -3,11 +3,10 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/context/session-context";
-import { supabase } from "@/integrations/supabase/client"; // Mengimpor instance 'supabase' yang sudah dibuat
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -20,8 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User as UserIcon } from "lucide-react";
+import { AvatarUploader } from "@/components/avatar-uploader";
 
 const profileFormSchema = z.object({
   first_name: z.string().min(1, { message: "Nama depan tidak boleh kosong." }).optional().or(z.literal("")),
@@ -30,13 +28,15 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
+interface ProfileData extends ProfileFormValues {
+  avatar_url?: string | null;
+}
+
 export default function ProfilePage() {
   const { user, isLoading: isSessionLoading } = useSession();
   const router = useRouter();
-  // Menggunakan instance supabase yang sudah diimpor
-  // const supabase = createClient(); // Baris ini dihapus karena supabase sudah diimpor
 
-  const [profile, setProfile] = React.useState<ProfileFormValues | null>(null);
+  const [profile, setProfile] = React.useState<ProfileData | null>(null);
   const [isProfileLoading, setIsProfileLoading] = React.useState(true);
 
   const form = useForm<ProfileFormValues>({
@@ -50,7 +50,7 @@ export default function ProfilePage() {
 
   React.useEffect(() => {
     if (!isSessionLoading && !user) {
-      router.push("/auth"); // Redirect if not authenticated
+      router.push("/auth");
     }
   }, [user, isSessionLoading, router]);
 
@@ -69,14 +69,14 @@ export default function ProfilePage() {
           toast.error("Gagal memuat profil: " + error.message);
         } else if (data) {
           setProfile(data);
-          form.reset(data); // Set form default values
+          form.reset({ first_name: data.first_name || "", last_name: data.last_name || "" });
         }
         setIsProfileLoading(false);
       }
     }
 
     getProfile();
-  }, [user, supabase, form]);
+  }, [user, form]);
 
   async function onSubmit(values: ProfileFormValues) {
     if (!user) return;
@@ -98,6 +98,21 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleAvatarUploadSuccess(newUrl: string) {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ avatar_url: newUrl, updated_at: new Date().toISOString() })
+      .eq("id", user.id);
+
+    if (error) {
+      toast.error("Gagal menyimpan avatar baru: " + error.message);
+    } else {
+      setProfile((prev) => ({ ...prev, avatar_url: newUrl } as ProfileData));
+    }
+  }
+
   if (isSessionLoading || isProfileLoading) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
@@ -107,7 +122,7 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    return null; // Should be redirected by useEffect
+    return null;
   }
 
   return (
@@ -116,11 +131,12 @@ export default function ProfilePage() {
 
       <Card className="max-w-2xl mx-auto">
         <CardHeader className="flex flex-col items-center text-center">
-          <Avatar className="h-24 w-24 mb-4">
-            <AvatarFallback className="text-4xl">
-              {profile?.first_name ? profile.first_name[0].toUpperCase() : <UserIcon className="h-12 w-12" />}
-            </AvatarFallback>
-          </Avatar>
+          <AvatarUploader
+            userId={user.id}
+            currentAvatarUrl={profile?.avatar_url || null}
+            onUploadSuccess={handleAvatarUploadSuccess}
+            fallbackName={profile?.first_name || user.email?.split('@')[0] || ""}
+          />
           <CardTitle className="text-2xl">
             {profile?.first_name || user.email?.split('@')[0] || "Pengguna"} {profile?.last_name}
           </CardTitle>
