@@ -28,13 +28,13 @@ const categories = [
   { name: "Semua Promo", icon: Megaphone, slug: "/promo" },
   { name: "Tagihan & Isi Ulang", icon: Receipt, slug: "/bills" },
   { name: "Bliblimart", icon: ShoppingBasket, slug: "/bliblimart" },
-  { name: "Gadget & Elektronik", icon: Smartphone, slug: "/gadgets" },
+  { name: "Gadget & Elektronik", icon: Smartphone, slug: "/category/handphone-tablet" },
   { name: "Sport & Wellness", icon: HeartPulse, slug: "/sports" },
   { name: "Gratis ongkir cepat sampai", icon: Truck, slug: "/shipping-promo", badge: "Baru" },
-  { name: "Pakaian Pria", icon: Shirt, slug: "pakaian-pria" },
-  { name: "Perhiasan & Logam", icon: Gem, slug: "perhiasan-logam" },
-  { name: "Ibu & Anak", icon: Baby, slug: "ibu-anak" },
-  { name: "Otomotif", icon: Car, slug: "otomotif" },
+  { name: "Pakaian Pria", icon: Shirt, slug: "/category/pakaian-pria" },
+  { name: "Perhiasan & Logam", icon: Gem, slug: "/category/perhiasan-logam" },
+  { name: "Ibu & Anak", icon: Baby, slug: "/category/ibu-anak" },
+  { name: "Otomotif", icon: Car, slug: "/category/otomotif" },
 ];
 
 export function CategoryIcons() {
