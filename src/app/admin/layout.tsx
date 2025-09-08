@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation"; // Import usePathname
 import { useAdmin } from "@/hooks/use-admin";
 import { useSession } from "@/context/session-context";
 import Link from "next/link";
@@ -9,9 +9,11 @@ import { LayoutDashboard, Package, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils"; // Import cn for conditional classNames
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname(); // Get current pathname
   const { isLoading: isSessionLoading, user } = useSession();
   const { isAdmin, isAdminLoading } = useAdmin();
 
@@ -43,26 +45,42 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <h2 className="text-xl font-bold text-primary">Admin Panel</h2>
         </div>
         <nav className="flex-1 space-y-2 py-4">
-          <Button variant="ghost" className="w-full justify-start" asChild>
+          <Button 
+            variant="ghost" 
+            className={cn("w-full justify-start", pathname === "/admin/dashboard" && "bg-muted hover:bg-muted")} 
+            asChild
+          >
             <Link href="/admin/dashboard">
               <LayoutDashboard className="mr-2 h-4 w-4" />
               Dashboard
             </Link>
           </Button>
-          <Button variant="ghost" className="w-full justify-start" asChild>
+          <Button 
+            variant="ghost" 
+            className={cn("w-full justify-start", pathname.startsWith("/admin/products") && "bg-muted hover:bg-muted")} 
+            asChild
+          >
             <Link href="/admin/products">
               <Package className="mr-2 h-4 w-4" />
               Produk
             </Link>
           </Button>
-          <Button variant="ghost" className="w-full justify-start" asChild>
+          <Button 
+            variant="ghost" 
+            className={cn("w-full justify-start", pathname === "/admin/users" && "bg-muted hover:bg-muted")} 
+            asChild
+          >
             <Link href="/admin/users">
               <Users className="mr-2 h-4 w-4" />
               Pengguna
             </Link>
           </Button>
           <Separator className="my-4" />
-          <Button variant="ghost" className="w-full justify-start" asChild>
+          <Button 
+            variant="ghost" 
+            className={cn("w-full justify-start", pathname === "/admin/settings" && "bg-muted hover:bg-muted")} 
+            asChild
+          >
             <Link href="/admin/settings">
               <Settings className="mr-2 h-4 w-4" />
               Pengaturan
