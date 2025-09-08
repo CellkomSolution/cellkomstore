@@ -15,7 +15,8 @@ const categoryMap: { [key: string]: string } = {
 };
 
 export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+  // Menggunakan React.use() untuk meng-unwrap params
+  const { slug } = React.use(Promise.resolve(params));
   const categoryName = categoryMap[slug];
 
   const [products, setProducts] = React.useState<Product[]>([]);
