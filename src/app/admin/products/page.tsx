@@ -115,7 +115,22 @@ export default function AdminProductsPage() {
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, index) => (
                     <TableRow key={index}>
-                      <TableCell><Skeleton className="h-12 w-12 rounded-md" /></TableCell><TableCell><Skeleton className="h-4 w-[200px]" /></TableCell><TableCell><Skeleton className="h-4 w-[100px]" /></TableCell><TableCell><Skeleton className="h-4 w-[80px]" /></TableCell><TableCell><Skeleton className="h-4 w-[50px]" /></TableCell><TableCell className="text-right">
+                      <TableCell>
+                        <Skeleton className="h-12 w-12 rounded-md" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[200px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[100px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[80px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[50px]" />
+                      </TableCell>
+                      <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Skeleton className="h-8 w-8 rounded-md" />
                           <Skeleton className="h-8 w-8 rounded-md" />
@@ -140,7 +155,12 @@ export default function AdminProductsPage() {
                           height={48}
                           className="rounded-md object-cover"
                         />
-                      </TableCell><TableCell className="font-medium">{product.name}</TableCell><TableCell>{product.category}</TableCell><TableCell>{formatRupiah(product.price)}</TableCell><TableCell>100</TableCell>{/* Placeholder for stock */}<TableCell className="text-right">
+                      </TableCell>
+                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>{product.category}</TableCell>
+                      <TableCell>{formatRupiah(product.price)}</TableCell>
+                      <TableCell>100</TableCell>{/* Placeholder for stock */}
+                      <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="outline" size="icon" asChild>
                             <Link href={`/admin/products/edit/${product.id}`}>
