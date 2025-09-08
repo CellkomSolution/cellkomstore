@@ -163,8 +163,8 @@ export async function getAllProfiles(): Promise<Profile[]> {
     return [];
   }
 
-  // Menggunakan type assertion untuk data mentah
-  const rawData = data as RawProfileDataFromSupabase[];
+  // Menggunakan type assertion untuk data mentah melalui 'unknown'
+  const rawData = data as unknown as RawProfileDataFromSupabase[];
 
   return rawData.map(profile => ({
     id: profile.id,
