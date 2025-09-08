@@ -9,6 +9,7 @@ import { useCart } from "@/context/cart-context";
 import type { Product } from "@/lib/mock-data";
 import { getProductById } from "@/lib/supabase-queries"; // Import fungsi Supabase
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
+import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Import ProductDetailPageSkeleton
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   // Menggunakan React.use() untuk meng-unwrap params
@@ -33,11 +34,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }, [id]);
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <p>Memuat detail produk...</p>
-      </div>
-    );
+    return <ProductDetailPageSkeleton />;
   }
 
   if (!product) {
