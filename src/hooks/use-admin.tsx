@@ -27,11 +27,13 @@ export function useAdmin() {
         .single();
 
       if (error) {
-        console.error("Error fetching user role:", error);
-        // Log more details if available
+        // Log the error in a way that always shows content
+        console.error("Error fetching user role:", error.message || JSON.stringify(error, null, 2) || "Unknown error object.");
+        // The subsequent detailed logs are still useful if message exists
         if (error.message) console.error("Error message:", error.message);
         if (error.details) console.error("Error details:", error.details);
         if (error.hint) console.error("Error hint:", error.hint);
+        if (error.code) console.error("Error code:", error.code); // Add code as well
         setIsAdmin(false);
       } else if (data) {
         setIsAdmin(data.role === "admin");
