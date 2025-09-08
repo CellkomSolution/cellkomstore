@@ -159,7 +159,7 @@ export async function getAllProfiles(): Promise<Profile[]> {
     .select("id, first_name, last_name, avatar_url, role, auth_users:auth.users(email)"); // Join dengan auth.users untuk mendapatkan email
 
   if (error) {
-    console.error("Error fetching all profiles:", error);
+    console.error("Error fetching all profiles:", error.message || JSON.stringify(error, null, 2) || "Unknown error object.");
     return [];
   }
 
