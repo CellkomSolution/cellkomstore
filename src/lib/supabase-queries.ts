@@ -150,13 +150,13 @@ interface RawProfileDataFromSupabase {
   last_name: string | null;
   avatar_url: string | null;
   role: 'user' | 'admin';
-  auth_users: { email: string | null } | null; // Data yang digabungkan dari auth.users
+  users: { email: string | null } | null; // Diperbarui: Menggunakan 'users' bukan 'auth_users'
 }
 
 export async function getAllProfiles(): Promise<Profile[]> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, avatar_url, role, auth_users:auth.users(email)"); // Join dengan auth.users untuk mendapatkan email
+    .select("id, first_name, last_name, avatar_url, role, users(email)"); // Diperbarui: Menggunakan 'users(email)'
 
   if (error) {
     console.error("Error fetching all profiles:", error.message || JSON.stringify(error, null, 2) || "Unknown error object.");
@@ -172,7 +172,7 @@ export async function getAllProfiles(): Promise<Profile[]> {
     last_name: profile.last_name,
     avatar_url: profile.avatar_url,
     role: profile.role,
-    email: profile.auth_users?.email || null,
+    email: profile.users?.email || null, // Diperbarui: Mengakses 'profile.users'
   }));
 }
 
