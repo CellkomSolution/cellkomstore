@@ -21,6 +21,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client"; // Import ini ditambahkan
 import { Badge } from "@/components/ui/badge";
 
 export default function AdminHeroCarouselPage() {

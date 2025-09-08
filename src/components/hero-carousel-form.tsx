@@ -35,26 +35,26 @@ const formSchema = z.object({
   type: z.enum(['full-banner', 'three-part'], { message: "Tipe slide harus dipilih." }),
   
   // Common fields
-  product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).optional().or(z.literal("")),
+  product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).nullable().optional(), // Diperbarui
   alt: z.string().min(3, { message: "Teks alternatif minimal 3 karakter." }),
-  logo_url: z.string().url({ message: "URL logo tidak valid." }).optional().or(z.literal("")),
-  product_name: z.string().optional().or(z.literal("")),
-  original_price: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).optional().or(z.literal(0)),
-  discounted_price: z.coerce.number().min(0, { message: "Harga diskon tidak boleh negatif." }).optional().or(z.literal(0)),
+  logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().optional(), // Diperbarui
+  product_name: z.string().nullable().optional(), // Diperbarui
+  original_price: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).nullable().optional(), // Diperbarui
+  discounted_price: z.coerce.number().min(0, { message: "Harga diskon tidak boleh negatif." }).nullable().optional(), // Diperbarui
   is_new: z.boolean().default(false).optional(),
-  hashtag: z.string().optional().or(z.literal("")),
-  left_panel_bg_color: z.string().optional().or(z.literal("")),
+  hashtag: z.string().nullable().optional(), // Diperbarui
+  left_panel_bg_color: z.string().nullable().optional(), // Diperbarui
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 
   // Three-part specific fields
-  left_peek_image_url: z.string().url({ message: "URL gambar peek kiri tidak valid." }).optional().or(z.literal("")),
-  left_peek_alt: z.string().optional().or(z.literal("")),
-  left_peek_bg_color: z.string().optional().or(z.literal("")),
-  right_peek_image_url: z.string().url({ message: "URL gambar peek kanan tidak valid." }).optional().or(z.literal("")),
-  right_peek_logo_url: z.string().url({ message: "URL logo peek kanan tidak valid." }).optional().or(z.literal("")),
-  right_peek_alt: z.string().optional().or(z.literal("")),
-  right_peek_bg_color: z.string().optional().or(z.literal("")),
-  right_peek_hashtag: z.string().optional().or(z.literal("")),
+  left_peek_image_url: z.string().url({ message: "URL gambar peek kiri tidak valid." }).nullable().optional(), // Diperbarui
+  left_peek_alt: z.string().nullable().optional(), // Diperbarui
+  left_peek_bg_color: z.string().nullable().optional(), // Diperbarui
+  right_peek_image_url: z.string().url({ message: "URL gambar peek kanan tidak valid." }).nullable().optional(), // Diperbarui
+  right_peek_logo_url: z.string().url({ message: "URL logo peek kanan tidak valid." }).nullable().optional(), // Diperbarui
+  right_peek_alt: z.string().nullable().optional(), // Diperbarui
+  right_peek_bg_color: z.string().nullable().optional(), // Diperbarui
+  right_peek_hashtag: z.string().nullable().optional(), // Diperbarui
 });
 
 interface HeroCarouselFormProps {
@@ -78,24 +78,24 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: initialData?.type || 'full-banner',
-      product_image_url: initialData?.product_image_url || "",
+      product_image_url: initialData?.product_image_url || null, // Diperbarui: default ke null
       alt: initialData?.alt || "",
-      logo_url: initialData?.logo_url || "",
-      product_name: initialData?.product_name || "",
-      original_price: initialData?.original_price || 0,
-      discounted_price: initialData?.discounted_price || 0,
+      logo_url: initialData?.logo_url || null, // Diperbarui: default ke null
+      product_name: initialData?.product_name || null, // Diperbarui: default ke null
+      original_price: initialData?.original_price || null, // Diperbarui: default ke null
+      discounted_price: initialData?.discounted_price || null, // Diperbarui: default ke null
       is_new: initialData?.is_new || false,
-      hashtag: initialData?.hashtag || "",
-      left_panel_bg_color: initialData?.left_panel_bg_color || "",
+      hashtag: initialData?.hashtag || null, // Diperbarui: default ke null
+      left_panel_bg_color: initialData?.left_panel_bg_color || null, // Diperbarui: default ke null
       order: initialData?.order || 0,
-      left_peek_image_url: initialData?.left_peek_image_url || "",
-      left_peek_alt: initialData?.left_peek_alt || "",
-      left_peek_bg_color: initialData?.left_peek_bg_color || "",
-      right_peek_image_url: initialData?.right_peek_image_url || "",
-      right_peek_logo_url: initialData?.right_peek_logo_url || "",
-      right_peek_alt: initialData?.right_peek_alt || "",
-      right_peek_bg_color: initialData?.right_peek_bg_color || "",
-      right_peek_hashtag: initialData?.right_peek_hashtag || "",
+      left_peek_image_url: initialData?.left_peek_image_url || null, // Diperbarui: default ke null
+      left_peek_alt: initialData?.left_peek_alt || null, // Diperbarui: default ke null
+      left_peek_bg_color: initialData?.left_peek_bg_color || null, // Diperbarui: default ke null
+      right_peek_image_url: initialData?.right_peek_image_url || null, // Diperbarui: default ke null
+      right_peek_logo_url: initialData?.right_peek_logo_url || null, // Diperbarui: default ke null
+      right_peek_alt: initialData?.right_peek_alt || null, // Diperbarui: default ke null
+      right_peek_bg_color: initialData?.right_peek_bg_color || null, // Diperbarui: default ke null
+      right_peek_hashtag: initialData?.right_peek_hashtag || null, // Diperbarui: default ke null
     },
   });
 

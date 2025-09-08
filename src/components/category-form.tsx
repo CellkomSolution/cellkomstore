@@ -24,7 +24,7 @@ import * as LucideIcons from "lucide-react"; // Import all Lucide icons
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama kategori minimal 3 karakter." }).max(50, { message: "Nama kategori maksimal 50 karakter." }),
   slug: z.string().min(3, { message: "Slug minimal 3 karakter." }).max(50, { message: "Slug maksimal 50 karakter." }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: "Slug harus berupa huruf kecil, angka, dan tanda hubung (tanpa spasi)." }),
-  icon_name: z.string().optional().or(z.literal("")), // Lucide icon name
+  icon_name: z.string().nullable().optional(), // Diperbarui: memungkinkan null dan opsional
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
@@ -42,13 +42,13 @@ export function CategoryForm({ initialData, onSubmit, loading = false }: Categor
     defaultValues: {
       name: initialData?.name || "",
       slug: initialData?.slug || "",
-      icon_name: initialData?.icon_name || "",
+      icon_name: initialData?.icon_name || null, // Diperbarui: default ke null
       order: initialData?.order || 0,
     },
   });
 
   // Function to render Lucide icon dynamically
-  const renderIcon = (iconName: string | null) => {
+  const renderIcon = (iconName: string | null | undefined) => { // Diperbarui: menerima undefined
     if (!iconName) return null;
     const IconComponent = (LucideIcons as any)[iconName];
     return IconComponent ? <IconComponent className="h-5 w-5 mr-2" /> : null;
