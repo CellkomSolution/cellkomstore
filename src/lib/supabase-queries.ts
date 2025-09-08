@@ -133,3 +133,32 @@ export async function searchProducts(query: string): Promise<Product[]> {
     isFlashSale: item.is_flash_sale,
   }));
 }
+
+export interface Profile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+  role: 'user' | 'admin';
+  email: string | null; // Menambahkan email untuk tampilan
+}
+
+export async function getAllProfiles(): Promise<Profile[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, first_name, last_name, avatar_url, role, auth_users:auth.users(email)"); // Join dengan auth.users untuk mendapatkan email
+
+  if (error) {
+    console.error("Error fetching all profiles:", error);
+    return [];
+  }
+
+  return data.map(profile => ({
+    id: profile.id,
+    first_name: profile.first_name,
+    last_name: profile.last_name,
+    avatar_url: profile.avatar_url,
+    role: profile.role,
+    email: profile.auth_users?.email || null,
+  }));
+}
