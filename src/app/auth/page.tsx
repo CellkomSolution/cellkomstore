@@ -8,10 +8,12 @@ import { useEffect } from "react";
 import { useSession } from "@/context/session-context";
 import Image from "next/image";
 import Link from "next/link";
+import { useTheme } from "next-themes"; // Import useTheme
 
 export default function AuthPage() {
   const router = useRouter();
   const { session, isLoading } = useSession();
+  const { theme } = useTheme(); // Dapatkan tema saat ini
 
   useEffect(() => {
     if (!isLoading && session) {
@@ -28,8 +30,8 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-4xl lg:grid lg:grid-cols-2 rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-black">
+    <div className="flex items-center justify-center min-h-screen bg-background"> {/* Full screen on mobile, uses app background */}
+      <div className="w-full h-screen lg:h-auto lg:max-w-4xl lg:grid lg:grid-cols-2 lg:rounded-2xl lg:shadow-2xl overflow-hidden bg-card"> {/* Full height/width on mobile, card style on desktop */}
         {/* Left Panel (Image) - Hidden on mobile */}
         <div className="hidden lg:flex relative items-center justify-center p-12 bg-blue-50 dark:bg-blue-900/20">
            <Image
@@ -53,7 +55,7 @@ export default function AuthPage() {
         </div>
 
         {/* Right Panel (Form) */}
-        <div className="p-8 md:p-12">
+        <div className="p-8 md:p-12 flex flex-col justify-center"> {/* Added flex-col and justify-center for vertical alignment */}
            {/* Mobile Header Image */}
            <div className="lg:hidden mb-8 text-center">
              <Image 
@@ -79,7 +81,7 @@ export default function AuthPage() {
                     brandAccent: 'hsl(var(--primary-foreground))',
                   },
                    radii: {
-                    buttonBorderRadius: 'var(--radius)', // Corrected property name
+                    buttonBorderRadius: 'var(--radius)',
                   },
                 },
               },
@@ -90,7 +92,7 @@ export default function AuthPage() {
                 anchor: 'text-sm'
               },
             }}
-            theme="light"
+            theme={theme === "dark" ? "dark" : "light"} // Tema dinamis berdasarkan next-themes
             localization={{
               variables: {
                 sign_in: {
