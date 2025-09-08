@@ -13,9 +13,11 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { FullCarouselSlide } from "./full-carousel-slide";
 import { ThreePartCarouselSlide } from "./three-part-carousel-slide";
+import { getHeroCarouselSlides, HeroCarouselSlide as SupabaseHeroCarouselSlide } from "@/lib/supabase-queries"; // Import from supabase-queries
 
-interface FullCarouselBanner {
-  type?: "full-banner";
+// Define types for the carousel slides based on Supabase data
+interface FullCarouselBannerProps {
+  type: "full-banner";
   productImageSrc: string;
   alt: string;
   logoSrc?: string;
@@ -27,14 +29,24 @@ interface FullCarouselBanner {
   leftPanelBgColor?: string;
 }
 
-interface ThreePartCarouselSlideData {
+interface ThreePartCarouselSlideDataProps {
   type: "three-part";
   leftPeek: {
     imageSrc?: string;
     alt: string;
     bgColor?: string;
   };
-  mainBanner: FullCarouselBanner;
+  mainBanner: {
+    productImageSrc: string;
+    alt: string;
+    logoSrc?: string;
+    productName?: string;
+    originalPrice?: number;
+    discountedPrice?: number;
+    isNew?: boolean;
+    hashtag?: string;
+    leftPanelBgColor?: string;
+  };
   rightPeek: {
     imageSrc?: string;
     logoSrc?: string;
@@ -44,72 +56,7 @@ interface ThreePartCarouselSlideData {
   };
 }
 
-type CarouselContentItem = FullCarouselBanner | ThreePartCarouselSlideData;
-
-const carouselSlides: CarouselContentItem[] = [
-  {
-    type: "three-part",
-    leftPeek: {
-      imageSrc: "https://images.unsplash.com/photo-1610945265064-0039e680ba21?q=80&w=600&auto=format&fit=crop", // Green phone
-      alt: "Green Phone",
-      bgColor: "bg-gray-100 dark:bg-gray-800",
-    },
-    mainBanner: {
-      productImageSrc: "https://images.unsplash.com/photo-1621609764095-f5285a59195f?q=80&w=600&auto=format&fit=crop", // Charger image
-      alt: "Redigo Cas Dua Perangkat Super Cepat",
-      logoSrc: "/redigo-logo.png",
-      productName: "Cas Dua Perangkat Super Cepat",
-      discountedPrice: 189000,
-      hashtag: "#NOBLABLADIBLIBLI",
-      leftPanelBgColor: "bg-blue-100 dark:bg-blue-950",
-    },
-    rightPeek: {
-      logoSrc: "/premier-league-logo.png",
-      alt: "Premier League",
-      bgColor: "bg-purple-200 dark:bg-purple-950",
-      hashtag: "#NOBLABLAD", // From image
-    },
-  },
-  {
-    type: "full-banner", // Explicitly set type
-    productImageSrc: "https://plus.unsplash.com/premium_photo-1661764878654-f2ff0e1d265a?q=80&w=600&auto=format&fit=crop", // Example product image (vacuum cleaner)
-    alt: "KV 01 Turbo DOUBLE BRUSH",
-    logoSrc: "/kurumi-logo.png",
-    productName: "KV 01 Turbo DOUBLE BRUSH",
-    originalPrice: 1750000,
-    discountedPrice: 1399000,
-    isNew: true,
-    hashtag: "#NOBLABLADIBLIBLI",
-    leftPanelBgColor: "bg-gray-50 dark:bg-gray-800",
-  },
-  {
-    type: "full-banner", // Explicitly set type
-    productImageSrc: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?q=80&w=600&auto=format&fit=crop",
-    alt: "Diskon Elektronik Besar-besaran",
-    productName: "Diskon Elektronik Besar-besaran",
-    discountedPrice: 999000,
-    hashtag: "#ELEKTRONIKMURAH",
-    leftPanelBgColor: "bg-blue-50 dark:bg-blue-900",
-  },
-  {
-    type: "full-banner", // Explicitly set type
-    productImageSrc: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=600&auto=format&fit=crop",
-    alt: "Fashion Sale Akhir Pekan",
-    productName: "Fashion Sale Akhir Pekan",
-    discountedPrice: 250000,
-    hashtag: "#FASHIONSALE",
-    leftPanelBgColor: "bg-pink-50 dark:bg-pink-900",
-  },
-  {
-    type: "full-banner", // Explicitly set type
-    productImageSrc: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?q=80&w=600&auto=format&fit=crop",
-    alt: "Produk Kecantikan Terbaru",
-    productName: "Produk Kecantikan Terbaru",
-    discountedPrice: 150000,
-    hashtag: "#KECANTIKAN",
-    leftPanelBgColor: "bg-purple-50 dark:bg-purple-900",
-  },
-];
+type CarouselContentItem = FullCarouselBannerProps | ThreePartCarouselSlideDataProps;
 
 export function HeroCarousel() {
   const plugin = React.useRef(
@@ -119,6 +66,62 @@ export function HeroCarousel() {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
+  const [carouselSlides, setCarouselSlides] = React.useState<CarouselContentItem[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchSlides() {
+      setIsLoading(true);
+      const slidesFromSupabase = await getHeroCarouselSlides();
+      
+      const formattedSlides: CarouselContentItem[] = slidesFromSupabase.map(slide => {
+        if (slide.type === 'full-banner') {
+          return {
+            type: 'full-banner',
+            productImageSrc: slide.product_image_url || '', // Ensure it's not null
+            alt: slide.alt,
+            logoSrc: slide.logo_url || undefined,
+            productName: slide.product_name || undefined,
+            originalPrice: slide.original_price || undefined,
+            discountedPrice: slide.discounted_price || undefined,
+            isNew: slide.is_new,
+            hashtag: slide.hashtag || undefined,
+            leftPanelBgColor: slide.left_panel_bg_color || undefined,
+          };
+        } else { // three-part
+          return {
+            type: 'three-part',
+            leftPeek: {
+              imageSrc: slide.left_peek_image_url || undefined,
+              alt: slide.left_peek_alt || 'Left Peek',
+              bgColor: slide.left_peek_bg_color || undefined,
+            },
+            mainBanner: {
+              productImageSrc: slide.product_image_url || '', // Ensure it's not null
+              alt: slide.alt,
+              logoSrc: slide.logo_url || undefined,
+              productName: slide.product_name || undefined,
+              originalPrice: slide.original_price || undefined,
+              discountedPrice: slide.discounted_price || undefined,
+              isNew: slide.is_new,
+              hashtag: slide.hashtag || undefined,
+              leftPanelBgColor: slide.left_panel_bg_color || undefined,
+            },
+            rightPeek: {
+              imageSrc: slide.right_peek_image_url || undefined,
+              logoSrc: slide.right_peek_logo_url || undefined,
+              alt: slide.right_peek_alt || 'Right Peek',
+              bgColor: slide.right_peek_bg_color || undefined,
+              hashtag: slide.right_peek_hashtag || undefined,
+            },
+          };
+        }
+      });
+      setCarouselSlides(formattedSlides);
+      setIsLoading(false);
+    }
+    fetchSlides();
+  }, []);
 
   React.useEffect(() => {
     if (!api) {
@@ -132,6 +135,22 @@ export function HeroCarousel() {
       setCurrent(api.selectedScrollSnap() + 1);
     });
   }, [api]);
+
+  if (isLoading) {
+    return (
+      <div className="relative w-full aspect-[4/1] rounded-lg overflow-hidden bg-muted animate-pulse flex items-center justify-center">
+        <Loader2 className="h-12 w-12 text-muted-foreground animate-spin" />
+      </div>
+    );
+  }
+
+  if (carouselSlides.length === 0) {
+    return (
+      <div className="relative w-full aspect-[4/1] rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
+        Tidak ada slide carousel untuk ditampilkan.
+      </div>
+    );
+  }
 
   return (
     <div className="relative">

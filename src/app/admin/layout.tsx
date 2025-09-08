@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation"; // Import usePathname
 import { useAdmin } from "@/hooks/use-admin";
 import { useSession } from "@/context/session-context";
 import Link from "next/link";
-import { LayoutDashboard, Package, Settings, Users } from "lucide-react";
+import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon } from "lucide-react"; // Import ImageIcon
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -63,6 +63,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/products">
               <Package className="mr-2 h-4 w-4" />
               Produk
+            </Link>
+          </Button>
+          <Button 
+            variant="ghost" 
+            className={cn("w-full justify-start", pathname.startsWith("/admin/hero-carousel") && "bg-muted hover:bg-muted")} 
+            asChild
+          >
+            <Link href="/admin/hero-carousel">
+              <ImageIcon className="mr-2 h-4 w-4" />
+              Hero Carousel
             </Link>
           </Button>
           <Button 
