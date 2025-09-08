@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Package, Users, DollarSign } from "lucide-react"; // Import ikon yang hilang
 
 export default function AdminDashboardPage() {
   return (
