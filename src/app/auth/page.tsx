@@ -28,100 +28,102 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-4xl lg:grid lg:grid-cols-2 rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-black">
-        {/* Left Panel (Image) - Hidden on mobile */}
-        <div className="hidden lg:flex relative items-center justify-center p-12 bg-blue-50 dark:bg-blue-900/20">
-           <Image
-            src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1000&auto=format&fit=crop"
-            alt="Shopping illustration"
-            layout="fill"
-            objectFit="cover"
-            className="opacity-20"
-          />
-          <div className="relative z-10 text-center">
+    <div className="relative flex min-h-[calc(100vh-200px)] items-center justify-center overflow-hidden">
+      {/* Background Image */}
+      <Image
+        src="https://images.unsplash.com/photo-1550745165-9bc0b252726a?q=80&w=1920&auto=format&fit=crop"
+        alt="Tech background"
+        layout="fill"
+        objectFit="cover"
+        className="-z-10 brightness-50"
+      />
+
+      {/* Auth Card */}
+      <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-lg sm:p-8">
+        <div className="mb-8 text-center">
+          <Link href="/">
             <Image 
               src="/teslogocellkom.png" 
               alt="Cellkom Store Logo" 
-              width={200}
-              height={50}
-              className="h-auto inline-block mb-4"
+              width={150}
+              height={38}
+              className="h-auto inline-block invert brightness-0" // Invert for dark background
             />
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Belanja Mudah & Aman</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">Gabung dan nikmati jutaan produk terbaik.</p>
-          </div>
+          </Link>
         </div>
-
-        {/* Right Panel (Form) */}
-        <div className="p-8 md:p-12">
-           {/* Mobile Header Image */}
-           <div className="lg:hidden mb-8 text-center">
-             <Image 
-                src="/teslogocellkom.png" 
-                alt="Cellkom Store Logo" 
-                width={150}
-                height={38}
-                className="h-auto inline-block"
-              />
-           </div>
-           <h2 className="text-2xl font-bold text-center mb-1 text-gray-900 dark:text-white">Selamat Datang</h2>
-           <p className="text-sm text-center text-gray-500 mb-8">Masuk atau daftar untuk melanjutkan</p>
-           <Auth
-            supabaseClient={supabase}
-            providers={['google', 'apple']}
-            socialLayout="horizontal"
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: 'hsl(var(--primary))',
-                    brandAccent: 'hsl(var(--primary-foreground))',
-                  },
-                   radii: {
-                    borderRadius: 'var(--radius)',
-                    buttonBorderRadius: 'var(--radius)',
-                  },
+        
+        <h2 className="text-2xl font-bold text-center mb-1 text-white">Selamat Datang</h2>
+        <p className="text-sm text-center text-gray-300 mb-8">Masuk atau daftar untuk melanjutkan</p>
+        
+        <Auth
+          supabaseClient={supabase}
+          providers={['google', 'apple']}
+          socialLayout="horizontal"
+          appearance={{
+            theme: ThemeSupa,
+            variables: {
+              default: {
+                colors: {
+                  brand: 'hsl(var(--primary))',
+                  brandAccent: 'hsl(var(--primary-foreground))',
+                  defaultButtonBackground: '#ffffff',
+                  defaultButtonBackgroundHover: '#f2f2f2',
+                  defaultButtonBorder: '#e6e6e6',
+                  defaultButtonText: '#333333',
+                  inputText: '#ffffff',
+                  inputLabelText: '#a1a1aa', // zinc-400
+                  inputBorder: '#52525b', // zinc-600
+                  inputPlaceholder: '#71717a', // zinc-500
+                  inputBackground: 'rgba(255, 255, 255, 0.05)',
+                  anchorTextColor: '#d4d4d8', // zinc-300
+                  anchorTextColorHover: '#ffffff',
+                },
+                radii: {
+                  borderRadius: 'var(--radius)',
+                  buttonBorderRadius: 'var(--radius)',
                 },
               },
-               className: {
-                button: 'py-2.5 text-sm',
-                input: 'py-2.5 text-sm',
-                label: 'text-sm',
-                anchor: 'text-sm'
+            },
+            className: {
+              button: 'py-2.5 text-sm',
+              input: 'py-2.5 text-sm',
+              label: 'text-sm !text-gray-300',
+              anchor: 'text-sm',
+              container: '!gap-y-4',
+              message: '!text-sm !text-red-400'
+            },
+          }}
+          theme="dark" // Force dark theme for better contrast on image
+          localization={{
+            variables: {
+              sign_in: {
+                email_label: 'Nomor HP atau email',
+                password_label: 'Kata Sandi',
+                button_label: 'Masuk',
+                social_provider_text: 'Masuk lebih cepat dengan',
+                link_text: 'Belum punya akun? Daftar, yuk!',
               },
-            }}
-            theme="light"
-            localization={{
-              variables: {
-                sign_in: {
-                  email_label: 'Nomor HP atau email',
-                  password_label: 'Kata Sandi',
-                  button_label: 'Masuk',
-                  social_provider_text: 'Masuk lebih cepat dengan',
-                  link_text: 'Belum punya akun? Daftar, yuk!',
-                },
-                sign_up: {
-                  email_label: 'Nomor HP atau email',
-                  password_label: 'Buat Kata Sandi',
-                  button_label: 'Daftar',
-                  link_text: 'Sudah punya akun? Masuk',
-                  social_provider_text: 'Daftar lebih cepat dengan',
-                },
+              sign_up: {
+                email_label: 'Nomor HP atau email',
+                password_label: 'Buat Kata Sandi',
+                button_label: 'Daftar',
+                link_text: 'Sudah punya akun? Masuk',
+                social_provider_text: 'Daftar lebih cepat dengan',
               },
-            }}
-            redirectTo={typeof window !== 'undefined' ? window.location.origin : undefined}
-          />
-           <p className="text-xs text-center text-gray-500 mt-8">
-             Dengan log in, kamu menyetujui{' '}
-             <Link href="#" className="underline hover:text-primary">
-               Kebijakan Privasi
-             </Link> dan{' '}
-             <Link href="#" className="underline hover:text-primary">
-               Syarat & Ketentuan
-             </Link> Cellkom.
-           </p>
-        </div>
+            },
+          }}
+          redirectTo={typeof window !== 'undefined' ? window.location.origin : undefined}
+        />
+        
+        <p className="text-xs text-center text-gray-400 mt-8">
+          Dengan log in, kamu menyetujui{' '}
+          <Link href="#" className="underline hover:text-white">
+            Kebijakan Privasi
+          </Link> dan{' '}
+          <Link href="#" className="underline hover:text-white">
+            Syarat & Ketentuan
+          </Link> Cellkom.
+        </p>
       </div>
     </div>
   );
