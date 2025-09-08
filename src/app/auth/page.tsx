@@ -8,16 +8,16 @@ import { useEffect } from "react";
 import { useSession } from "@/context/session-context";
 import Image from "next/image";
 import Link from "next/link";
-import { useTheme } from "next-themes"; // Import useTheme
+import { useTheme } from "next-themes";
 
 export default function AuthPage() {
   const router = useRouter();
   const { session, isLoading } = useSession();
-  const { theme } = useTheme(); // Dapatkan tema saat ini
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!isLoading && session) {
-      router.push("/"); // Redirect to home if already logged in
+      router.push("/");
     }
   }, [session, isLoading, router]);
 
@@ -30,16 +30,16 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background"> {/* Full screen on mobile, uses app background */}
-      <div className="w-full h-screen lg:h-auto lg:max-w-4xl lg:grid lg:grid-cols-2 lg:rounded-2xl lg:shadow-2xl overflow-hidden bg-card"> {/* Full height/width on mobile, card style on desktop */}
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="w-full h-screen lg:h-auto lg:max-w-4xl lg:grid lg:grid-cols-2 lg:rounded-2xl lg:shadow-2xl overflow-hidden bg-card">
         {/* Left Panel (Image) - Hidden on mobile */}
-        <div className="hidden lg:flex relative items-center justify-center p-12 bg-blue-50 dark:bg-blue-900/20">
+        <div className="hidden lg:flex relative items-center justify-center p-12 bg-black"> {/* Changed background to black */}
            <Image
-            src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1000&auto=format&fit=crop"
+            src="/bg-login.jpeg" // Updated image source
             alt="Shopping illustration"
             layout="fill"
             objectFit="cover"
-            className="opacity-20"
+            className="opacity-100" // Set opacity to 100
           />
           <div className="relative z-10 text-center">
             <Image 
@@ -49,13 +49,13 @@ export default function AuthPage() {
               height={50}
               className="h-auto inline-block mb-4"
             />
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Belanja Mudah & Aman</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">Gabung dan nikmati jutaan produk terbaik.</p>
+            <h1 className="text-2xl font-bold text-white">Belanja Mudah & Aman</h1> {/* Changed text color to white */}
+            <p className="text-gray-300 mt-2">Gabung dan nikmati jutaan produk terbaik.</p> {/* Changed text color to gray-300 */}
           </div>
         </div>
 
         {/* Right Panel (Form) */}
-        <div className="p-8 md:p-12 flex flex-col justify-center"> {/* Added flex-col and justify-center for vertical alignment */}
+        <div className="p-8 md:p-12 flex flex-col justify-center">
            {/* Mobile Header Image */}
            <div className="lg:hidden mb-8 text-center">
              <Image 
@@ -92,7 +92,7 @@ export default function AuthPage() {
                 anchor: 'text-sm'
               },
             }}
-            theme={theme === "dark" ? "dark" : "light"} // Tema dinamis berdasarkan next-themes
+            theme={theme === "dark" ? "dark" : "light"}
             localization={{
               variables: {
                 sign_in: {
