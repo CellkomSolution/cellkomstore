@@ -11,13 +11,11 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import Image from "next/image";
-import { formatRupiah } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight } from "lucide-react"; // Import Chevron icons
+import { FullCarouselSlide } from "./full-carousel-slide";
+import { ThreePartCarouselSlide } from "./three-part-carousel-slide";
 
 interface FullCarouselBanner {
-  type?: "full-banner"; // Add a discriminator for FullCarouselBanner as well
+  type?: "full-banner";
   productImageSrc: string;
   alt: string;
   logoSrc?: string;
@@ -29,14 +27,14 @@ interface FullCarouselBanner {
   leftPanelBgColor?: string;
 }
 
-interface ThreePartCarouselSlide {
-  type: "three-part"; // Discriminator
+interface ThreePartCarouselSlideData {
+  type: "three-part";
   leftPeek: {
-    imageSrc?: string; // Make optional as per usage
+    imageSrc?: string;
     alt: string;
     bgColor?: string;
   };
-  mainBanner: FullCarouselBanner; // Re-use FullCarouselBanner for the main part
+  mainBanner: FullCarouselBanner;
   rightPeek: {
     imageSrc?: string;
     logoSrc?: string;
@@ -46,7 +44,7 @@ interface ThreePartCarouselSlide {
   };
 }
 
-type CarouselContentItem = FullCarouselBanner | ThreePartCarouselSlide;
+type CarouselContentItem = FullCarouselBanner | ThreePartCarouselSlideData;
 
 const carouselSlides: CarouselContentItem[] = [
   {
@@ -150,110 +148,25 @@ export function HeroCarousel() {
               <Card className="overflow-hidden rounded-lg">
                 <CardContent className="flex aspect-[4/1] p-0 relative">
                   {slide.type === "three-part" ? (
-                    // Render 3-part layout
-                    <div className="grid grid-cols-[1fr_4fr_1fr] gap-2 h-full w-full">
-                      {/* Left Peek */}
-                      <div className={`relative flex items-center justify-center rounded-lg overflow-hidden ${(slide as ThreePartCarouselSlide).leftPeek.bgColor || 'bg-gray-100 dark:bg-gray-800'}`}>
-                        {(slide as ThreePartCarouselSlide).leftPeek.imageSrc && (
-                          <Image src={(slide as ThreePartCarouselSlide).leftPeek.imageSrc!} alt={(slide as ThreePartCarouselSlide).leftPeek.alt} fill style={{ objectFit: 'cover' }} />
-                        )}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <ChevronLeft className="h-8 w-8 text-gray-500 opacity-70" />
-                        </div>
-                      </div>
-
-                      {/* Main Banner (using FullCarouselBanner structure) */}
-                      <div className={`relative flex rounded-lg overflow-hidden ${(slide as ThreePartCarouselSlide).mainBanner.leftPanelBgColor || 'bg-white dark:bg-gray-900'}`}>
-                        {/* Left text panel of main banner */}
-                        <div className="w-1/2 flex flex-col justify-center p-3 md:p-6 lg:p-8">
-                          {(slide as ThreePartCarouselSlide).mainBanner.logoSrc && (
-                            <Image src={(slide as ThreePartCarouselSlide).mainBanner.logoSrc!} alt="Brand Logo" width={100} height={30} className="h-auto mb-1 md:mb-2" />
-                          )}
-                          {(slide as ThreePartCarouselSlide).mainBanner.productName && (
-                            <h3 className="text-lg md:text-2xl font-bold leading-tight text-foreground">
-                              {(slide as ThreePartCarouselSlide).mainBanner.productName}
-                            </h3>
-                          )}
-                          {(slide as ThreePartCarouselSlide).mainBanner.originalPrice && (
-                            <p className="text-xs md:text-sm line-through text-muted-foreground mt-0.5">
-                              {formatRupiah((slide as ThreePartCarouselSlide).mainBanner.originalPrice!)}
-                            </p>
-                          )}
-                          {(slide as ThreePartCarouselSlide).mainBanner.discountedPrice && (
-                            <p className="text-xl md:text-3xl font-extrabold text-primary mt-0.5">
-                              {formatRupiah((slide as ThreePartCarouselSlide).mainBanner.discountedPrice!)}
-                            </p>
-                          )}
-                          {(slide as ThreePartCarouselSlide).mainBanner.hashtag && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {(slide as ThreePartCarouselSlide).mainBanner.hashtag}
-                            </p>
-                          )}
-                        </div>
-                        {/* Right image panel of main banner */}
-                        <div className="w-1/2 relative flex items-center justify-end">
-                          <Image src={(slide as ThreePartCarouselSlide).mainBanner.productImageSrc} alt={(slide as ThreePartCarouselSlide).mainBanner.alt} width={600} height={480} className="h-full w-auto object-contain object-right" priority={index === 0} />
-                          {(slide as ThreePartCarouselSlide).mainBanner.isNew && (
-                            <Badge variant="destructive" className="absolute top-4 right-4 rotate-12 text-xs px-2 py-0.5">NEW</Badge>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Right Peek */}
-                      <div className={`relative flex items-center justify-center rounded-lg overflow-hidden ${(slide as ThreePartCarouselSlide).rightPeek.bgColor || 'bg-gray-100 dark:bg-gray-800'}`}>
-                        {(slide as ThreePartCarouselSlide).rightPeek.logoSrc && (
-                          <Image src={(slide as ThreePartCarouselSlide).rightPeek.logoSrc!} alt={(slide as ThreePartCarouselSlide).rightPeek.alt} width={80} height={24} className="h-auto w-auto max-w-[80%] max-h-[80%]" />
-                        )}
-                        {(slide as ThreePartCarouselSlide).rightPeek.imageSrc && (
-                          <Image src={(slide as ThreePartCarouselSlide).rightPeek.imageSrc!} alt={(slide as ThreePartCarouselSlide).rightPeek.alt} fill style={{ objectFit: 'cover' }} />
-                        )}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <ChevronRight className="h-8 w-8 text-gray-500 opacity-70" />
-                        </div>
-                        {(slide as ThreePartCarouselSlide).rightPeek.hashtag && (
-                          <p className="absolute bottom-2 text-xs text-muted-foreground">
-                            {(slide as ThreePartCarouselSlide).rightPeek.hashtag}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                    <ThreePartCarouselSlide
+                      leftPeek={slide.leftPeek}
+                      mainBanner={slide.mainBanner}
+                      rightPeek={slide.rightPeek}
+                      priority={index === 0}
+                    />
                   ) : (
-                    // Render existing full banner layout
-                    <div className={`relative w-full flex rounded-lg overflow-hidden ${(slide as FullCarouselBanner).leftPanelBgColor || 'bg-white dark:bg-gray-900'}`}>
-                      {/* Left text panel */}
-                      <div className="w-2/3 md:w-1/2 flex flex-col justify-center p-3 md:p-6 lg:p-8 z-10 rounded-l-lg">
-                        {(slide as FullCarouselBanner).logoSrc && (
-                          <Image src={(slide as FullCarouselBanner).logoSrc!} alt="Brand Logo" width={100} height={30} className="h-auto mb-1 md:mb-2" />
-                        )}
-                        {(slide as FullCarouselBanner).productName && (
-                          <h3 className="text-lg md:text-2xl font-bold leading-tight text-foreground">
-                            {(slide as FullCarouselBanner).productName}
-                          </h3>
-                        )}
-                        {(slide as FullCarouselBanner).originalPrice && (
-                          <p className="text-xs md:text-sm line-through text-muted-foreground mt-0.5">
-                            {formatRupiah((slide as FullCarouselBanner).originalPrice!)}
-                          </p>
-                        )}
-                        {(slide as FullCarouselBanner).discountedPrice && (
-                          <p className="text-xl md:text-3xl font-extrabold text-primary mt-0.5">
-                            {formatRupiah((slide as FullCarouselBanner).discountedPrice!)}
-                          </p>
-                        )}
-                        {(slide as FullCarouselBanner).hashtag && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {(slide as FullCarouselBanner).hashtag}
-                          </p>
-                        )}
-                      </div>
-                      {/* Right image panel */}
-                      <div className="relative w-1/3 md:w-1/2 flex items-center justify-end rounded-r-lg bg-white dark:bg-gray-900">
-                        <Image src={(slide as FullCarouselBanner).productImageSrc} alt={(slide as FullCarouselBanner).alt} width={600} height={480} className="h-full w-auto object-contain object-right" priority={index === 0} />
-                        {(slide as FullCarouselBanner).isNew && (
-                          <Badge variant="destructive" className="absolute top-4 right-4 rotate-12 text-xs px-2 py-0.5">NEW</Badge>
-                        )}
-                      </div>
-                    </div>
+                    <FullCarouselSlide
+                      productImageSrc={slide.productImageSrc}
+                      alt={slide.alt}
+                      logoSrc={slide.logoSrc}
+                      productName={slide.productName}
+                      originalPrice={slide.originalPrice}
+                      discountedPrice={slide.discountedPrice}
+                      isNew={slide.isNew}
+                      hashtag={slide.hashtag}
+                      leftPanelBgColor={slide.leftPanelBgColor}
+                      priority={index === 0}
+                    />
                   )}
                 </CardContent>
               </Card>
