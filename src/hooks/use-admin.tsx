@@ -28,10 +28,15 @@ export function useAdmin() {
 
       if (error) {
         console.error("Error fetching user role:", error);
+        // Log more details if available
+        if (error.message) console.error("Error message:", error.message);
+        if (error.details) console.error("Error details:", error.details);
+        if (error.hint) console.error("Error hint:", error.hint);
         setIsAdmin(false);
       } else if (data) {
         setIsAdmin(data.role === "admin");
       } else {
+        // No profile found for the user, default to not admin
         setIsAdmin(false);
       }
       setIsAdminLoading(false);
