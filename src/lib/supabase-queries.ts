@@ -162,3 +162,27 @@ export async function getAllProfiles(): Promise<Profile[]> {
     email: profile.auth_users?.email || null,
   }));
 }
+
+export async function getTotalProductsCount(): Promise<number> {
+  const { count, error } = await supabase
+    .from("products")
+    .select("*", { count: "exact", head: true });
+
+  if (error) {
+    console.error("Error fetching total products count:", error);
+    return 0;
+  }
+  return count || 0;
+}
+
+export async function getTotalUsersCount(): Promise<number> {
+  const { count, error } = await supabase
+    .from("profiles") // Assuming each user has a profile
+    .select("*", { count: "exact", head: true });
+
+  if (error) {
+    console.error("Error fetching total users count:", error);
+    return 0;
+  }
+  return count || 0;
+}

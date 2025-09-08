@@ -2,9 +2,26 @@
 
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, DollarSign } from "lucide-react"; // Import ikon yang hilang
+import { Package, Users, DollarSign } from "lucide-react";
+import { getTotalProductsCount, getTotalUsersCount } from "@/lib/supabase-queries"; // Import new functions
 
 export default function AdminDashboardPage() {
+  const [totalProducts, setTotalProducts] = React.useState<number | null>(null);
+  const [totalUsers, setTotalUsers] = React.useState<number | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      const productsCount = await getTotalProductsCount();
+      const usersCount = await getTotalUsersCount();
+      setTotalProducts(productsCount);
+      setTotalUsers(usersCount);
+      setIsLoading(false);
+    }
+    fetchData();
+  }, []);
+
   return (
     <div className="space-y-6 py-8">
       <h2 className="text-2xl font-bold">Selamat Datang di Dasbor Admin!</h2>
@@ -19,8 +36,10 @@ export default function AdminDashboardPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
-            <p className="text-xs text-muted-foreground">+20% dari bulan lalu</p>
+            <div className="text-2xl font-bold">
+              {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalProducts}
+            </div>
+            <p className="text-xs text-muted-foreground">+20% dari bulan lalu</p> {/* Placeholder */}
           </CardContent>
         </Card>
         <Card>
@@ -29,8 +48,10 @@ export default function AdminDashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">567</div>
-            <p className="text-xs text-muted-foreground">+15% dari bulan lalu</p>
+            <div className="text-2xl font-bold">
+              {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalUsers}
+            </div>
+            <p className="text-xs text-muted-foreground">+15% dari bulan lalu</p> {/* Placeholder */}
           </CardContent>
         </Card>
         <Card>
@@ -39,8 +60,8 @@ export default function AdminDashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rp 12.500.000</div>
-            <p className="text-xs text-muted-foreground">+5% dari kemarin</p>
+            <div className="text-2xl font-bold">Rp 12.500.000</div> {/* Static placeholder */}
+            <p className="text-xs text-muted-foreground">+5% dari kemarin</p> {/* Static placeholder */}
           </CardContent>
         </Card>
       </div>
