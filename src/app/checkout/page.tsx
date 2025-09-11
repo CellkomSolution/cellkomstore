@@ -4,7 +4,7 @@ import * as React from "react";
 import { useCart } from "@/context/cart-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -55,6 +55,12 @@ export default function CheckoutPage() {
     clearCart();
     router.push("/");
   }
+
+  const handleCancelOrder = () => {
+    clearCart();
+    toast.info("Pesanan Anda telah dibatalkan.");
+    router.push("/");
+  };
 
   if (totalItems === 0) {
     return (
@@ -169,6 +175,14 @@ export default function CheckoutPage() {
                 <span>{formatRupiah(totalPrice)}</span>
               </div>
             </CardContent>
+            <CardFooter className="flex flex-col gap-2">
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/">Tambah Pesanan</Link>
+              </Button>
+              <Button variant="destructive" className="w-full" onClick={handleCancelOrder}>
+                Batalkan Pesanan
+              </Button>
+            </CardFooter>
           </Card>
         </div>
       </div>
