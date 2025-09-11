@@ -28,6 +28,7 @@ const formSchema = z.object({
   display_style: z.enum(['full', 'split']).default('split'),
   product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).min(1, "URL Gambar Produk harus diisi."),
   alt: z.string().min(3, { message: "Teks alternatif minimal 3 karakter." }),
+  link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional(),
   order: z.coerce.number().min(0).optional(),
   // Optional fields for split view
   logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().optional(),
@@ -61,6 +62,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
     display_style: initialData?.display_style ?? 'split',
     product_image_url: initialData?.product_image_url ?? "",
     alt: initialData?.alt ?? "",
+    link_url: initialData?.link_url ?? null,
     logo_url: initialData?.logo_url ?? null,
     product_name: initialData?.product_name ?? null,
     original_price: initialData?.original_price ?? null,
@@ -243,6 +245,23 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
               </FormControl>
               <FormDescription>
                 Wajib diisi untuk SEO dan aksesibilitas.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="link_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL Tautan (Opsional)</FormLabel>
+              <FormControl>
+                <Input placeholder="https://contoh.com/produk/promo" {...field} value={field.value ?? ""} />
+              </FormControl>
+              <FormDescription>
+                Jika diisi, seluruh slide akan menjadi tautan yang dapat diklik ke URL ini.
               </FormDescription>
               <FormMessage />
             </FormItem>

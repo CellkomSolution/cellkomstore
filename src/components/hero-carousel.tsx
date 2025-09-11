@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { FullCarouselSlide } from "./full-carousel-slide";
-import { FullWidthCarouselSlide } from "./full-width-carousel-slide"; // Ditambahkan
+import { FullWidthCarouselSlide } from "./full-width-carousel-slide";
 import { getHeroCarouselSlides, HeroCarouselSlide as SupabaseHeroCarouselSlide } from "@/lib/supabase-queries";
 import { Loader2 } from "lucide-react";
 
@@ -76,8 +77,8 @@ export function HeroCarousel() {
         setApi={setApi}
       >
         <CarouselContent>
-          {carouselSlides.map((slide, index) => (
-            <CarouselItem key={index}>
+          {carouselSlides.map((slide, index) => {
+            const slideContent = (
               <Card className="overflow-hidden rounded-lg">
                 <CardContent className="flex aspect-[4/1] p-0 relative">
                   {slide.display_style === 'full' ? (
@@ -102,8 +103,20 @@ export function HeroCarousel() {
                   )}
                 </CardContent>
               </Card>
-            </CarouselItem>
-          ))}
+            );
+
+            return (
+              <CarouselItem key={index}>
+                {slide.link_url ? (
+                  <Link href={slide.link_url} target="_blank" rel="noopener noreferrer" className="block">
+                    {slideContent}
+                  </Link>
+                ) : (
+                  slideContent
+                )}
+              </CarouselItem>
+            );
+          })}
         </CarouselContent>
         {/* Custom styled navigation buttons - positioned within the carousel area */}
         <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 hidden sm:flex h-10 w-10 rounded-full bg-gray-800 text-white hover:bg-gray-700 z-20" />
