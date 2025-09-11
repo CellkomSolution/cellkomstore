@@ -63,12 +63,9 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
     const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
 
     if (!conversationsMap.has(conversationKey)) {
-      // Safely access profile and product info, handling potential array inference
-      const rawUserProfile = Array.isArray(chat.profiles) ? chat.profiles[0] : chat.profiles;
-      const userProfile = rawUserProfile as ChatMessage['profiles'];
-
-      const rawProductInfo = Array.isArray(chat.products) ? chat.products[0] : chat.products;
-      const productInfo = rawProductInfo as ChatMessage['products'];
+      // Directly cast to the expected object type, as Supabase typically returns single objects for these joins.
+      const userProfile = chat.profiles as ChatMessage['profiles'];
+      const productInfo = chat.products as ChatMessage['products'];
 
       conversationsMap.set(conversationKey, {
         user_id: otherParticipantId,
