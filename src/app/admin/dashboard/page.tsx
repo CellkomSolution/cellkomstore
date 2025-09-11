@@ -3,7 +3,8 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, Users, DollarSign } from "lucide-react";
-import { getTotalProductsCount, getTotalUsersCount } from "@/lib/supabase-queries"; // Import new functions
+import { getTotalProductsCount } from "@/lib/supabase/products"; // Import dari modul products
+import { getTotalUsersCount } from "@/lib/supabase/profiles"; // Import dari modul profiles
 
 export default function AdminDashboardPage() {
   const [totalProducts, setTotalProducts] = React.useState<number | null>(null);
@@ -39,7 +40,7 @@ export default function AdminDashboardPage() {
             <div className="text-2xl font-bold">
               {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalProducts}
             </div>
-            <p className="text-xs text-muted-foreground">+20% dari bulan lalu</p> {/* Placeholder */}
+            <p className="text-xs text-muted-foreground">+20% dari bulan lalu</p>
           </CardContent>
         </Card>
         <Card>
@@ -51,7 +52,7 @@ export default function AdminDashboardPage() {
             <div className="text-2xl font-bold">
               {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalUsers}
             </div>
-            <p className="text-xs text-muted-foreground">+15% dari bulan lalu</p> {/* Placeholder */}
+            <p className="text-xs text-muted-foreground">+15% dari bulan lalu</p>
           </CardContent>
         </Card>
         <Card>
@@ -60,8 +61,8 @@ export default function AdminDashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rp 12.500.000</div> {/* Static placeholder */}
-            <p className="text-xs text-muted-foreground">+5% dari kemarin</p> {/* Static placeholder */}
+            <div className="text-2xl font-bold">Rp 12.500.000</div>
+            <p className="text-xs text-muted-foreground">+5% dari kemarin</p>
           </CardContent>
         </Card>
       </div>

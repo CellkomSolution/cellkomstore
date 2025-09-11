@@ -13,7 +13,9 @@ import { formatDistanceToNow } from "date-fns";
 import { id } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getAdminUserId, getChatMessages, markMessagesAsRead, ChatMessage, Profile, getProductById } from "@/lib/supabase-queries";
+import { getAdminUserId, Profile } from "@/lib/supabase/profiles"; // Import dari modul profiles
+import { getChatMessages, markMessagesAsRead, ChatMessage } from "@/lib/supabase/chats"; // Import dari modul chats
+import { getProductById } from "@/lib/supabase/products"; // Import dari modul products
 import Link from "next/link";
 import Image from "next/image";
 
@@ -38,7 +40,6 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
       setTargetAdminId(currentAdminId);
 
       if (currentAdminId && adminUser) {
-        // Fetch other user's profile
         const { data: userProfileData, error: userProfileError } = await supabase
           .from("profiles")
           .select("*")
@@ -52,7 +53,6 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
         }
         setOtherUserProfile(userProfileData);
 
-        // Fetch product info if product_id exists
         if (productId) {
           const product = await getProductById(productId);
           if (product) {
@@ -71,7 +71,6 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
     setMessages(fetchedMessages);
     setIsLoadingMessages(false);
     
-    // Mark messages as read
     try {
       await markMessagesAsRead(userId, targetAdminId, productId);
     } catch (error) {
@@ -83,7 +82,6 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
     if (adminUser && targetAdminId && otherUserProfile) {
       fetchMessages();
 
-      // Realtime subscription for new messages
       const channel = supabase
         .channel(`admin_chat_${userId}_${productId || 'general'}`)
         .on(
@@ -96,21 +94,18 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
           },
           (payload) => {
             const newMsg = payload.new as ChatMessage;
-            // Only add if the message is relevant to this conversation
             if (
               (newMsg.sender_id === userId && newMsg.receiver_id === targetAdminId) ||
               (newMsg.sender_id === targetAdminId && newMsg.receiver_id === userId)
             ) {
-              // Fetch profile data for the new message
               supabase.from('profiles').select('first_name, last_name, avatar_url, role').eq('id', newMsg.sender_id).single()
                 .then(({ data: profileData, error: profileError }) => {
                   if (!profileError && profileData) {
                     setMessages((prev) => [...prev, { ...newMsg, profiles: profileData }]);
                   } else {
-                    setMessages((prev) => [...prev, newMsg]); // Add without profile if error
+                    setMessages((prev) => [...prev, newMsg]);
                   }
                 });
-              // Mark new incoming messages as read immediately
               if (newMsg.sender_id === userId) {
                 markMessagesAsRead(userId, targetAdminId, productId);
               }

@@ -4,7 +4,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getHeroCarouselSlides, deleteHeroCarouselSlide, HeroCarouselSlide } from "@/lib/supabase-queries";
+import { getHeroCarouselSlides, deleteHeroCarouselSlide, HeroCarouselSlide } from "@/lib/supabase/hero-carousel"; // Import dari modul hero-carousel
 import { Edit, Trash2, PlusCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,7 +21,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client"; // Import ini ditambahkan
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminHeroCarouselPage() {
   const [slides, setSlides] = React.useState<HeroCarouselSlide[]>([]);
@@ -57,7 +57,6 @@ export default function AdminHeroCarouselPage() {
 
         if (storageError) {
           console.warn("Failed to delete carousel images from storage:", storageError.message);
-          // Don't throw error here, proceed with slide deletion even if image deletion fails
         }
       }
 

@@ -6,14 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, ShieldCheck, Truck, Store } from "lucide-react";
 import { useCart } from "@/context/cart-context";
-import type { Product } from "@/lib/mock-data";
-import { getProductById } from "@/lib/supabase-queries"; // Import fungsi Supabase
-import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
-import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Import ProductDetailPageSkeleton
-import { StickyProductActions } from "@/components/sticky-product-actions"; // Import StickyProductActions
+import type { Product } from "@/lib/supabase/products"; // Import Product interface dari modul yang benar
+import { getProductById } from "@/lib/supabase/products"; // Import getProductById dari modul yang benar
+import { formatRupiah } from "@/lib/utils";
+import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton";
+import { StickyProductActions } from "@/components/sticky-product-actions";
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  // Menggunakan React.use() untuk meng-unwrap params
   const { id } = React.use(params);
   const { addItem } = useCart();
   
@@ -27,7 +26,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       if (fetchedProduct) {
         setProduct(fetchedProduct);
       } else {
-        notFound(); // If product not found, trigger Next.js notFound
+        notFound();
       }
       setIsLoading(false);
     }
@@ -39,7 +38,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }
 
   if (!product) {
-    return null; // notFound() will handle this
+    return null;
   }
 
   const handleAddToCart = () => {
@@ -51,9 +50,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     : 0;
 
   return (
-    <div className="container mx-auto px-4 py-8 pb-24"> {/* Added pb-24 to ensure content is not hidden by sticky bar */}
+    <div className="container mx-auto px-4 py-8 pb-24">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-        {/* Product Image */}
         <div>
           <div className="aspect-square rounded-lg overflow-hidden border">
             <img
@@ -64,7 +62,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
-        {/* Product Details */}
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold mb-2">{product.name}</h1>
           <div className="flex items-center gap-4 mb-4">
@@ -90,12 +87,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             )}
           </div>
 
-          {/* Removed original buttons here */}
-          {/* <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            <Button size="lg" className="flex-1" onClick={handleAddToCart}>Tambah ke Keranjang</Button>
-            <Button size="lg" variant="outline" className="flex-1">Beli Langsung</Button>
-          </div> */}
-
           <div className="border-t pt-6 space-y-4">
              <div className="flex items-center gap-3">
                 <Store className="h-5 w-5 text-muted-foreground" />
@@ -113,7 +104,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      {/* Product Description */}
       <div className="mt-12">
         <h2 className="text-xl font-bold mb-4 border-b pb-2">Deskripsi Produk</h2>
         <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -121,7 +111,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      {/* Sticky Product Actions */}
       <StickyProductActions product={product} onAddToCart={handleAddToCart} />
     </div>
   );

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HeroCarouselForm } from "@/components/hero-carousel-form";
 import { toast } from "sonner";
-import { createHeroCarouselSlide } from "@/lib/supabase-queries";
+import { createHeroCarouselSlide } from "@/lib/supabase/hero-carousel"; // Import createHeroCarouselSlide dari modul hero-carousel
 
 export default function NewHeroCarouselSlidePage() {
   const router = useRouter();
@@ -16,7 +16,6 @@ export default function NewHeroCarouselSlidePage() {
     try {
       let slideData = { ...values };
 
-      // Jika tampilan 'full', hapus data yang hanya relevan untuk 'split'
       if (values.display_style === 'full') {
         slideData = {
           ...slideData,

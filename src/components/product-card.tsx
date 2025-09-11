@@ -3,12 +3,12 @@
 import { Star, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import type { Product } from "@/lib/mock-data";
+import type { Product } from "@/lib/supabase/products"; // Import Product interface dari modul yang benar
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useCart } from "@/context/cart-context";
-import Image from "next/image"; // Import Image component
-import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
+import Image from "next/image";
+import { formatRupiah } from "@/lib/utils";
 
 interface ProductCardProps {
   product: Product;

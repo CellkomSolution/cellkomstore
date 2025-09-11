@@ -4,7 +4,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
-import { Product } from "@/lib/mock-data";
+import { Product } from "@/lib/supabase/products"; // Import Product interface dari modul yang benar
 import { ChatWidget } from "./chat-widget";
 import Link from "next/link";
 

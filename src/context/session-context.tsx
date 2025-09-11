@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { type Session, type User } from "@supabase/supabase-js";
 import { toast } from "sonner";
-import { type Profile } from "@/lib/supabase-queries";
+import { type Profile } from "@/lib/supabase/profiles"; // Import Profile dari modul profiles
 
 interface SessionContextType {
   session: Session | null;

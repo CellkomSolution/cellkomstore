@@ -4,9 +4,9 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getCategories, deleteCategory, Category } from "@/lib/supabase-queries";
+import { getCategories, deleteCategory, Category } from "@/lib/supabase/categories"; // Import dari modul categories
 import { Edit, Trash2, PlusCircle, Loader2, LayoutGrid } from "lucide-react";
-import * as LucideIcons from "lucide-react"; // Import all Lucide icons
+import * as LucideIcons from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import {
@@ -57,7 +57,6 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  // Function to render Lucide icon dynamically
   const renderIcon = (iconName: string | null) => {
     if (!iconName) return <LayoutGrid className="h-5 w-5 text-muted-foreground" />;
     const IconComponent = (LucideIcons as any)[iconName];

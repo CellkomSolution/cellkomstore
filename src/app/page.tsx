@@ -4,7 +4,7 @@ import { HeroCarousel } from "@/components/hero-carousel";
 import { ProductGrid } from "@/components/product-grid";
 import { FeatureBadges } from "@/components/feature-badges";
 import { FeaturedBrands } from "@/components/featured-brands";
-import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase-queries";
+import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase/products"; // Import dari modul products
 
 export default async function Home() {
   const products = await getProducts();

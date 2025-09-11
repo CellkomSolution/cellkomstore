@@ -6,12 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductForm } from "@/components/product-form";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { getProductById } from "@/lib/supabase-queries";
-import { Product } from "@/lib/mock-data";
-import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Reusing skeleton for loading state
+import { getProductById, Product } from "@/lib/supabase/products"; // Import Product dan getProductById dari modul yang benar
+import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton";
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
-  // Menggunakan React.use() untuk meng-unwrap params
   const { id } = React.use(params);
   const router = useRouter();
 

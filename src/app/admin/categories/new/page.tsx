@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CategoryForm } from "@/components/category-form";
 import { toast } from "sonner";
-import { createCategory } from "@/lib/supabase-queries";
+import { createCategory } from "@/lib/supabase/categories"; // Import createCategory dari modul categories
 
 export default function NewCategoryPage() {
   const router = useRouter();

@@ -29,8 +29,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Image from "next/image";
 import { Loader2, UploadCloud, XCircle } from "lucide-react";
-import { Product } from "@/lib/mock-data";
-import { getCategories, Category } from "@/lib/supabase-queries";
+import { Product } from "@/lib/supabase/products"; // Import Product dari modul products
+import { getCategories, Category } from "@/lib/supabase/categories"; // Import getCategories, Category dari modul categories
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama produk minimal 3 karakter." }),

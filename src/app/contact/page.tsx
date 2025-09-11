@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube, Linkedin, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAppSettings, AppSettings } from "@/lib/supabase-queries";
+import { getAppSettings, AppSettings } from "@/lib/supabase/app-settings"; // Import dari modul app-settings
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 

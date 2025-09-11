@@ -3,7 +3,8 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getChatConversations, getAdminUserId, ChatConversation } from "@/lib/supabase-queries";
+import { getChatConversations, ChatConversation } from "@/lib/supabase/chats"; // Import dari modul chats
+import { getAdminUserId } from "@/lib/supabase/profiles"; // Import dari modul profiles
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Loader2, User as UserIcon, Package } from "lucide-react";

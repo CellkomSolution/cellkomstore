@@ -7,6 +7,7 @@ import { ProductForm } from "@/components/product-form";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { Product } from "@/lib/supabase/products"; // Import Product interface dari modul yang benar
 
 export default function NewProductPage() {
   const router = useRouter();

@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { getAppSettings, updateAppSettings, AppSettings } from "@/lib/supabase-queries";
-import { ImageUploader } from "@/components/image-uploader"; // Import ImageUploader
+import { getAppSettings, updateAppSettings, AppSettings } from "@/lib/supabase/app-settings"; // Import dari modul app-settings
+import { ImageUploader } from "@/components/image-uploader";
 
 const formSchema = z.object({
   site_name: z.string().nullable().optional().or(z.literal("")),
@@ -78,13 +78,12 @@ export default function AdminSettingsPage() {
       setIsLoading(false);
     }
     fetchSettings();
-  }, [form]); // Added form to dependency array for safety, though usually not needed for form.reset
+  }, [form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log("onSubmit called with values:", values); // Debug log
+    console.log("onSubmit called with values:", values);
     setIsSubmitting(true);
     try {
-      // Pre-process values: convert empty strings to null for optional fields
       const processedValues = Object.fromEntries(
         Object.entries(values).map(([key, value]) => [
           key,
@@ -92,12 +91,12 @@ export default function AdminSettingsPage() {
         ])
       ) as Partial<Omit<AppSettings, 'id' | 'created_at'>>;
 
-      console.log("Submitting with processed values:", processedValues); // Debug log
+      console.log("Submitting with processed values:", processedValues);
 
       await updateAppSettings(processedValues);
       toast.success("Pengaturan berhasil diperbarui!");
     } catch (error: any) {
-      console.error("Error during settings update:", error); // Debug log
+      console.error("Error during settings update:", error);
       toast.error("Gagal memperbarui pengaturan: " + (error.message || "Terjadi kesalahan tidak dikenal."));
     } finally {
       setIsSubmitting(false);

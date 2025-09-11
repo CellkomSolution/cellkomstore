@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { Product } from "@/lib/mock-data";
+import type { Product } from "@/lib/supabase/products"; // Import Product interface dari modul yang benar
 import { toast } from "sonner";
 
 export interface CartItem extends Product {

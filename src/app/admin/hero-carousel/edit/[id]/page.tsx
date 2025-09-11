@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HeroCarouselForm } from "@/components/hero-carousel-form";
 import { toast } from "sonner";
-import { getHeroCarouselSlideById, updateHeroCarouselSlide, HeroCarouselSlide } from "@/lib/supabase-queries";
-import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Reusing skeleton for loading state
+import { getHeroCarouselSlideById, updateHeroCarouselSlide, HeroCarouselSlide } from "@/lib/supabase/hero-carousel"; // Import dari modul hero-carousel
+import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton";
 
 export default function EditHeroCarouselSlidePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
@@ -36,7 +36,6 @@ export default function EditHeroCarouselSlidePage({ params }: { params: Promise<
     try {
       let slideData = { ...values };
 
-      // Jika tampilan 'full', hapus data yang hanya relevan untuk 'split'
       if (values.display_style === 'full') {
         slideData = {
           ...slideData,
@@ -71,7 +70,7 @@ export default function EditHeroCarouselSlidePage({ params }: { params: Promise<
   }
 
   if (!initialData) {
-    return null; // Redirect handled in useEffect
+    return null;
   }
 
   return (

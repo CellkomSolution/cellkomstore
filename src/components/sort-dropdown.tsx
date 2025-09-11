@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { type SortOption } from "@/lib/supabase-queries";
+import { type SortOption } from "@/lib/supabase/products"; // Import SortOption dari modul products
 
 interface SortDropdownProps {
   onSortChange: (value: SortOption) => void;

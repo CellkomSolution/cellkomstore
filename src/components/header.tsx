@@ -10,8 +10,8 @@ import { ThemeToggle } from "./theme-toggle";
 import Link from "next/link";
 import Image from "next/image";
 import { UserAuthNav } from "./user-auth-nav";
-import { getAppSettings, AppSettings } from "@/lib/supabase-queries"; // Import getAppSettings and AppSettings
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
+import { getAppSettings, AppSettings } from "@/lib/supabase/app-settings"; // Import dari modul app-settings
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function Header() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -37,7 +37,6 @@ export function Header() {
 
   return (
     <header className="border-b sticky top-0 bg-background/95 backdrop-blur-sm z-50">
-      {/* Top bar */}
       <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300">
         <div className="container mx-auto px-4 py-1 flex justify-between items-center">
           <div className="flex space-x-4">
@@ -54,7 +53,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* Main Header */}
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center gap-4">
           <div className="flex items-center gap-4">
@@ -118,7 +116,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* New Bottom Bar for popular searches and location */}
       <div className="bg-background border-t text-xs text-muted-foreground">
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
           <div className="flex gap-4 overflow-x-auto whitespace-nowrap pb-1">

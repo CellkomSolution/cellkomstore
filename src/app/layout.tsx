@@ -7,7 +7,7 @@ import { CartProvider } from "@/context/cart-context";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "@/context/session-context";
-import { getAppSettings } from "@/lib/supabase-queries"; // Import getAppSettings
+import { getAppSettings } from "@/lib/supabase/app-settings"; // Import getAppSettings dari modul app-settings
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,12 +19,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Fetch app settings for metadata
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getAppSettings();
   return {
     title: settings?.site_name || "Cellkom Store",
-    description: "Cellkom Store built with Next.js", // You might want to add a description field to app_settings too
+    description: "Cellkom Store built with Next.js",
   };
 }
 

@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CategoryForm } from "@/components/category-form";
 import { toast } from "sonner";
-import { getCategoryBySlug, updateCategory, Category } from "@/lib/supabase-queries";
-import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Reusing skeleton for loading state
+import { getCategoryBySlug, updateCategory, Category } from "@/lib/supabase/categories"; // Import dari modul categories
+import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton";
 
 export default function EditCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
@@ -67,7 +67,7 @@ export default function EditCategoryPage({ params }: { params: Promise<{ slug: s
   }
 
   if (!initialData) {
-    return null; // Redirect handled in useEffect
+    return null;
   }
 
   return (

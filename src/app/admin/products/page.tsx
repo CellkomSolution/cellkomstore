@@ -4,8 +4,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getProducts } from "@/lib/supabase-queries";
-import { Product } from "@/lib/mock-data";
+import { getProducts, Product } from "@/lib/supabase/products"; // Import Product dan getProducts dari modul yang benar
 import { Edit, Trash2, PlusCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { formatRupiah } from "@/lib/utils";

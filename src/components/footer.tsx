@@ -5,8 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Facebook, Instagram, Twitter, Youtube, Linkedin, Mail, Phone } from 'lucide-react';
 import { Separator } from './ui/separator';
-import { getAppSettings, AppSettings } from '@/lib/supabase-queries'; // Import getAppSettings and AppSettings
-import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
+import { getAppSettings, AppSettings } from '@/lib/supabase/app-settings'; // Import dari modul app-settings
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function Footer() {
   const [appSettings, setAppSettings] = React.useState<AppSettings | null>(null);
@@ -26,7 +26,6 @@ export function Footer() {
     <footer className="bg-gray-100 dark:bg-gray-900 border-t mt-12">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-          {/* Cellkom Store Column */}
           <div className="col-span-2 lg:col-span-1">
             <Link href="/" className="text-2xl font-bold text-primary mb-4 block">
               {isLoadingSettings ? (
@@ -81,7 +80,6 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Kategori Populer Column */}
           <div>
             <h3 className="font-semibold text-foreground mb-4">Kategori Populer</h3>
             <ul className="space-y-2 text-sm">
@@ -93,7 +91,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Layanan Pelanggan Column */}
           <div>
             <h3 className="font-semibold text-foreground mb-4">Layanan Pelanggan</h3>
             <ul className="space-y-2 text-sm">
@@ -105,18 +102,16 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Tentang Kami Column */}
           <div>
             <h3 className="font-semibold text-foreground mb-4">Tentang Kami</h3>
             <ul className="space-y-2 text-sm">
               <li><Link href="#" className="text-muted-foreground hover:text-primary transition-colors">Karir</Link></li>
               <li><Link href="#" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link></li>
               <li><Link href="#" className="text-muted-foreground hover:text-primary transition-colors">Mitra</Link></li>
-              <li><Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">Kontak Kami</Link></li> {/* Added Contact Us link */}
+              <li><Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">Kontak Kami</Link></li>
             </ul>
           </div>
 
-          {/* Kontak Kami Column */}
           <div>
             <h3 className="font-semibold text-foreground mb-4">Kontak Kami</h3>
             <ul className="space-y-2 text-sm">

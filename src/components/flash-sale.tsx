@@ -1,7 +1,9 @@
+"use client";
+
 import { Zap, ChevronRight } from "lucide-react";
 import { ProductCard } from "./product-card";
 import { CountdownTimer } from "./countdown-timer";
-import { Product } from "@/lib/mock-data"; // Import Product interface
+import { Product } from "@/lib/supabase/products"; // Import Product interface dari modul yang benar
 
 interface FlashSaleProps {
   initialProducts: Product[];

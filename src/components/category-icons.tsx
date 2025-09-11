@@ -9,7 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { getCategoriesWithLatestProductImage, Category } from "@/lib/supabase-queries";
+import { getCategoriesWithLatestProductImage, Category } from "@/lib/supabase/categories"; // Import dari modul categories
 import { icons, Tag, Loader2 } from "lucide-react";
 import Image from "next/image";
 

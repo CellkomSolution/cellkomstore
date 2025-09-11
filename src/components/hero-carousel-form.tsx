@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Image from "next/image";
 import { Loader2, UploadCloud, XCircle } from "lucide-react";
-import { HeroCarouselSlide } from "@/lib/supabase-queries";
+import { HeroCarouselSlide } from "@/lib/supabase/hero-carousel"; // Import HeroCarouselSlide dari modul hero-carousel
 
 const formSchema = z.object({
   display_style: z.enum(['full', 'split']).default('split'),

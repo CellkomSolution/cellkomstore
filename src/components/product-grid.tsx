@@ -1,8 +1,8 @@
 "use client";
 
 import { ProductCard } from "./product-card";
-import { Product } from "@/lib/mock-data";
-import { ProductCardSkeleton } from "./product-card-skeleton"; // Import ProductCardSkeleton
+import { Product } from "@/lib/supabase/products"; // Import Product interface dari modul yang benar
+import { ProductCardSkeleton } from "./product-card-skeleton";
 
 interface ProductGridProps {
   products: Product[];

@@ -3,8 +3,7 @@
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { ProductGrid } from "@/components/product-grid";
-import { searchProducts, type SortOption } from "@/lib/supabase-queries";
-import { Product } from "@/lib/mock-data";
+import { searchProducts, type SortOption, Product } from "@/lib/supabase/products"; // Import dari modul products
 import { Suspense } from "react";
 import { SortDropdown } from "@/components/sort-dropdown";
 

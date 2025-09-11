@@ -3,8 +3,8 @@
 import * as React from "react";
 import { ProductGrid } from "@/components/product-grid";
 import { notFound } from "next/navigation";
-import { getProductsByCategory, getCategoryBySlug, type SortOption } from "@/lib/supabase-queries";
-import { Product } from "@/lib/mock-data";
+import { getProductsByCategory, Product, SortOption } from "@/lib/supabase/products"; // Import Product, getProductsByCategory, SortOption dari modul products
+import { getCategoryBySlug, Category } from "@/lib/supabase/categories"; // Import getCategoryBySlug, Category dari modul categories
 import { SortDropdown } from "@/components/sort-dropdown";
 
 export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {

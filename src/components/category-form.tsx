@@ -18,14 +18,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { Category } from "@/lib/supabase-queries"; // Import Category interface
-import * as LucideIcons from "lucide-react"; // Import all Lucide icons
+import { Category } from "@/lib/supabase/categories"; // Import Category interface dari modul yang benar
+import * as LucideIcons from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama kategori minimal 3 karakter." }).max(50, { message: "Nama kategori maksimal 50 karakter." }),
   slug: z.string().min(3, { message: "Slug minimal 3 karakter." }).max(50, { message: "Slug maksimal 50 karakter." }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: "Slug harus berupa huruf kecil, angka, dan tanda hubung (tanpa spasi)." }),
-  icon_name: z.string().nullable().optional(), // Memungkinkan null dan opsional
-  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).optional(), // Changed: Removed .default(0) from schema
+  icon_name: z.string().nullable().optional(),
+  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).optional(),
 });
 
 interface CategoryFormProps {
@@ -37,20 +37,18 @@ interface CategoryFormProps {
 export function CategoryForm({ initialData, onSubmit, loading = false }: CategoryFormProps) {
   const router = useRouter();
 
-  // Explicitly define default values with the inferred schema type
   const defaultValues: z.infer<typeof formSchema> = {
     name: initialData?.name ?? "",
     slug: initialData?.slug ?? "",
-    icon_name: initialData?.icon_name ?? null, // Use null for nullable optional fields
-    order: initialData?.order ?? 0, // Provide default here for the now required field
+    icon_name: initialData?.icon_name ?? null,
+    order: initialData?.order ?? 0,
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues, // Pass the explicitly typed defaultValues
+    defaultValues,
   });
 
-  // Function to render Lucide icon dynamically
   const renderIcon = (iconName: string | null | undefined) => {
     if (!iconName) return null;
     const IconComponent = (LucideIcons as any)[iconName];

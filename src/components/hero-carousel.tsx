@@ -14,7 +14,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { FullCarouselSlide } from "./full-carousel-slide";
 import { FullWidthCarouselSlide } from "./full-width-carousel-slide";
-import { getHeroCarouselSlides, HeroCarouselSlide as SupabaseHeroCarouselSlide } from "@/lib/supabase-queries";
+import { getHeroCarouselSlides, HeroCarouselSlide as SupabaseHeroCarouselSlide } from "@/lib/supabase/hero-carousel"; // Import dari modul hero-carousel
 import { Loader2 } from "lucide-react";
 
 export function HeroCarousel() {
@@ -118,11 +118,9 @@ export function HeroCarousel() {
             );
           })}
         </CarouselContent>
-        {/* Custom styled navigation buttons - positioned within the carousel area */}
         <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 hidden sm:flex h-10 w-10 rounded-full bg-gray-800 text-white hover:bg-gray-700 z-20" />
         <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 hidden sm:flex h-10 w-10 rounded-full bg-gray-800 text-white hover:bg-gray-700 z-20" />
       </Carousel>
-      {/* Carousel Dots */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
         {Array.from({ length: count }).map((_, index) => (
           <button
