@@ -38,7 +38,7 @@ export async function getProducts(sort: SortOption = 'newest'): Promise<Product[
   const { data, error } = await query;
 
   if (error) {
-    console.error("Error fetching products:", error);
+    console.error("Error fetching products:", error.message || error);
     return [];
   }
 
@@ -53,7 +53,7 @@ export async function getFlashSaleProducts(): Promise<Product[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching flash sale products:", error);
+    console.error("Error fetching flash sale products:", error.message || error);
     return [];
   }
 
@@ -71,7 +71,7 @@ export async function getProductsByCategory(categorySlug: string, sort: SortOpti
   const { data, error } = await query;
 
   if (error) {
-    console.error(`Error fetching products for category ${categorySlug}:`, error);
+    console.error(`Error fetching products for category ${categorySlug}:`, error.message || error);
     return [];
   }
 
@@ -86,7 +86,7 @@ export async function getProductById(id: string): Promise<Product | null> {
     .single();
 
   if (error) {
-    console.error(`Error fetching product with ID ${id}:`, error);
+    console.error(`Error fetching product with ID ${id}:`, error.message || error);
     return null;
   }
 
@@ -108,7 +108,7 @@ export async function searchProducts(query: string, sort: SortOption = 'newest')
   const { data, error } = await dbQuery;
 
   if (error) {
-    console.error("Error searching products:", error);
+    console.error("Error searching products:", error.message || error);
     return [];
   }
 
@@ -131,7 +131,7 @@ export async function getAllProfiles(): Promise<Profile[]> {
     .select("id, first_name, last_name, avatar_url, role, email, bio");
 
   if (error) {
-    console.error("Error fetching all profiles:", error.message || JSON.stringify(error, null, 2) || "Unknown error object.");
+    console.error("Error fetching all profiles:", error.message || error);
     return [];
   }
 
@@ -152,7 +152,7 @@ export async function getTotalProductsCount(): Promise<number> {
     .select("*", { count: "exact", head: true });
 
   if (error) {
-    console.error("Error fetching total products count:", error);
+    console.error("Error fetching total products count:", error.message || error);
     return 0;
   }
   return count || 0;
@@ -164,7 +164,7 @@ export async function getTotalUsersCount(): Promise<number> {
     .select("*", { count: "exact", head: true });
 
   if (error) {
-    console.error("Error fetching total users count:", error);
+    console.error("Error fetching total users count:", error.message || error);
     return 0;
   }
   return count || 0;
@@ -198,7 +198,7 @@ export async function getHeroCarouselSlides(): Promise<HeroCarouselSlide[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching hero carousel slides:", error);
+    console.error("Error fetching hero carousel slides:", error.message || error);
     return [];
   }
   return data;
@@ -212,7 +212,7 @@ export async function getHeroCarouselSlideById(id: string): Promise<HeroCarousel
     .single();
 
   if (error) {
-    console.error(`Error fetching hero carousel slide with ID ${id}:`, error);
+    console.error(`Error fetching hero carousel slide with ID ${id}:`, error.message || error);
     return null;
   }
   return data;
@@ -226,7 +226,7 @@ export async function createHeroCarouselSlide(slideData: Omit<HeroCarouselSlide,
     .single();
 
   if (error) {
-    console.error("Error creating hero carousel slide:", error);
+    console.error("Error creating hero carousel slide:", error.message || error);
     throw error;
   }
   return data;
@@ -241,7 +241,7 @@ export async function updateHeroCarouselSlide(id: string, slideData: Partial<Omi
     .single();
 
   if (error) {
-    console.error(`Error updating hero carousel slide with ID ${id}:`, error);
+    console.error(`Error updating hero carousel slide with ID ${id}:`, error.message || error);
     throw error;
   }
   return data;
@@ -254,7 +254,7 @@ export async function deleteHeroCarouselSlide(id: string): Promise<void> {
     .eq("id", id);
 
   if (error) {
-    console.error(`Error deleting hero carousel slide with ID ${id}:`, error);
+    console.error(`Error deleting hero carousel slide with ID ${id}:`, error.message || error);
     throw error;
   }
 }
@@ -280,7 +280,7 @@ export async function getCategories(): Promise<Category[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching categories:", error);
+    console.error("Error fetching categories:", error.message || error);
     return [];
   }
   return data;
@@ -290,7 +290,7 @@ export async function getCategoriesWithLatestProductImage(): Promise<Category[]>
   const { data, error } = await supabase.rpc('get_categories_with_latest_product_image');
 
   if (error) {
-    console.error("Error fetching categories with latest product image:", error);
+    console.error("Error fetching categories with latest product image:", error.message || error);
     return [];
   }
   return data as Category[];
@@ -304,7 +304,8 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
     .single();
 
   if (error) {
-    console.error(`Error fetching category with slug ${slug}:`, error);
+    // Log error.message if available, otherwise the full error object
+    console.error(`Error fetching category with slug ${slug}:`, error.message || error);
     return null;
   }
   return data;
@@ -318,7 +319,7 @@ export async function createCategory(categoryData: Omit<Category, 'id' | 'create
     .single();
 
   if (error) {
-    console.error("Error creating category:", error);
+    console.error("Error creating category:", error.message || error);
     throw error;
   }
   return data;
@@ -333,7 +334,7 @@ export async function updateCategory(id: string, categoryData: Partial<Omit<Cate
     .single();
 
   if (error) {
-    console.error(`Error updating category with ID ${id}:`, error);
+    console.error(`Error updating category with ID ${id}:`, error.message || error);
     throw error;
   }
   return data;
@@ -346,7 +347,7 @@ export async function deleteCategory(id: string): Promise<void> {
     .eq("id", id);
 
   if (error) {
-    console.error(`Error deleting category with ID ${id}:`, error);
+    console.error(`Error deleting category with ID ${id}:`, error.message || error);
     throw error;
   }
 }
@@ -376,7 +377,7 @@ export async function getAppSettings(): Promise<AppSettings | null> {
     .single();
 
   if (error) {
-    console.error("Error fetching app settings:", error);
+    console.error("Error fetching app settings:", error.message || error);
     return null;
   }
   return data;
@@ -391,7 +392,7 @@ export async function updateAppSettings(settingsData: Partial<Omit<AppSettings, 
     .single();
 
   if (error) {
-    console.error("Error updating app settings:", error);
+    console.error("Error updating app settings:", error.message || error);
     throw error;
   }
   return data;
