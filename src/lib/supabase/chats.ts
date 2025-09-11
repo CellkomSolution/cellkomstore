@@ -35,6 +35,25 @@ export interface ChatConversation {
   unread_count: number;
 }
 
+// Define a specific interface for the data returned by the select query in getChatConversations
+interface JoinedChatData {
+  sender_id: string;
+  receiver_id: string;
+  product_id: string | null;
+  message: string;
+  created_at: string;
+  is_read: boolean;
+  profiles: {
+    first_name: string | null;
+    last_name: string | null;
+    avatar_url: string | null;
+  } | null; // Supabase returns a single object or null for this join
+  products: {
+    name: string;
+    image_url: string;
+  } | null; // Supabase returns a single object or null for this join
+}
+
 export async function getChatConversations(adminId: string): Promise<ChatConversation[]> {
   const { data, error } = await supabase
     .from('chats')
@@ -56,16 +75,18 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
     return [];
   }
 
+  // Cast the fetched data to the more precise interface
+  const typedData = data as JoinedChatData[];
+
   const conversationsMap = new Map<string, ChatConversation>();
 
-  for (const chat of data) {
+  for (const chat of typedData) {
     const otherParticipantId = chat.sender_id === adminId ? chat.receiver_id : chat.sender_id;
     const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
 
     if (!conversationsMap.has(conversationKey)) {
-      // Directly cast to the expected object type, as Supabase typically returns single objects for these joins.
-      const userProfile = chat.profiles as ChatMessage['profiles'];
-      const productInfo = chat.products as ChatMessage['products'];
+      const userProfile = chat.profiles; // Now correctly typed as object | null
+      const productInfo = chat.products; // Now correctly typed as object | null
 
       conversationsMap.set(conversationKey, {
         user_id: otherParticipantId,
