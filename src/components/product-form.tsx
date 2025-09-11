@@ -29,7 +29,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Image from "next/image";
 import { Loader2, UploadCloud, XCircle } from "lucide-react";
-import { Product } from "@/lib/mock-data"; // Import Product interface
+import { Product } from "@/lib/mock-data";
+import { getCategories, Category } from "@/lib/supabase-queries";
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama produk minimal 3 karakter." }),
@@ -44,27 +45,29 @@ const formSchema = z.object({
 });
 
 interface ProductFormProps {
-  initialData?: Product | null; // Untuk mode edit
+  initialData?: Product | null;
   onSubmit: (values: z.infer<typeof formSchema>) => Promise<void>;
   loading?: boolean;
 }
-
-const categories = [
-  { label: "Handphone & Tablet", value: "handphone-tablet" },
-  { label: "Komputer & Laptop", value: "komputer-laptop" },
-  { label: "Pakaian Pria", value: "pakaian-pria" },
-  { label: "Kesehatan & Kecantikan", value: "kesehatan-kecantikan" },
-  { label: "Perhiasan & Logam", value: "perhiasan-logam" },
-  { label: "Ibu & Anak", value: "ibu-anak" },
-  { label: "Otomotif", value: "otomotif" },
-  // Tambahkan kategori lain sesuai kebutuhan
-];
 
 export function ProductForm({ initialData, onSubmit, loading = false }: ProductFormProps) {
   const router = useRouter();
   const [imagePreview, setImagePreview] = React.useState<string | null>(initialData?.imageUrl || null);
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const [categories, setCategories] = React.useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchCategories() {
+      setIsLoadingCategories(true);
+      const fetchedCategories = await getCategories();
+      setCategories(fetchedCategories);
+      setIsLoadingCategories(false);
+    }
+    fetchCategories();
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -180,16 +183,16 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
           render={({ field }) => (
             <FormItem>
               <FormLabel>Kategori</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Pilih kategori" />
+                    <SelectValue placeholder={isLoadingCategories ? "Memuat kategori..." : "Pilih kategori"} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   {categories.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
+                    <SelectItem key={cat.slug} value={cat.slug}>
+                      {cat.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
