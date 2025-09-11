@@ -63,9 +63,13 @@ interface HeroCarouselFormProps {
   loading?: boolean;
 }
 
+type ImageFieldName = 'product_image_url' | 'logo_url' | 'left_peek_image_url' | 'right_peek_image_url' | 'right_peek_logo_url';
+
 export function HeroCarouselForm({ initialData, onSubmit, loading = false }: HeroCarouselFormProps) {
   const router = useRouter();
-  const [imagePreviews, setImagePreviews] = React.useState<{ [key: string]: string | null }>({
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [activeUploader, setActiveUploader] = React.useState<ImageFieldName | null>(null);
+  const [imagePreviews, setImagePreviews] = React.useState<{ [key in ImageFieldName]: string | null }>({
     product_image_url: initialData?.product_image_url || null,
     logo_url: initialData?.logo_url || null,
     left_peek_image_url: initialData?.left_peek_image_url || null,
@@ -74,19 +78,18 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
   });
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
 
-  // Explicitly define default values with the inferred schema type
   const defaultValues: z.infer<typeof formSchema> = {
     type: initialData?.type || 'full-banner',
-    product_image_url: initialData?.product_image_url ?? null, // Use null for nullable optional fields
+    product_image_url: initialData?.product_image_url ?? null,
     alt: initialData?.alt ?? "",
     logo_url: initialData?.logo_url ?? null,
     product_name: initialData?.product_name ?? null,
-    original_price: initialData?.original_price ?? null, // Use null
-    discounted_price: initialData?.discounted_price ?? null, // Use null
+    original_price: initialData?.original_price ?? null,
+    discounted_price: initialData?.discounted_price ?? null,
     is_new: initialData?.is_new ?? false,
     hashtag: initialData?.hashtag ?? null,
     left_panel_bg_color: initialData?.left_panel_bg_color ?? null,
-    order: initialData?.order ?? 0, // Provide default here for the now required field
+    order: initialData?.order ?? 0,
     left_peek_image_url: initialData?.left_peek_image_url ?? null,
     left_peek_alt: initialData?.left_peek_alt ?? null,
     left_peek_bg_color: initialData?.left_peek_bg_color ?? null,
@@ -99,16 +102,19 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues, // Pass the explicitly typed defaultValues
+    defaultValues,
   });
 
   const currentSlideType = form.watch("type");
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, fieldName: keyof typeof imagePreviews) => {
-    if (!event.target.files || event.target.files.length === 0) {
-      toast.error("Anda harus memilih gambar untuk diunggah.");
-      return;
-    }
+  const triggerFileInput = (fieldName: ImageFieldName) => {
+    if (loading || isUploadingImage) return;
+    setActiveUploader(fieldName);
+    fileInputRef.current?.click();
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, fieldName: ImageFieldName) => {
+    if (!event.target.files || event.target.files.length === 0) return;
 
     const file = event.target.files[0];
     const fileExt = file.name.split(".").pop();
@@ -117,83 +123,83 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
 
     setIsUploadingImage(true);
     try {
-      const { data, error: uploadError } = await supabase.storage
-        .from("carousel-images") // Use the new bucket
+      const { error: uploadError } = await supabase.storage
+        .from("carousel-images")
         .upload(filePath, file);
 
-      if (uploadError) {
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
       const { data: publicUrlData } = supabase.storage
         .from("carousel-images")
         .getPublicUrl(filePath);
 
-      if (!publicUrlData.publicUrl) {
-        throw new Error("Tidak bisa mendapatkan URL publik untuk gambar.");
-      }
+      if (!publicUrlData.publicUrl) throw new Error("Tidak bisa mendapatkan URL publik untuk gambar.");
 
       setImagePreviews((prev) => ({ ...prev, [fieldName]: publicUrlData.publicUrl }));
-      form.setValue(fieldName as any, publicUrlData.publicUrl, { shouldValidate: true });
+      form.setValue(fieldName, publicUrlData.publicUrl, { shouldValidate: true });
       toast.success("Gambar berhasil diunggah!");
     } catch (error: any) {
       toast.error("Gagal mengunggah gambar: " + error.message);
       setImagePreviews((prev) => ({ ...prev, [fieldName]: null }));
-      form.setValue(fieldName as any, "");
+      form.setValue(fieldName, null);
     } finally {
       setIsUploadingImage(false);
+      setActiveUploader(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  const removeImage = (fieldName: keyof typeof imagePreviews) => {
+  const removeImage = (fieldName: ImageFieldName) => {
     setImagePreviews((prev) => ({ ...prev, [fieldName]: null }));
-    form.setValue(fieldName as any, "");
+    form.setValue(fieldName, null);
   };
 
-  const ImageUploader = ({ fieldName, label, description }: { fieldName: keyof typeof imagePreviews, label: string, description?: string }) => (
+  const ImageUploader = ({ fieldName, label, description }: { fieldName: ImageFieldName, label: string, description?: string }) => (
     <FormItem>
       <FormLabel>{label}</FormLabel>
       <FormControl>
-        <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 hover:bg-muted/30 relative">
+        <div>
           {imagePreviews[fieldName] ? (
-            <>
+            <div className="relative h-48 w-full max-w-md">
               <Image
                 src={imagePreviews[fieldName]!}
                 alt={`${label} Preview`}
                 fill
                 style={{ objectFit: "contain" }}
-                className="p-2"
+                className="p-2 border rounded-lg"
               />
               <Button
                 type="button"
                 variant="destructive"
                 size="icon"
-                className="absolute top-2 right-2 rounded-full"
+                className="absolute top-2 right-2 rounded-full h-6 w-6"
                 onClick={() => removeImage(fieldName)}
                 disabled={loading || isUploadingImage}
               >
                 <XCircle className="h-4 w-4" />
                 <span className="sr-only">Hapus Gambar</span>
               </Button>
-            </>
+            </div>
           ) : (
-            <>
-              <Input
-                type="file"
-                accept="image/*"
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                onChange={(e) => handleImageUpload(e, fieldName)}
-                disabled={loading || isUploadingImage}
-              />
-              {isUploadingImage ? (
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <div
+              className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 hover:bg-muted/30"
+              onClick={() => triggerFileInput(fieldName)}
+            >
+              {isUploadingImage && activeUploader === fieldName ? (
+                <>
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <p className="mt-2 text-sm text-muted-foreground">Mengunggah...</p>
+                </>
               ) : (
-                <UploadCloud className="h-8 w-8 text-muted-foreground" />
+                <div className="text-center">
+                  <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    <span className="font-semibold text-primary">Klik untuk mengunggah</span> atau seret & lepas
+                  </p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, WEBP</p>
+                </div>
               )}
-              <p className="mt-2 text-sm text-muted-foreground text-center">
-                {isUploadingImage ? "Mengunggah..." : "Klik untuk mengunggah atau seret & lepas"}
-              </p>
-            </>
+            </div>
           )}
         </div>
       </FormControl>
@@ -205,6 +211,14 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={(e) => activeUploader && handleImageUpload(e, activeUploader)}
+          disabled={loading || isUploadingImage}
+        />
         <FormField
           control={form.control}
           name="type"
@@ -296,7 +310,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
               <FormItem>
                 <FormLabel>Harga Asli (Opsional)</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
+                  <Input type="number" placeholder="0" {...field} value={field.value ?? ""} onChange={e => field.onChange(e.target.value === '' ? null : +e.target.value)} />
                 </FormControl>
                 <FormDescription>
                   Harga sebelum diskon.
@@ -312,7 +326,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
                 <FormItem>
                     <FormLabel>Harga Diskon (Opsional)</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
+                        <Input type="number" placeholder="0" {...field} value={field.value ?? ""} onChange={e => field.onChange(e.target.value === '' ? null : +e.target.value)} />
                     </FormControl>
                     <FormDescription>
                         Harga setelah diskon.
