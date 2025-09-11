@@ -44,7 +44,7 @@ const formSchema = z.object({
   is_new: z.boolean().default(false).optional(),
   hashtag: z.string().nullable().optional(),
   left_panel_bg_color: z.string().nullable().optional(),
-  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }), // Changed: Removed .optional()
+  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).optional(), // Changed: Removed .default(0) from schema
 
   // Three-part specific fields
   left_peek_image_url: z.string().url({ message: "URL gambar peek kiri tidak valid." }).nullable().optional(),
