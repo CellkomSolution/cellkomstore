@@ -1,20 +1,6 @@
 "use client";
 
 import * as React from "react";
-import {
-  LayoutGrid,
-  Megaphone,
-  Receipt,
-  ShoppingBasket,
-  Smartphone,
-  HeartPulse,
-  Truck,
-  Shirt,
-  Gem,
-  Baby,
-  Car,
-} from "lucide-react";
-import * as LucideIcons from "lucide-react"; // Import all Lucide icons
 import Link from "next/link";
 import {
   Carousel,
@@ -23,81 +9,51 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Badge } from "@/components/ui/badge";
-import { getCategories, Category as SupabaseCategory } from "@/lib/supabase-queries"; // Import from supabase-queries
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
+import { getCategoriesWithLatestProductImage, Category } from "@/lib/supabase-queries";
+import { icons, Tag, Loader2 } from "lucide-react";
+import Image from "next/image";
 
-// Map of hardcoded icons for categories that might not have a specific icon_name in DB
-const defaultIcons: { [key: string]: React.ElementType } = {
-  "Lihat semua": LayoutGrid,
-  "Semua Promo": Megaphone,
-  "Tagihan & Isi Ulang": Receipt,
-  "Bliblimart": ShoppingBasket,
-  "Sport & Wellness": HeartPulse,
-  "Gratis ongkir cepat sampai": Truck,
-  "Ibu & Anak": Baby,
-  "Otomotif": Car,
-  // Add more default icons if needed for specific categories
-};
+function CategoryIcon({ name }: { name: string | null }) {
+  const Icon = icons[name as keyof typeof icons] || Tag;
+  return <Icon className="h-8 w-8 text-muted-foreground group-hover:text-primary" />;
+}
 
 export function CategoryIcons() {
-  const [categories, setCategories] = React.useState<SupabaseCategory[]>([]);
+  const [categories, setCategories] = React.useState<Category[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
     async function fetchCategories() {
       setIsLoading(true);
-      const fetchedCategories = await getCategories();
+      const fetchedCategories = await getCategoriesWithLatestProductImage();
       setCategories(fetchedCategories);
       setIsLoading(false);
     }
     fetchCategories();
   }, []);
 
-  // Function to render Lucide icon dynamically
-  const renderIcon = (iconName: string | null, fallbackName: string) => {
-    if (iconName) {
-      const IconComponent = (LucideIcons as any)[iconName];
-      if (IconComponent) return <IconComponent className="h-5 w-5 text-muted-foreground group-hover:text-primary" />;
-    }
-    // Fallback to defaultIcons map or generic LayoutGrid
-    const FallbackIcon = defaultIcons[fallbackName] || LayoutGrid;
-    return <FallbackIcon className="h-5 w-5 text-muted-foreground group-hover:text-primary" />;
-  };
-
   if (isLoading) {
     return (
-      <div className="bg-card p-3 rounded-lg border">
-        <Carousel
-          opts={{
-            align: "start",
-            dragFree: true,
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-2">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <CarouselItem key={index} className="pl-2 basis-auto">
-                <div className="flex items-center gap-2 p-2 rounded-lg group">
-                  <div className="w-10 h-10 bg-background rounded-lg flex items-center justify-center border">
-                    <Skeleton className="h-5 w-5" />
-                  </div>
-                  <Skeleton className="h-4 w-24" />
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+      <div className="flex items-center justify-center h-32">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (categories.length === 0) {
+    return (
+      <div className="text-center text-muted-foreground py-4">
+        Tidak ada kategori yang ditemukan.
       </div>
     );
   }
 
   return (
-    <div className="bg-card p-3 rounded-lg border">
+    <div className="relative px-10">
       <Carousel
         opts={{
           align: "start",
-          dragFree: true, // Allows for free scrolling like a list
+          dragFree: true,
         }}
         className="w-full"
       >
@@ -106,31 +62,31 @@ export function CategoryIcons() {
             <CarouselItem key={index} className="pl-2 basis-auto">
               <Link
                 href={`/category/${category.slug}`}
-                className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors group"
+                className="flex flex-col items-center justify-start space-y-2 text-center group w-24"
               >
-                <div className="relative">
-                  <div className="w-10 h-10 bg-background rounded-lg flex items-center justify-center border group-hover:border-primary">
-                    {renderIcon(category.icon_name, category.name)}
-                  </div>
-                  {/* You can add a badge logic here if categories have a 'isNew' or 'promo' flag */}
-                  {/* {category.badge && (
-                    <Badge
-                      variant="destructive"
-                      className="absolute -top-2 -right-3 text-[10px] px-1.5 py-0 leading-tight"
-                    >
-                      {category.badge}
-                    </Badge>
-                  )} */}
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-muted group-hover:bg-primary/10 transition-colors relative overflow-hidden">
+                  {category.latest_product_image_url ? (
+                    <Image
+                      src={category.latest_product_image_url}
+                      alt={category.name}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      className="transition-transform group-hover:scale-110"
+                      sizes="(max-width: 768px) 10vw, 5vw"
+                    />
+                  ) : (
+                    <CategoryIcon name={category.icon_name} />
+                  )}
                 </div>
-                <span className="text-xs font-medium text-foreground whitespace-nowrap">
+                <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors h-10 flex items-center text-center w-full justify-center">
                   {category.name}
-                </span>
+                </p>
               </Link>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden sm:flex -left-4" />
-        <CarouselNext className="hidden sm:flex -right-4" />
+        <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 hidden sm:flex" />
+        <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 hidden sm:flex" />
       </Carousel>
     </div>
   );

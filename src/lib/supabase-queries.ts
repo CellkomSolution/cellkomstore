@@ -209,7 +209,7 @@ export interface HeroCarouselSlide {
   left_panel_bg_color: string | null;
   order: number;
   display_style: 'full' | 'split';
-  link_url: string | null; // Ditambahkan
+  link_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -293,6 +293,7 @@ export interface Category {
   order: number;
   created_at: string;
   updated_at: string;
+  latest_product_image_url?: string | null; // Ditambahkan
 }
 
 export async function getCategories(): Promise<Category[]> {
@@ -309,6 +310,16 @@ export async function getCategories(): Promise<Category[]> {
   return data;
 }
 
+export async function getCategoriesWithLatestProductImage(): Promise<Category[]> {
+  const { data, error } = await supabase.rpc('get_categories_with_latest_product_image');
+
+  if (error) {
+    console.error("Error fetching categories with latest product image:", error);
+    return [];
+  }
+  return data as Category[];
+}
+
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
   const { data, error } = await supabase
     .from("categories")
@@ -323,7 +334,7 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
   return data;
 }
 
-export async function createCategory(categoryData: Omit<Category, 'id' | 'created_at' | 'updated_at'>): Promise<Category | null> {
+export async function createCategory(categoryData: Omit<Category, 'id' | 'created_at' | 'updated_at' | 'latest_product_image_url'>): Promise<Category | null> {
   const { data, error } = await supabase
     .from("categories")
     .insert(categoryData)
@@ -337,7 +348,7 @@ export async function createCategory(categoryData: Omit<Category, 'id' | 'create
   return data;
 }
 
-export async function updateCategory(id: string, categoryData: Partial<Omit<Category, 'id' | 'created_at'>>): Promise<Category | null> {
+export async function updateCategory(id: string, categoryData: Partial<Omit<Category, 'id' | 'created_at' | 'latest_product_image_url'>>): Promise<Category | null> {
   const { data, error } = await supabase
     .from("categories")
     .update({ ...categoryData, updated_at: new Date().toISOString() })
