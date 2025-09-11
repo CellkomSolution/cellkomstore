@@ -197,7 +197,6 @@ export async function getTotalUsersCount(): Promise<number> {
 
 export interface HeroCarouselSlide {
   id: string;
-  type: 'full-banner' | 'three-part';
   product_image_url: string | null;
   alt: string;
   logo_url: string | null;
@@ -207,14 +206,6 @@ export interface HeroCarouselSlide {
   is_new: boolean;
   hashtag: string | null;
   left_panel_bg_color: string | null;
-  left_peek_image_url: string | null;
-  left_peek_alt: string | null;
-  left_peek_bg_color: string | null;
-  right_peek_image_url: string | null;
-  right_peek_logo_url: string | null;
-  right_peek_alt: string | null;
-  right_peek_bg_color: string | null;
-  right_peek_hashtag: string | null;
   order: number;
   created_at: string;
   updated_at: string;

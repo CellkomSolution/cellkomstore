@@ -16,25 +16,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Image from "next/image";
 import { Loader2, UploadCloud, XCircle } from "lucide-react";
-import { HeroCarouselSlide } from "@/lib/supabase-queries"; // Import HeroCarouselSlide interface
+import { HeroCarouselSlide } from "@/lib/supabase-queries";
 
 const formSchema = z.object({
-  type: z.enum(['full-banner', 'three-part'], { message: "Tipe slide harus dipilih." }),
-  
-  // Common fields
   product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).nullable().optional(),
   alt: z.string().min(3, { message: "Teks alternatif minimal 3 karakter." }),
   logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().optional(),
@@ -44,17 +33,7 @@ const formSchema = z.object({
   is_new: z.boolean().default(false).optional(),
   hashtag: z.string().nullable().optional(),
   left_panel_bg_color: z.string().nullable().optional(),
-  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).optional(), // Changed: Removed .default(0) from schema
-
-  // Three-part specific fields
-  left_peek_image_url: z.string().url({ message: "URL gambar peek kiri tidak valid." }).nullable().optional(),
-  left_peek_alt: z.string().nullable().optional(),
-  left_peek_bg_color: z.string().nullable().optional(),
-  right_peek_image_url: z.string().url({ message: "URL gambar peek kanan tidak valid." }).nullable().optional(),
-  right_peek_logo_url: z.string().url({ message: "URL logo peek kanan tidak valid." }).nullable().optional(),
-  right_peek_alt: z.string().nullable().optional(),
-  right_peek_bg_color: z.string().nullable().optional(),
-  right_peek_hashtag: z.string().nullable().optional(),
+  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).optional(),
 });
 
 interface HeroCarouselFormProps {
@@ -63,7 +42,7 @@ interface HeroCarouselFormProps {
   loading?: boolean;
 }
 
-type ImageFieldName = 'product_image_url' | 'logo_url' | 'left_peek_image_url' | 'right_peek_image_url' | 'right_peek_logo_url';
+type ImageFieldName = 'product_image_url' | 'logo_url';
 
 export function HeroCarouselForm({ initialData, onSubmit, loading = false }: HeroCarouselFormProps) {
   const router = useRouter();
@@ -72,14 +51,10 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
   const [imagePreviews, setImagePreviews] = React.useState<{ [key in ImageFieldName]: string | null }>({
     product_image_url: initialData?.product_image_url || null,
     logo_url: initialData?.logo_url || null,
-    left_peek_image_url: initialData?.left_peek_image_url || null,
-    right_peek_image_url: initialData?.right_peek_image_url || null,
-    right_peek_logo_url: initialData?.right_peek_logo_url || null,
   });
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
 
   const defaultValues: z.infer<typeof formSchema> = {
-    type: initialData?.type || 'full-banner',
     product_image_url: initialData?.product_image_url ?? null,
     alt: initialData?.alt ?? "",
     logo_url: initialData?.logo_url ?? null,
@@ -90,22 +65,12 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
     hashtag: initialData?.hashtag ?? null,
     left_panel_bg_color: initialData?.left_panel_bg_color ?? null,
     order: initialData?.order ?? 0,
-    left_peek_image_url: initialData?.left_peek_image_url ?? null,
-    left_peek_alt: initialData?.left_peek_alt ?? null,
-    left_peek_bg_color: initialData?.left_peek_bg_color ?? null,
-    right_peek_image_url: initialData?.right_peek_image_url ?? null,
-    right_peek_logo_url: initialData?.right_peek_logo_url ?? null,
-    right_peek_alt: initialData?.right_peek_alt ?? null,
-    right_peek_bg_color: initialData?.right_peek_bg_color ?? null,
-    right_peek_hashtag: initialData?.right_peek_hashtag ?? null,
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
-
-  const currentSlideType = form.watch("type");
 
   const triggerFileInput = (fieldName: ImageFieldName) => {
     if (loading || isUploadingImage) return;
@@ -219,31 +184,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
           onChange={(e) => activeUploader && handleImageUpload(e, activeUploader)}
           disabled={loading || isUploadingImage}
         />
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipe Slide</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih tipe slide" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="full-banner">Full Banner</SelectItem>
-                  <SelectItem value="three-part">Three-Part Banner</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Pilih tata letak untuk slide carousel ini.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+        
         <FormField
           control={form.control}
           name="alt"
@@ -278,7 +219,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
           )}
         />
 
-        <h3 className="text-lg font-semibold mt-8">Detail Banner Utama</h3>
+        <h3 className="text-lg font-semibold mt-8">Detail Banner</h3>
         <ImageUploader
           fieldName="product_image_url"
           label="Gambar Produk Utama"
@@ -389,103 +330,6 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
             </FormItem>
           )}
         />
-
-        {currentSlideType === 'three-part' && (
-          <>
-            <h3 className="text-lg font-semibold mt-8">Detail Peek Kiri</h3>
-            <ImageUploader
-              fieldName="left_peek_image_url"
-              label="Gambar Peek Kiri (Opsional)"
-              description="Gambar kecil di sisi kiri slide tiga bagian."
-            />
-            <FormField
-              control={form.control}
-              name="left_peek_alt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Teks Alternatif Peek Kiri (Opsional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Deskripsi gambar peek kiri" {...field} value={field.value ?? ""} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="left_peek_bg_color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Warna Latar Belakang Peek Kiri (Opsional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="bg-gray-100 dark:bg-gray-800" {...field} value={field.value ?? ""} />
-                  </FormControl>
-                  <FormDescription>
-                    Kelas Tailwind CSS untuk warna latar belakang peek kiri.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <h3 className="text-lg font-semibold mt-8">Detail Peek Kanan</h3>
-            <ImageUploader
-              fieldName="right_peek_image_url"
-              label="Gambar Peek Kanan (Opsional)"
-              description="Gambar kecil di sisi kanan slide tiga bagian."
-            />
-            <ImageUploader
-              fieldName="right_peek_logo_url"
-              label="Logo Peek Kanan (Opsional)"
-              description="Logo yang akan muncul di peek kanan."
-            />
-            <FormField
-              control={form.control}
-              name="right_peek_alt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Teks Alternatif Peek Kanan (Opsional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Deskripsi gambar peek kanan" {...field} value={field.value ?? ""} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="right_peek_bg_color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Warna Latar Belakang Peek Kanan (Opsional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="bg-purple-200 dark:bg-purple-950" {...field} value={field.value ?? ""} />
-                  </FormControl>
-                  <FormDescription>
-                    Kelas Tailwind CSS untuk warna latar belakang peek kanan.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="right_peek_hashtag"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Hashtag Peek Kanan (Opsional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="#PROMOHEMAT" {...field} value={field.value ?? ""} />
-                  </FormControl>
-                  <FormDescription>
-                    Teks kecil di bawah peek kanan.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        )}
 
         <Button type="submit" disabled={loading || isUploadingImage}>
           {loading || isUploadingImage ? (

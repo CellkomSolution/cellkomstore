@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client"; // Import ini ditambahkan
-import { Badge } from "@/components/ui/badge";
 
 export default function AdminHeroCarouselPage() {
   const [slides, setSlides] = React.useState<HeroCarouselSlide[]>([]);
@@ -49,10 +48,7 @@ export default function AdminHeroCarouselPage() {
       const imageUrlsToDelete: string[] = [];
       if (slideToDelete.product_image_url) imageUrlsToDelete.push(slideToDelete.product_image_url);
       if (slideToDelete.logo_url) imageUrlsToDelete.push(slideToDelete.logo_url);
-      if (slideToDelete.left_peek_image_url) imageUrlsToDelete.push(slideToDelete.left_peek_image_url);
-      if (slideToDelete.right_peek_image_url) imageUrlsToDelete.push(slideToDelete.right_peek_image_url);
-      if (slideToDelete.right_peek_logo_url) imageUrlsToDelete.push(slideToDelete.right_peek_logo_url);
-
+      
       if (imageUrlsToDelete.length > 0) {
         const fileNames = imageUrlsToDelete.map(url => url.split('/').pop()!).filter(Boolean);
         const { error: storageError } = await supabase.storage
@@ -103,7 +99,6 @@ export default function AdminHeroCarouselPage() {
                 <TableRow>
                   <TableHead className="w-[80px]">Gambar</TableHead>
                   <TableHead>Judul/Alt Text</TableHead>
-                  <TableHead>Tipe</TableHead>
                   <TableHead>Urutan</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
@@ -114,7 +109,6 @@ export default function AdminHeroCarouselPage() {
                     <TableRow key={index}>
                       <TableCell><Skeleton className="h-12 w-12 rounded-md" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-[50px]" /></TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -126,7 +120,7 @@ export default function AdminHeroCarouselPage() {
                   ))
                 ) : slides.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                       Belum ada slide carousel yang ditambahkan.
                     </TableCell>
                   </TableRow>
@@ -149,11 +143,6 @@ export default function AdminHeroCarouselPage() {
                         )}
                       </TableCell>
                       <TableCell className="font-medium">{slide.product_name || slide.alt}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {slide.type === 'full-banner' ? 'Full Banner' : 'Three-Part'}
-                        </Badge>
-                      </TableCell>
                       <TableCell>{slide.order}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">

@@ -43,14 +43,6 @@ export default function EditHeroCarouselSlidePage({ params }: { params: Promise<
         logo_url: values.logo_url || null,
         hashtag: values.hashtag || null,
         left_panel_bg_color: values.left_panel_bg_color || null,
-        left_peek_image_url: values.left_peek_image_url || null,
-        left_peek_alt: values.left_peek_alt || null,
-        left_peek_bg_color: values.left_peek_bg_color || null,
-        right_peek_image_url: values.right_peek_image_url || null,
-        right_peek_logo_url: values.right_peek_logo_url || null,
-        right_peek_alt: values.right_peek_alt || null,
-        right_peek_bg_color: values.right_peek_bg_color || null,
-        right_peek_hashtag: values.right_peek_hashtag || null,
       };
 
       await updateHeroCarouselSlide(id, slideData);
