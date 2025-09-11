@@ -23,7 +23,7 @@ import { getAppSettings, updateAppSettings, AppSettings } from "@/lib/supabase-q
 import { ImageUploader } from "@/components/image-uploader"; // Import ImageUploader
 
 const formSchema = z.object({
-  site_name: z.string().nullable().optional().or(z.literal("")), // Diubah agar opsional dan menerima string kosong
+  site_name: z.string().nullable().optional().or(z.literal("")),
   site_logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().optional(),
   contact_email: z.string().email({ message: "Email tidak valid." }).nullable().optional().or(z.literal("")),
   contact_phone: z.string().nullable().optional().or(z.literal("")),
@@ -63,7 +63,7 @@ export default function AdminSettingsPage() {
       if (settings) {
         setInitialData(settings);
         form.reset({
-          site_name: settings.site_name || "", // Pastikan string kosong jika null
+          site_name: settings.site_name || "",
           site_logo_url: settings.site_logo_url,
           contact_email: settings.contact_email,
           contact_phone: settings.contact_phone,
@@ -78,9 +78,10 @@ export default function AdminSettingsPage() {
       setIsLoading(false);
     }
     fetchSettings();
-  }, []);
+  }, [form]); // Added form to dependency array for safety, though usually not needed for form.reset
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log("onSubmit called with values:", values); // Debug log
     setIsSubmitting(true);
     try {
       // Pre-process values: convert empty strings to null for optional fields
@@ -91,10 +92,13 @@ export default function AdminSettingsPage() {
         ])
       ) as Partial<Omit<AppSettings, 'id' | 'created_at'>>;
 
+      console.log("Submitting with processed values:", processedValues); // Debug log
+
       await updateAppSettings(processedValues);
       toast.success("Pengaturan berhasil diperbarui!");
     } catch (error: any) {
-      toast.error("Gagal memperbarui pengaturan: " + error.message);
+      console.error("Error during settings update:", error); // Debug log
+      toast.error("Gagal memperbarui pengaturan: " + (error.message || "Terjadi kesalahan tidak dikenal."));
     } finally {
       setIsSubmitting(false);
     }
