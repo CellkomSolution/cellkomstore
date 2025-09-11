@@ -4,14 +4,20 @@ import { Zap, ChevronRight } from "lucide-react";
 import { ProductCard } from "./product-card";
 import { CountdownTimer } from "./countdown-timer";
 import { Product } from "@/lib/supabase/products"; // Import Product interface dari modul yang benar
+import { useState, useEffect } from "react";
 
 interface FlashSaleProps {
   initialProducts: Product[];
 }
 
 export function FlashSale({ initialProducts }: FlashSaleProps) {
-  // Set flash sale to end in 24 hours from now
-  const saleEndDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  const [saleEndDate, setSaleEndDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Set flash sale to end in 24 hours from now, only on the client
+    const endDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    setSaleEndDate(endDate);
+  }, []);
 
   return (
     <section className="bg-card p-4 rounded-lg border">
