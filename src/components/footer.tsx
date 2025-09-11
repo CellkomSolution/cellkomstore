@@ -4,9 +4,24 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Facebook, Instagram, Twitter, Youtube, Linkedin, Mail, Phone } from 'lucide-react';
-import { Separator } from './ui/separator'; // Menambahkan import untuk Separator
+import { Separator } from './ui/separator';
+import { getAppSettings, AppSettings } from '@/lib/supabase-queries'; // Import getAppSettings and AppSettings
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 export function Footer() {
+  const [appSettings, setAppSettings] = React.useState<AppSettings | null>(null);
+  const [isLoadingSettings, setIsLoadingSettings] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchSettings() {
+      setIsLoadingSettings(true);
+      const settings = await getAppSettings();
+      setAppSettings(settings);
+      setIsLoadingSettings(false);
+    }
+    fetchSettings();
+  }, []);
+
   return (
     <footer className="bg-gray-100 dark:bg-gray-900 border-t mt-12">
       <div className="container mx-auto px-4 py-12">
@@ -14,33 +29,55 @@ export function Footer() {
           {/* Cellkom Store Column */}
           <div className="col-span-2 lg:col-span-1">
             <Link href="/" className="text-2xl font-bold text-primary mb-4 block">
-              <Image 
-                src="/teslogocellkom.png" 
-                alt="Cellkom Store Logo" 
-                width={150} 
-                height={38} 
-                className="h-auto"
-              />
+              {isLoadingSettings ? (
+                <Skeleton className="h-10 w-40" />
+              ) : appSettings?.site_logo_url ? (
+                <Image
+                  src={appSettings.site_logo_url}
+                  alt={appSettings.site_name || "Cellkom Store Logo"}
+                  width={150}
+                  height={38}
+                  className="h-auto"
+                />
+              ) : (
+                appSettings?.site_name || "Cellkom Store"
+              )}
             </Link>
             <p className="text-sm text-muted-foreground mt-2">
               Toko online terpercaya untuk kebutuhan gadget, elektronik, fashion, dan lainnya.
             </p>
             <div className="flex space-x-3 mt-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Youtube className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </a>
+              {isLoadingSettings ? (
+                Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-5 w-5 rounded-full" />)
+              ) : (
+                <>
+                  {appSettings?.facebook_url && (
+                    <a href={appSettings.facebook_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                      <Facebook className="h-5 w-5" />
+                    </a>
+                  )}
+                  {appSettings?.instagram_url && (
+                    <a href={appSettings.instagram_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                      <Instagram className="h-5 w-5" />
+                    </a>
+                  )}
+                  {appSettings?.twitter_url && (
+                    <a href={appSettings.twitter_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                      <Twitter className="h-5 w-5" />
+                    </a>
+                  )}
+                  {appSettings?.youtube_url && (
+                    <a href={appSettings.youtube_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                      <Youtube className="h-5 w-5" />
+                    </a>
+                  )}
+                  {appSettings?.linkedin_url && (
+                    <a href={appSettings.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                      <Linkedin className="h-5 w-5" />
+                    </a>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
@@ -82,23 +119,39 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-foreground mb-4">Kontak Kami</h3>
             <ul className="space-y-2 text-sm">
-              <li className="flex items-center text-muted-foreground">
-                <Mail className="h-4 w-4 mr-2" />
-                <span>support@cellkom.com</span>
-              </li>
-              <li className="flex items-center text-muted-foreground">
-                <Phone className="h-4 w-4 mr-2" />
-                <span>+62 812 3456 7890</span>
-              </li>
-              <li className="text-muted-foreground">
-                Jl. Contoh No. 123, Jakarta, Indonesia
-              </li>
+              {isLoadingSettings ? (
+                <>
+                  <Skeleton className="h-4 w-40 mb-2" />
+                  <Skeleton className="h-4 w-40 mb-2" />
+                  <Skeleton className="h-4 w-52" />
+                </>
+              ) : (
+                <>
+                  {appSettings?.contact_email && (
+                    <li className="flex items-center text-muted-foreground">
+                      <Mail className="h-4 w-4 mr-2" />
+                      <span>{appSettings.contact_email}</span>
+                    </li>
+                  )}
+                  {appSettings?.contact_phone && (
+                    <li className="flex items-center text-muted-foreground">
+                      <Phone className="h-4 w-4 mr-2" />
+                      <span>{appSettings.contact_phone}</span>
+                    </li>
+                  )}
+                  {appSettings?.contact_address && (
+                    <li className="text-muted-foreground">
+                      {appSettings.contact_address}
+                    </li>
+                  )}
+                </>
+              )}
             </ul>
           </div>
         </div>
         <Separator className="my-8" />
         <div className="text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} Cellkom Store. All rights reserved.
+          &copy; {new Date().getFullYear()} {appSettings?.site_name || "Cellkom Store"}. All rights reserved.
         </div>
       </div>
     </footer>

@@ -6,7 +6,8 @@ import { Footer } from "@/components/footer";
 import { CartProvider } from "@/context/cart-context";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SessionProvider } from "@/context/session-context"; // Import SessionProvider
+import { SessionProvider } from "@/context/session-context";
+import { getAppSettings } from "@/lib/supabase-queries"; // Import getAppSettings
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,10 +19,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Cellkom Store",
-  description: "Cellkom Store built with Next.js",
-};
+// Fetch app settings for metadata
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getAppSettings();
+  return {
+    title: settings?.site_name || "Cellkom Store",
+    description: "Cellkom Store built with Next.js", // You might want to add a description field to app_settings too
+  };
+}
 
 export default function RootLayout({
   children,
@@ -39,7 +44,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SessionProvider> {/* Wrap with SessionProvider */}
+          <SessionProvider>
             <CartProvider>
               <Header />
               <main className="flex-grow">{children}</main>

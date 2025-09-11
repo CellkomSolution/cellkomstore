@@ -9,11 +9,25 @@ import { CartSheet } from "./cart-sheet";
 import { ThemeToggle } from "./theme-toggle";
 import Link from "next/link";
 import Image from "next/image";
-import { UserAuthNav } from "./user-auth-nav"; // Import UserAuthNav
+import { UserAuthNav } from "./user-auth-nav";
+import { getAppSettings, AppSettings } from "@/lib/supabase-queries"; // Import getAppSettings and AppSettings
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 
 export function Header() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const router = useRouter();
+  const [appSettings, setAppSettings] = React.useState<AppSettings | null>(null);
+  const [isLoadingSettings, setIsLoadingSettings] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchSettings() {
+      setIsLoadingSettings(true);
+      const settings = await getAppSettings();
+      setAppSettings(settings);
+      setIsLoadingSettings(false);
+    }
+    fetchSettings();
+  }, []);
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -45,13 +59,19 @@ export function Header() {
         <div className="flex justify-between items-center gap-4">
           <div className="flex items-center gap-4">
             <Link href="/" className="text-2xl font-bold text-primary">
-              <Image 
-                src="/teslogocellkom.png" 
-                alt="Cellkom Store Logo" 
-                width={120}
-                height={30}
-                className="h-auto"
-              />
+              {isLoadingSettings ? (
+                <Skeleton className="h-8 w-32" />
+              ) : appSettings?.site_logo_url ? (
+                <Image
+                  src={appSettings.site_logo_url}
+                  alt={appSettings.site_name || "Cellkom Store Logo"}
+                  width={120}
+                  height={30}
+                  className="h-auto"
+                />
+              ) : (
+                appSettings?.site_name || "Cellkom Store"
+              )}
             </Link>
             <Button variant="ghost" className="hidden md:flex items-center gap-2 text-sm text-gray-500 hover:text-primary">
               <LayoutGrid className="h-5 w-5" />
@@ -77,7 +97,7 @@ export function Header() {
 
           <div className="flex items-center gap-2">
             <CartSheet />
-            <UserAuthNav /> {/* Menggunakan komponen UserAuthNav */}
+            <UserAuthNav />
             <ThemeToggle />
           </div>
         </div>
@@ -110,7 +130,7 @@ export function Header() {
           <Button variant="ghost" size="sm" className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
             <MapPin className="h-4 w-4" />
             <span>Tambah alamat biar belanja lebih asyik</span>
-            <Menu className="h-4 w-4 rotate-90" /> {/* Using Menu icon rotated for dropdown arrow */}
+            <Menu className="h-4 w-4 rotate-90" />
           </Button>
         </div>
       </div>
