@@ -27,8 +27,8 @@ export function AvatarUploader({ userId, currentAvatarUrl, onUploadSuccess, fall
 
       const file = event.target.files[0];
       const fileExt = file.name.split(".").pop();
-      const fileName = `${userId}-${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      // Create a unique path within a folder for the user
+      const filePath = `${userId}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
