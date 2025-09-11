@@ -208,6 +208,7 @@ export interface HeroCarouselSlide {
   hashtag: string | null;
   left_panel_bg_color: string | null;
   order: number;
+  display_style: 'full' | 'split'; // Ditambahkan
   created_at: string;
   updated_at: string;
 }

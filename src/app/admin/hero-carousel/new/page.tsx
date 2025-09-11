@@ -14,16 +14,21 @@ export default function NewHeroCarouselSlidePage() {
   const onSubmit = async (values: any) => {
     setLoading(true);
     try {
-      // Clean up values for Supabase insertion
-      const slideData = {
-        ...values,
-        original_price: values.original_price === 0 ? null : values.original_price,
-        discounted_price: values.discounted_price === 0 ? null : values.discounted_price,
-        product_image_url: values.product_image_url || null,
-        logo_url: values.logo_url || null,
-        hashtag: values.hashtag || null,
-        left_panel_bg_color: values.left_panel_bg_color || null,
-      };
+      let slideData = { ...values };
+
+      // Jika tampilan 'full', hapus data yang hanya relevan untuk 'split'
+      if (values.display_style === 'full') {
+        slideData = {
+          ...slideData,
+          logo_url: null,
+          product_name: null,
+          original_price: null,
+          discounted_price: null,
+          is_new: false,
+          hashtag: null,
+          left_panel_bg_color: null,
+        };
+      }
 
       await createHeroCarouselSlide(slideData);
 

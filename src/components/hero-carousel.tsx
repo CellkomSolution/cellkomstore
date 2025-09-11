@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { FullCarouselSlide } from "./full-carousel-slide";
+import { FullWidthCarouselSlide } from "./full-width-carousel-slide"; // Ditambahkan
 import { getHeroCarouselSlides, HeroCarouselSlide as SupabaseHeroCarouselSlide } from "@/lib/supabase-queries";
 import { Loader2 } from "lucide-react";
 
@@ -79,18 +80,26 @@ export function HeroCarousel() {
             <CarouselItem key={index}>
               <Card className="overflow-hidden rounded-lg">
                 <CardContent className="flex aspect-[4/1] p-0 relative">
-                  <FullCarouselSlide
-                    productImageSrc={slide.product_image_url || ''}
-                    alt={slide.alt}
-                    logoSrc={slide.logo_url || undefined}
-                    productName={slide.product_name || undefined}
-                    originalPrice={slide.original_price || undefined}
-                    discountedPrice={slide.discounted_price || undefined}
-                    isNew={slide.is_new}
-                    hashtag={slide.hashtag || undefined}
-                    leftPanelBgColor={slide.left_panel_bg_color || undefined}
-                    priority={index === 0}
-                  />
+                  {slide.display_style === 'full' ? (
+                    <FullWidthCarouselSlide
+                      imageSrc={slide.product_image_url || ''}
+                      alt={slide.alt}
+                      priority={index === 0}
+                    />
+                  ) : (
+                    <FullCarouselSlide
+                      productImageSrc={slide.product_image_url || ''}
+                      alt={slide.alt}
+                      logoSrc={slide.logo_url || undefined}
+                      productName={slide.product_name || undefined}
+                      originalPrice={slide.original_price || undefined}
+                      discountedPrice={slide.discounted_price || undefined}
+                      isNew={slide.is_new}
+                      hashtag={slide.hashtag || undefined}
+                      leftPanelBgColor={slide.left_panel_bg_color || undefined}
+                      priority={index === 0}
+                    />
+                  )}
                 </CardContent>
               </Card>
             </CarouselItem>

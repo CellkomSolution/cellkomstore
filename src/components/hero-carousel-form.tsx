@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Image from "next/image";
@@ -24,16 +25,18 @@ import { Loader2, UploadCloud, XCircle } from "lucide-react";
 import { HeroCarouselSlide } from "@/lib/supabase-queries";
 
 const formSchema = z.object({
-  product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).nullable().optional(),
+  display_style: z.enum(['full', 'split']).default('split'),
+  product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).min(1, "URL Gambar Produk harus diisi."),
   alt: z.string().min(3, { message: "Teks alternatif minimal 3 karakter." }),
+  order: z.coerce.number().min(0).optional(),
+  // Optional fields for split view
   logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().optional(),
   product_name: z.string().nullable().optional(),
-  original_price: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).nullable().optional(),
-  discounted_price: z.coerce.number().min(0, { message: "Harga diskon tidak boleh negatif." }).nullable().optional(),
+  original_price: z.coerce.number().min(0).nullable().optional(),
+  discounted_price: z.coerce.number().min(0).nullable().optional(),
   is_new: z.boolean().default(false).optional(),
   hashtag: z.string().nullable().optional(),
   left_panel_bg_color: z.string().nullable().optional(),
-  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).optional(),
 });
 
 interface HeroCarouselFormProps {
@@ -55,7 +58,8 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
 
   const defaultValues: z.infer<typeof formSchema> = {
-    product_image_url: initialData?.product_image_url ?? null,
+    display_style: initialData?.display_style ?? 'split',
+    product_image_url: initialData?.product_image_url ?? "",
     alt: initialData?.alt ?? "",
     logo_url: initialData?.logo_url ?? null,
     product_name: initialData?.product_name ?? null,
@@ -71,6 +75,8 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
     resolver: zodResolver(formSchema),
     defaultValues,
   });
+
+  const displayStyle = form.watch('display_style');
 
   const triggerFileInput = (fieldName: ImageFieldName) => {
     if (loading || isUploadingImage) return;
@@ -187,6 +193,47 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
         
         <FormField
           control={form.control}
+          name="display_style"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>Tipe Tampilan Banner</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex items-center space-x-4"
+                >
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="split" />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Split (Teks & Gambar)
+                    </FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="full" />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Full (Gambar Penuh)
+                    </FormLabel>
+                  </FormItem>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <ImageUploader
+          fieldName="product_image_url"
+          label="Gambar Banner"
+          description="Gambar utama yang akan ditampilkan di slide."
+        />
+
+        <FormField
+          control={form.control}
           name="alt"
           render={({ field }) => (
             <FormItem>
@@ -195,7 +242,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
                 <Input placeholder="Deskripsi singkat gambar untuk aksesibilitas" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormDescription>
-                Penting untuk SEO dan aksesibilitas.
+                Wajib diisi untuk SEO dan aksesibilitas.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -219,117 +266,116 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
           )}
         />
 
-        <h3 className="text-lg font-semibold mt-8">Detail Banner</h3>
-        <ImageUploader
-          fieldName="product_image_url"
-          label="Gambar Produk Utama"
-          description="Gambar utama yang akan ditampilkan di slide."
-        />
-        <ImageUploader
-          fieldName="logo_url"
-          label="Logo Brand (Opsional)"
-          description="Logo brand yang akan muncul di atas nama produk."
-        />
-        <FormField
-          control={form.control}
-          name="product_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nama Produk/Judul</FormLabel>
-              <FormControl>
-                <Input placeholder="Nama produk atau judul promosi" {...field} value={field.value ?? ""} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="original_price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Harga Asli (Opsional)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="0" {...field} value={field.value ?? ""} onChange={e => field.onChange(e.target.value === '' ? null : +e.target.value)} />
-                </FormControl>
-                <FormDescription>
-                  Harga sebelum diskon.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="discounted_price"
-            render={({ field }) => (
+        {displayStyle === 'split' && (
+          <div className="space-y-8 border-t pt-8">
+            <h3 className="text-lg font-semibold">Detail Panel Teks (Tampilan Split)</h3>
+            <ImageUploader
+              fieldName="logo_url"
+              label="Logo Brand (Opsional)"
+              description="Logo brand yang akan muncul di atas nama produk."
+            />
+            <FormField
+              control={form.control}
+              name="product_name"
+              render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Harga Diskon (Opsional)</FormLabel>
+                  <FormLabel>Nama Produk/Judul</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nama produk atau judul promosi" {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="original_price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Harga Asli (Opsional)</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="0" {...field} value={field.value ?? ""} onChange={e => field.onChange(e.target.value === '' ? null : +e.target.value)} />
+                      <Input type="number" placeholder="0" {...field} value={field.value ?? ""} onChange={e => field.onChange(e.target.value === '' ? null : +e.target.value)} />
                     </FormControl>
                     <FormDescription>
-                        Harga setelah diskon.
+                      Harga sebelum diskon.
                     </FormDescription>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="discounted_price"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Harga Diskon (Opsional)</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="0" {...field} value={field.value ?? ""} onChange={e => field.onChange(e.target.value === '' ? null : +e.target.value)} />
+                        </FormControl>
+                        <FormDescription>
+                            Harga setelah diskon.
+                        </FormDescription>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+            </div>
+            <FormField
+              control={form.control}
+              name="is_new"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Produk Baru</FormLabel>
+                    <FormDescription>
+                      Tandai jika ini adalah produk atau promosi baru.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={loading || isUploadingImage}
+                    />
+                  </FormControl>
                 </FormItem>
-            )}
-        />
-        </div>
-        <FormField
-          control={form.control}
-          name="is_new"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Produk Baru</FormLabel>
-                <FormDescription>
-                  Tandai jika ini adalah produk atau promosi baru.
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={loading || isUploadingImage}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="hashtag"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hashtag (Opsional)</FormLabel>
-              <FormControl>
-                <Input placeholder="#PROMODASYAT" {...field} value={field.value ?? ""} />
-              </FormControl>
-              <FormDescription>
-                Teks kecil di bawah harga/judul.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="left_panel_bg_color"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Warna Latar Belakang Panel Kiri (Opsional)</FormLabel>
-              <FormControl>
-                <Input placeholder="bg-blue-100 dark:bg-blue-950" {...field} value={field.value ?? ""} />
-              </FormControl>
-              <FormDescription>
-                Kelas Tailwind CSS untuk warna latar belakang panel teks kiri (mis. `bg-red-100 dark:bg-red-900`).
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="hashtag"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Hashtag (Opsional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="#PROMODASYAT" {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormDescription>
+                    Teks kecil di bawah harga/judul.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="left_panel_bg_color"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Warna Latar Belakang Panel Kiri (Opsional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="bg-blue-100 dark:bg-blue-950" {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormDescription>
+                    Kelas Tailwind CSS untuk warna latar belakang panel teks kiri (mis. `bg-red-100 dark:bg-red-900`).
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
 
         <Button type="submit" disabled={loading || isUploadingImage}>
           {loading || isUploadingImage ? (
