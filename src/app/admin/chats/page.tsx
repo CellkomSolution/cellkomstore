@@ -3,39 +3,69 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getChatConversations, ChatConversation } from "@/lib/supabase/chats"; // Import dari modul chats
-import { getAdminUserId } from "@/lib/supabase/profiles"; // Import dari modul profiles
+import { getChatConversations, ChatConversation, ChatMessage } from "@/lib/supabase/chats"; // Import ChatMessage
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Loader2, User as UserIcon, Package } from "lucide-react";
+import { MessageSquare, Loader2, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { id } from "date-fns/locale";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button"; // Import Button
+import { Button } from "@/components/ui/button";
+import { useSession } from "@/context/session-context"; // Import useSession
+import { supabase } from "@/integrations/supabase/client"; // Import supabase client
+import { toast } from "sonner"; // Import toast
 
 export default function AdminChatsPage() {
+  const { user, isLoading: isSessionLoading } = useSession(); // Get user from session
   const [conversations, setConversations] = React.useState<ChatConversation[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [adminId, setAdminId] = React.useState<string | null>(null);
+  
+  const adminId = user?.id; // Use the logged-in user's ID as adminId
+
+  const fetchConversations = React.useCallback(async () => {
+    if (!adminId) return;
+    setIsLoading(true);
+    const fetchedConversations = await getChatConversations(adminId);
+    setConversations(fetchedConversations);
+    setIsLoading(false);
+  }, [adminId]);
 
   React.useEffect(() => {
-    async function loadAdminAndConversations() {
-      setIsLoading(true);
-      const currentAdminId = await getAdminUserId();
-      setAdminId(currentAdminId);
+    if (!isSessionLoading && adminId) {
+      fetchConversations();
 
-      if (currentAdminId) {
-        const fetchedConversations = await getChatConversations(currentAdminId);
-        setConversations(fetchedConversations);
-      }
-      setIsLoading(false);
+      // Set up real-time subscription
+      const channel = supabase
+        .channel(`admin_conversations_${adminId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "chats",
+            filter: `receiver_id=eq.${adminId}`, // Only listen for messages sent TO this admin
+          },
+          async (payload) => {
+            const newMsg = payload.new as ChatMessage;
+            // Re-fetch conversations to update the list and unread counts
+            // This is simpler than trying to update individual conversation objects
+            // and ensures consistency. For very high-volume chats, a more granular
+            // update might be needed, but for typical admin chat, this is fine.
+            await fetchConversations();
+            toast.info(`Pesan baru dari ${newMsg.profiles?.first_name || 'Pengguna'}!`);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
-    loadAdminAndConversations();
-  }, []);
+  }, [isSessionLoading, adminId, fetchConversations]);
 
-  if (isLoading) {
+  if (isSessionLoading || isLoading) { // Combine loading states
     return (
       <div className="space-y-6 py-8">
         <h2 className="text-2xl font-bold">Memuat Percakapan Chat...</h2>
@@ -59,12 +89,12 @@ export default function AdminChatsPage() {
     );
   }
 
-  if (!adminId) {
+  if (!adminId) { // If user is not logged in or adminId is somehow null
     return (
       <div className="space-y-6 py-8 text-center">
         <h2 className="text-2xl font-bold">Manajemen Chat</h2>
         <p className="text-muted-foreground">
-          Tidak dapat menemukan ID admin. Pastikan ada setidaknya satu pengguna dengan peran 'admin' di tabel profil Anda.
+          Anda harus login sebagai admin untuk melihat percakapan chat.
         </p>
       </div>
     );

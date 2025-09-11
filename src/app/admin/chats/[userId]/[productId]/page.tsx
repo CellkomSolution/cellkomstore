@@ -13,9 +13,9 @@ import { formatDistanceToNow } from "date-fns";
 import { id } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getAdminUserId, Profile } from "@/lib/supabase/profiles"; // Import dari modul profiles
-import { getChatMessages, markMessagesAsRead, ChatMessage } from "@/lib/supabase/chats"; // Import dari modul chats
-import { getProductById } from "@/lib/supabase/products"; // Import dari modul products
+import { Profile } from "@/lib/supabase/profiles"; 
+import { getChatMessages, markMessagesAsRead, ChatMessage } from "@/lib/supabase/chats";
+import { getProductById } from "@/lib/supabase/products";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -29,17 +29,15 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
   const [newMessage, setNewMessage] = React.useState("");
   const [isLoadingMessages, setIsLoadingMessages] = React.useState(true);
   const [isSending, setIsSending] = React.useState(false);
-  const [targetAdminId, setTargetAdminId] = React.useState<string | null>(null);
   const [otherUserProfile, setOtherUserProfile] = React.useState<Profile | null>(null);
   const [productInfo, setProductInfo] = React.useState<{ name: string; imageUrl: string } | null>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
-    async function loadAdminAndUserProfile() {
-      const currentAdminId = await getAdminUserId();
-      setTargetAdminId(currentAdminId);
+  const adminId = adminUser?.id; // Use the logged-in admin's ID directly
 
-      if (currentAdminId && adminUser) {
+  React.useEffect(() => {
+    async function loadUserProfileAndProduct() {
+      if (adminId && adminUser) { // Ensure adminId is available
         const { data: userProfileData, error: userProfileError } = await supabase
           .from("profiles")
           .select("*")
@@ -61,25 +59,25 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
         }
       }
     }
-    loadAdminAndUserProfile();
-  }, [userId, productId, adminUser, router]);
+    loadUserProfileAndProduct();
+  }, [userId, productId, adminUser, adminId, router]); // Add adminId to dependencies
 
   const fetchMessages = React.useCallback(async () => {
-    if (!adminUser || !targetAdminId || !otherUserProfile) return;
+    if (!adminUser || !adminId || !otherUserProfile) return; // Use adminId directly
     setIsLoadingMessages(true);
-    const fetchedMessages = await getChatMessages(userId, targetAdminId, productId);
+    const fetchedMessages = await getChatMessages(userId, adminId, productId); // Use adminId directly
     setMessages(fetchedMessages);
     setIsLoadingMessages(false);
     
     try {
-      await markMessagesAsRead(userId, targetAdminId, productId);
+      await markMessagesAsRead(userId, adminId, productId); // Use adminId directly
     } catch (error) {
       console.error("Failed to mark messages as read:", error);
     }
-  }, [adminUser, targetAdminId, otherUserProfile, userId, productId]);
+  }, [adminUser, adminId, otherUserProfile, userId, productId]); // Add adminId to dependencies
 
   React.useEffect(() => {
-    if (adminUser && targetAdminId && otherUserProfile) {
+    if (adminUser && adminId && otherUserProfile) { // Use adminId directly
       fetchMessages();
 
       const channel = supabase
@@ -95,8 +93,8 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
           (payload) => {
             const newMsg = payload.new as ChatMessage;
             if (
-              (newMsg.sender_id === userId && newMsg.receiver_id === targetAdminId) ||
-              (newMsg.sender_id === targetAdminId && newMsg.receiver_id === userId)
+              (newMsg.sender_id === userId && newMsg.receiver_id === adminId) || // Use adminId directly
+              (newMsg.sender_id === adminId && newMsg.receiver_id === userId) // Use adminId directly
             ) {
               supabase.from('profiles').select('first_name, last_name, avatar_url, role').eq('id', newMsg.sender_id).single()
                 .then(({ data: profileData, error: profileError }) => {
@@ -107,7 +105,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
                   }
                 });
               if (newMsg.sender_id === userId) {
-                markMessagesAsRead(userId, targetAdminId, productId);
+                markMessagesAsRead(userId, adminId, productId); // Use adminId directly
               }
             }
           }
@@ -118,7 +116,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
         supabase.removeChannel(channel);
       };
     }
-  }, [adminUser, targetAdminId, otherUserProfile, userId, productId, fetchMessages]);
+  }, [adminUser, adminId, otherUserProfile, userId, productId, fetchMessages]); // Add adminId to dependencies
 
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -126,7 +124,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !adminUser || isSending || !targetAdminId || !otherUserProfile) return;
+    if (!newMessage.trim() || !adminUser || isSending || !adminId || !otherUserProfile) return; // Use adminId directly
 
     setIsSending(true);
     const { data, error } = await supabase.from("chats").insert({
@@ -149,7 +147,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
     setIsSending(false);
   };
 
-  if (isSessionLoading || !targetAdminId || !otherUserProfile) {
+  if (isSessionLoading || !adminId || !otherUserProfile) { // Use adminId directly
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
