@@ -43,15 +43,17 @@ interface JoinedChatData {
   message: string;
   created_at: string;
   is_read: boolean;
+  // Adjusted to reflect that Supabase might return an array for embedded relationships
+  // even with the '!' syntax, or TypeScript's inference is conservative.
   profiles: {
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
-  } | null; // Supabase returns a single object or null for this join
+  }[] | null; // Changed to array of objects or null
   products: {
     name: string;
     image_url: string;
-  } | null; // Supabase returns a single object or null for this join
+  }[] | null; // Changed to array of objects or null
 }
 
 export async function getChatConversations(adminId: string): Promise<ChatConversation[]> {
@@ -85,8 +87,9 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
     const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
 
     if (!conversationsMap.has(conversationKey)) {
-      const userProfile = chat.profiles; // Now correctly typed as object | null
-      const productInfo = chat.products; // Now correctly typed as object | null
+      // Access the first element of the array, as per the updated JoinedChatData interface
+      const userProfile = chat.profiles?.[0] || null;
+      const productInfo = chat.products?.[0] || null;
 
       conversationsMap.set(conversationKey, {
         user_id: otherParticipantId,
