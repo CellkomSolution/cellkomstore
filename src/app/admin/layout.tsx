@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation"; // Import usePathname
 import { useAdmin } from "@/hooks/use-admin";
 import { useSession } from "@/context/session-context";
 import Link from "next/link";
-import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon, LayoutGrid } from "lucide-react"; // Import ImageIcon and LayoutGrid
+import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon, LayoutGrid, MessageSquare } from "lucide-react"; // Import MessageSquare
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -93,6 +93,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/users">
               <Users className="mr-2 h-4 w-4" />
               Pengguna
+            </Link>
+          </Button>
+          <Button 
+            variant="ghost" 
+            className={cn("w-full justify-start", pathname.startsWith("/admin/chats") && "bg-muted hover:bg-muted")} 
+            asChild
+          >
+            <Link href="/admin/chats">
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Chat
             </Link>
           </Button>
           <Separator className="my-4" />

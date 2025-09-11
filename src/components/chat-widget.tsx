@@ -12,6 +12,7 @@ import { formatDistanceToNow } from "date-fns";
 import { id } from "date-fns/locale"; // Import Indonesian locale for date-fns
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getAdminUserId } from "@/lib/supabase-queries"; // New import
 
 interface ChatMessage {
   id: string;
@@ -41,11 +42,18 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
   const [isSending, setIsSending] = React.useState(false);
   const [isChatOpen, setIsChatOpen] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const [targetAdminId, setTargetAdminId] = React.useState<string | null>(null); // New state for dynamic admin ID
 
-  const adminId = "00000000-0000-0000-0000-000000000001"; // Placeholder for a generic admin ID. In a real app, you'd fetch a specific admin.
+  React.useEffect(() => {
+    async function loadAdminId() {
+      const id = await getAdminUserId();
+      setTargetAdminId(id);
+    }
+    loadAdminId();
+  }, []); // Run once on component mount
 
   const fetchMessages = React.useCallback(async () => {
-    if (!user) return;
+    if (!user || !targetAdminId) return; // Ensure targetAdminId is loaded
     setIsLoadingMessages(true);
     const { data, error } = await supabase
       .from("chats")
@@ -54,7 +62,7 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
         profiles (first_name, last_name, avatar_url, role)
       `)
       .eq("product_id", productId)
-      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .or(`(sender_id.eq.${user.id},receiver_id.eq.${targetAdminId}),(sender_id.eq.${targetAdminId},receiver_id.eq.${user.id})`)
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -64,15 +72,15 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
       setMessages(data || []);
     }
     setIsLoadingMessages(false);
-  }, [user, productId]);
+  }, [user, productId, targetAdminId]); // Add targetAdminId to dependencies
 
   React.useEffect(() => {
-    if (isChatOpen && user) {
+    if (isChatOpen && user && targetAdminId) { // Ensure targetAdminId is loaded
       fetchMessages();
 
       // Realtime subscription for new messages
       const channel = supabase
-        .channel(`product_chat_${productId}`)
+        .channel(`product_chat_${productId}_${user.id}_${targetAdminId}`) // More specific channel name
         .on(
           "postgres_changes",
           {
@@ -84,7 +92,10 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
           (payload) => {
             const newMsg = payload.new as ChatMessage;
             // Only add if the message is relevant to the current user (sender or receiver)
-            if (newMsg.sender_id === user.id || newMsg.receiver_id === user.id) {
+            if (
+              (newMsg.sender_id === user.id && newMsg.receiver_id === targetAdminId) ||
+              (newMsg.sender_id === targetAdminId && newMsg.receiver_id === user.id)
+            ) {
               // Fetch profile data for the new message
               supabase.from('profiles').select('first_name, last_name, avatar_url, role').eq('id', newMsg.sender_id).single()
                 .then(({ data: profileData, error: profileError }) => {
@@ -103,7 +114,7 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
         supabase.removeChannel(channel);
       };
     }
-  }, [isChatOpen, user, productId, fetchMessages]);
+  }, [isChatOpen, user, productId, targetAdminId, fetchMessages]); // Add targetAdminId to dependencies
 
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -111,13 +122,16 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !user || isSending) return;
+    if (!newMessage.trim() || !user || isSending || !targetAdminId) { // Check targetAdminId
+      if (!targetAdminId) toast.error("Admin tidak ditemukan untuk chat.");
+      return;
+    }
 
     setIsSending(true);
     const { data, error } = await supabase.from("chats").insert({
       product_id: productId,
       sender_id: user.id,
-      receiver_id: adminId, // Assuming admin is the receiver
+      receiver_id: targetAdminId, // Use dynamic admin ID
       message: newMessage.trim(),
     }).select(`
       *,
@@ -134,7 +148,7 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
     setIsSending(false);
   };
 
-  if (isSessionLoading) {
+  if (isSessionLoading || !targetAdminId) { // Show loading if admin ID is not yet loaded
     return null; // Or a loading spinner
   }
 
