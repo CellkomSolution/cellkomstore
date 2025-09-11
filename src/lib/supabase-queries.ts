@@ -23,6 +23,7 @@ export async function getProducts(): Promise<Product[]> {
     soldCount: item.sold_count,
     category: item.category,
     isFlashSale: item.is_flash_sale,
+    description: item.description,
   }));
 }
 
@@ -49,6 +50,7 @@ export async function getFlashSaleProducts(): Promise<Product[]> {
     soldCount: item.sold_count,
     category: item.category,
     isFlashSale: item.is_flash_sale,
+    description: item.description,
   }));
 }
 
@@ -75,6 +77,7 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
     soldCount: item.sold_count,
     category: item.category,
     isFlashSale: item.is_flash_sale,
+    description: item.description,
   }));
 }
 
@@ -105,6 +108,7 @@ export async function getProductById(id: string): Promise<Product | null> {
     soldCount: data.sold_count,
     category: data.category,
     isFlashSale: data.is_flash_sale,
+    description: data.description,
   };
 }
 
@@ -131,6 +135,7 @@ export async function searchProducts(query: string): Promise<Product[]> {
     soldCount: item.sold_count,
     category: item.category,
     isFlashSale: item.is_flash_sale,
+    description: item.description,
   }));
 }
 
