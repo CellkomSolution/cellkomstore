@@ -4,14 +4,14 @@ export interface Product {
   id: string;
   name: string;
   price: number;
-  originalPrice?: number;
+  originalPrice?: number | null; // Changed to allow null
   imageUrl: string;
   location: string;
   rating: number;
   soldCount: string;
   category: string;
   isFlashSale?: boolean;
-  description?: string;
+  description?: string | null; // Changed to allow null
 }
 
 export type SortOption = 'newest' | 'popularity' | 'price-asc' | 'price-desc';
@@ -138,4 +138,45 @@ export async function getTotalProductsCount(): Promise<number> {
     return 0;
   }
   return count || 0;
+}
+
+// New function to create a product
+export async function createProduct(productData: Omit<Product, 'id' | 'rating' | 'soldCount'>): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from("products")
+    .insert({
+      ...productData,
+      original_price: productData.originalPrice === 0 ? null : productData.originalPrice,
+      rating: 0, // Default rating
+      sold_count: "0", // Default sold count
+      created_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating product:", error.message || error);
+    throw error;
+  }
+  return mapProductData(data);
+}
+
+// New function to update a product
+export async function updateProduct(id: string, productData: Partial<Omit<Product, 'id' | 'created_at' | 'rating' | 'soldCount'>>): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from("products")
+    .update({
+      ...productData,
+      original_price: productData.originalPrice === 0 ? null : productData.originalPrice,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error(`Error updating product with ID ${id}:`, error.message || error);
+    throw error;
+  }
+  return mapProductData(data);
 }

@@ -7,7 +7,7 @@ import { ProductForm } from "@/components/product-form";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-import { Product } from "@/lib/supabase/products"; // Import Product interface dari modul yang benar
+import { createProduct, Product } from "@/lib/supabase/products"; // Import createProduct
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -23,25 +23,17 @@ export default function NewProductPage() {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("products")
-        .insert({
-          name: values.name,
-          price: values.price,
-          original_price: values.originalPrice === 0 ? null : values.originalPrice,
-          image_url: values.imageUrl,
-          location: values.location,
-          category: values.category,
-          is_flash_sale: values.isFlashSale,
-          description: values.description,
-          rating: 0, // Default rating
-          sold_count: "0", // Default sold count
-          created_at: new Date().toISOString(),
-        });
-
-      if (error) {
-        throw error;
-      }
+      // Use the new createProduct utility function
+      await createProduct({
+        name: values.name,
+        price: values.price,
+        originalPrice: values.originalPrice,
+        imageUrl: values.imageUrl,
+        location: values.location,
+        category: values.category,
+        isFlashSale: values.isFlashSale,
+        description: values.description,
+      });
 
       toast.success("Produk berhasil ditambahkan!");
       router.push("/admin/products");

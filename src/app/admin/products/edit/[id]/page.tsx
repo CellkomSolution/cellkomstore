@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductForm } from "@/components/product-form";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { getProductById, Product } from "@/lib/supabase/products"; // Import Product dan getProductById dari modul yang benar
+import { getProductById, updateProduct, Product } from "@/lib/supabase/products"; // Import updateProduct
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton";
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -42,24 +42,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         return;
       }
 
-      const { error } = await supabase
-        .from("products")
-        .update({
-          name: values.name,
-          price: values.price,
-          original_price: values.originalPrice === 0 ? null : values.originalPrice,
-          image_url: values.imageUrl,
-          location: values.location,
-          category: values.category,
-          is_flash_sale: values.isFlashSale,
-          description: values.description,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", id);
-
-      if (error) {
-        throw error;
-      }
+      // Use the new updateProduct utility function
+      await updateProduct(id, {
+        name: values.name,
+        price: values.price,
+        originalPrice: values.originalPrice,
+        imageUrl: values.imageUrl,
+        location: values.location,
+        category: values.category,
+        isFlashSale: values.isFlashSale,
+        description: values.description,
+      });
 
       toast.success("Produk berhasil diperbarui!");
       router.push("/admin/products");
