@@ -40,9 +40,11 @@ const formSchema = z.object({
   left_panel_bg_color: z.string().nullable().optional(),
 });
 
+type HeroCarouselFormValues = z.infer<typeof formSchema>; // Define explicit type
+
 interface HeroCarouselFormProps {
   initialData?: HeroCarouselSlide | null;
-  onSubmit: (values: z.infer<typeof formSchema>) => Promise<void>;
+  onSubmit: (values: HeroCarouselFormValues) => Promise<void>; // Use explicit type here
   loading?: boolean;
 }
 
@@ -58,7 +60,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
   });
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
 
-  const defaultValues: z.infer<typeof formSchema> = {
+  const defaultValues: HeroCarouselFormValues = { // Use explicit type here
     display_style: initialData?.display_style ?? 'split',
     product_image_url: initialData?.product_image_url ?? "",
     alt: initialData?.alt ?? "",
@@ -73,7 +75,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
     order: initialData?.order ?? 0,
   };
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<HeroCarouselFormValues>({ // Use the explicit type here
     resolver: zodResolver(formSchema),
     defaultValues,
   });
@@ -114,7 +116,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
     } catch (error: any) {
       toast.error("Gagal mengunggah gambar: " + error.message);
       setImagePreviews((prev) => ({ ...prev, [fieldName]: null }));
-      form.setValue(fieldName, null);
+      form.setValue(fieldName, null as any); // Cast to any to allow null for optional fields
     } finally {
       setIsUploadingImage(false);
       setActiveUploader(null);
@@ -124,7 +126,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
 
   const removeImage = (fieldName: ImageFieldName) => {
     setImagePreviews((prev) => ({ ...prev, [fieldName]: null }));
-    form.setValue(fieldName, null);
+    form.setValue(fieldName, null as any); // Cast to any to allow null for optional fields
   };
 
   const ImageUploader = ({ fieldName, label, description }: { fieldName: ImageFieldName, label: string, description?: string }) => (
@@ -158,6 +160,14 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
               className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 hover:bg-muted/30"
               onClick={() => triggerFileInput(fieldName)}
             >
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => activeUploader && handleImageUpload(e, activeUploader)}
+                disabled={loading || isUploadingImage}
+              />
               {isUploadingImage && activeUploader === fieldName ? (
                 <>
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -184,14 +194,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          accept="image/*"
-          onChange={(e) => activeUploader && handleImageUpload(e, activeUploader)}
-          disabled={loading || isUploadingImage}
-        />
+        {/* The hidden input for file upload is now inside ImageUploader */}
         
         <FormField
           control={form.control}
@@ -347,17 +350,18 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Produk Baru</FormLabel>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={loading || isUploadingImage}
+                      />
+                    </FormControl>
                     <FormDescription>
                       Tandai jika ini adalah produk atau promosi baru.
                     </FormDescription>
                   </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={loading || isUploadingImage}
-                    />
-                  </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />

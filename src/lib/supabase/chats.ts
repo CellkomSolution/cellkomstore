@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { Profile } from "./profiles"; // Import Profile interface
+import { Product } from "./products"; // Import Product interface
 
 export interface ChatMessage {
   id: string;
@@ -61,8 +63,9 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
     const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
 
     if (!conversationsMap.has(conversationKey)) {
-      const userProfile = chat.profiles;
-      const productInfo = chat.products;
+      // Explicitly cast to the expected single object type
+      const userProfile = chat.profiles as ChatMessage['profiles'];
+      const productInfo = chat.products as ChatMessage['products'];
 
       conversationsMap.set(conversationKey, {
         user_id: otherParticipantId,

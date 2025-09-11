@@ -166,7 +166,7 @@ export default function AdminSettingsPage() {
                 <FormControl>
                   <ImageUploader
                     bucketName="app-assets"
-                    currentImageUrl={form.watch("site_logo_url")}
+                    currentImageUrl={form.watch("site_logo_url") ?? null} // Coalesce undefined to null
                     onUploadSuccess={handleLogoUploadSuccess}
                     onRemove={handleRemoveLogo}
                     disabled={isSubmitting}

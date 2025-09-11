@@ -13,6 +13,7 @@ import { formatDistanceToNow } from "date-fns";
 import { id } from "date-fns/locale";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button"; // Import Button
 
 export default function AdminChatsPage() {
   const [conversations, setConversations] = React.useState<ChatConversation[]>([]);
