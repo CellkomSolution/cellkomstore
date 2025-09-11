@@ -3,21 +3,23 @@
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { ProductGrid } from "@/components/product-grid";
-import { searchProducts } from "@/lib/supabase-queries";
+import { searchProducts, type SortOption } from "@/lib/supabase-queries";
 import { Product } from "@/lib/mock-data";
 import { Suspense } from "react";
+import { SortDropdown } from "@/components/sort-dropdown";
 
 function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
   const [products, setProducts] = React.useState<Product[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [sortOption, setSortOption] = React.useState<SortOption>('newest');
 
   React.useEffect(() => {
     if (query) {
       const fetchProducts = async () => {
         setIsLoading(true);
-        const results = await searchProducts(query);
+        const results = await searchProducts(query, sortOption);
         setProducts(results);
         setIsLoading(false);
       };
@@ -26,16 +28,24 @@ function SearchResults() {
       setProducts([]);
       setIsLoading(false);
     }
-  }, [query]);
+  }, [query, sortOption]);
+
+  const title = query ? `Hasil pencarian untuk "${query}"` : "Silakan masukkan kata kunci pencarian";
 
   return (
-    <ProductGrid
-      products={products}
-      title={query ? `Hasil pencarian untuk "${query}"` : "Silakan masukkan kata kunci pencarian"}
-      isLoading={isLoading}
-      emptyStateMessage={query ? "Produk tidak ditemukan" : "Mulai cari produk impianmu"}
-      emptyStateDescription={query ? "Coba gunakan kata kunci yang berbeda." : ""}
-    />
+    <>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">{title}</h1>
+        {query && products.length > 0 && <SortDropdown onSortChange={setSortOption} />}
+      </div>
+      <ProductGrid
+        products={products}
+        title=""
+        isLoading={isLoading}
+        emptyStateMessage={query ? "Produk tidak ditemukan" : "Mulai cari produk impianmu"}
+        emptyStateDescription={query ? "Coba gunakan kata kunci yang berbeda." : ""}
+      />
+    </>
   );
 }
 
