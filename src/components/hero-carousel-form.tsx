@@ -25,19 +25,19 @@ import { Loader2, UploadCloud, XCircle } from "lucide-react";
 import { HeroCarouselSlide } from "@/lib/supabase/hero-carousel"; // Import HeroCarouselSlide dari modul hero-carousel
 
 const formSchema = z.object({
-  display_style: z.enum(['full', 'split']).default('split'),
-  product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).min(1, "URL Gambar Produk harus diisi."),
-  alt: z.string().min(3, { message: "Teks alternatif minimal 3 karakter." }),
-  link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional(),
-  order: z.coerce.number().min(0).optional(),
+  display_style: z.enum(['full', 'split']), // Matches interface: not optional
+  product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).nullable(), // Matches interface: string | null
+  alt: z.string().min(3, { message: "Teks alternatif minimal 3 karakter." }), // Matches interface: string
+  link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable(), // Matches interface: string | null
+  order: z.coerce.number().min(0), // Matches interface: number
   // Optional fields for split view
-  logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().optional(),
-  product_name: z.string().nullable().optional(),
-  original_price: z.coerce.number().min(0).nullable().optional(),
-  discounted_price: z.coerce.number().min(0).nullable().optional(),
-  is_new: z.boolean().default(false).optional(),
-  hashtag: z.string().nullable().optional(),
-  left_panel_bg_color: z.string().nullable().optional(),
+  logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable(), // Matches interface: string | null
+  product_name: z.string().nullable(), // Matches interface: string | null
+  original_price: z.coerce.number().min(0).nullable(), // Matches interface: number | null
+  discounted_price: z.coerce.number().min(0).nullable(), // Matches interface: number | null
+  is_new: z.boolean(), // Matches interface: boolean
+  hashtag: z.string().nullable(), // Matches interface: string | null
+  left_panel_bg_color: z.string().nullable(), // Matches interface: string | null
 });
 
 type HeroCarouselFormValues = z.infer<typeof formSchema>; // Define explicit type
@@ -61,20 +61,18 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
 
   const defaultValues: HeroCarouselFormValues = {
-    display_style: (initialData?.display_style === 'full' || initialData?.display_style === 'split')
-      ? initialData.display_style
-      : 'split', // Ensure it's always 'full' or 'split'
-    product_image_url: initialData?.product_image_url ?? "",
-    alt: initialData?.alt ?? "",
-    link_url: initialData?.link_url ?? null,
-    order: initialData?.order ?? undefined, // Match schema's `number | undefined`
-    logo_url: initialData?.logo_url ?? null,
-    product_name: initialData?.product_name ?? null,
-    original_price: initialData?.original_price ?? null,
-    discounted_price: initialData?.discounted_price ?? null,
-    is_new: initialData?.is_new ?? false,
-    hashtag: initialData?.hashtag ?? null,
-    left_panel_bg_color: initialData?.left_panel_bg_color ?? null,
+    display_style: initialData?.display_style ?? 'split', // Provide a default if initialData is null/undefined
+    product_image_url: initialData?.product_image_url ?? null, // Must be string or null
+    alt: initialData?.alt ?? "", // Must be string
+    link_url: initialData?.link_url ?? null, // Must be string or null
+    order: initialData?.order ?? 0, // Must be number
+    logo_url: initialData?.logo_url ?? null, // Must be string or null
+    product_name: initialData?.product_name ?? null, // Must be string or null
+    original_price: initialData?.original_price ?? null, // Must be number or null
+    discounted_price: initialData?.discounted_price ?? null, // Must be number or null
+    is_new: initialData?.is_new ?? false, // Must be boolean
+    hashtag: initialData?.hashtag ?? null, // Must be string or null
+    left_panel_bg_color: initialData?.left_panel_bg_color ?? null, // Must be string or null
   };
 
   const form = useForm<HeroCarouselFormValues>({ // Use the explicit type here
@@ -118,7 +116,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
     } catch (error: any) {
       toast.error("Gagal mengunggah gambar: " + error.message);
       setImagePreviews((prev) => ({ ...prev, [fieldName]: null }));
-      form.setValue(fieldName, null as any); // Cast to any to allow null for optional fields
+      form.setValue(fieldName, null); // Now that schema allows null, no need for 'as any'
     } finally {
       setIsUploadingImage(false);
       setActiveUploader(null);
@@ -128,7 +126,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
 
   const removeImage = (fieldName: ImageFieldName) => {
     setImagePreviews((prev) => ({ ...prev, [fieldName]: null }));
-    form.setValue(fieldName, null as any); // Cast to any to allow null for optional fields
+    form.setValue(fieldName, null); // Now that schema allows null, no need for 'as any'
   };
 
   const ImageUploader = ({ fieldName, label, description }: { fieldName: ImageFieldName, label: string, description?: string }) => (
