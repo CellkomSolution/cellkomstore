@@ -23,7 +23,7 @@ import { getAppSettings, updateAppSettings, AppSettings } from "@/lib/supabase-q
 import { ImageUploader } from "@/components/image-uploader"; // Import ImageUploader
 
 const formSchema = z.object({
-  site_name: z.string().min(1, { message: "Nama situs tidak boleh kosong." }),
+  site_name: z.string().nullable().optional().or(z.literal("")), // Diubah agar opsional dan menerima string kosong
   site_logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().optional(),
   contact_email: z.string().email({ message: "Email tidak valid." }).nullable().optional().or(z.literal("")),
   contact_phone: z.string().nullable().optional().or(z.literal("")),
@@ -63,7 +63,7 @@ export default function AdminSettingsPage() {
       if (settings) {
         setInitialData(settings);
         form.reset({
-          site_name: settings.site_name,
+          site_name: settings.site_name || "", // Pastikan string kosong jika null
           site_logo_url: settings.site_logo_url,
           contact_email: settings.contact_email,
           contact_phone: settings.contact_phone,
@@ -83,7 +83,15 @@ export default function AdminSettingsPage() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
-      await updateAppSettings(values);
+      // Pre-process values: convert empty strings to null for optional fields
+      const processedValues = Object.fromEntries(
+        Object.entries(values).map(([key, value]) => [
+          key,
+          typeof value === 'string' && value.trim() === '' ? null : value,
+        ])
+      ) as Partial<Omit<AppSettings, 'id' | 'created_at'>>;
+
+      await updateAppSettings(processedValues);
       toast.success("Pengaturan berhasil diperbarui!");
     } catch (error: any) {
       toast.error("Gagal memperbarui pengaturan: " + error.message);
@@ -140,10 +148,10 @@ export default function AdminSettingsPage() {
                   <FormItem>
                     <FormLabel>Nama Situs</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nama Toko Anda" {...field} />
+                      <Input placeholder="Nama Toko Anda" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormDescription>
-                      Nama yang akan ditampilkan di header, footer, dan judul halaman.
+                      Nama yang akan ditampilkan di header, footer, dan judul halaman. Jika kosong, akan menggunakan nama default.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -154,7 +162,7 @@ export default function AdminSettingsPage() {
                 <FormLabel>Logo Situs</FormLabel>
                 <FormControl>
                   <ImageUploader
-                    bucketName="app-assets" // Anda mungkin perlu membuat bucket ini di Supabase Storage
+                    bucketName="app-assets"
                     currentImageUrl={form.watch("site_logo_url")}
                     onUploadSuccess={handleLogoUploadSuccess}
                     onRemove={handleRemoveLogo}
