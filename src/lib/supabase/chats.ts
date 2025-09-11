@@ -63,9 +63,9 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
     const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
 
     if (!conversationsMap.has(conversationKey)) {
-      // Explicitly cast to the expected single object type
-      const userProfile = chat.profiles as ChatMessage['profiles'];
-      const productInfo = chat.products as ChatMessage['products'];
+      // Explicitly cast to unknown first to bypass strict overlap checks
+      const userProfile = chat.profiles as unknown as ChatMessage['profiles'];
+      const productInfo = chat.products as unknown as ChatMessage['products'];
 
       conversationsMap.set(conversationKey, {
         user_id: otherParticipantId,
