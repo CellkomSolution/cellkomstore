@@ -10,6 +10,7 @@ import type { Product } from "@/lib/mock-data";
 import { getProductById } from "@/lib/supabase-queries"; // Import fungsi Supabase
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Import ProductDetailPageSkeleton
+import { StickyProductActions } from "@/components/sticky-product-actions"; // Import StickyProductActions
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   // Menggunakan React.use() untuk meng-unwrap params
@@ -50,7 +51,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     : 0;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pb-24"> {/* Added pb-24 to ensure content is not hidden by sticky bar */}
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         {/* Product Image */}
         <div>
@@ -89,10 +90,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          {/* Removed original buttons here */}
+          {/* <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <Button size="lg" className="flex-1" onClick={handleAddToCart}>Tambah ke Keranjang</Button>
             <Button size="lg" variant="outline" className="flex-1">Beli Langsung</Button>
-          </div>
+          </div> */}
 
           <div className="border-t pt-6 space-y-4">
              <div className="flex items-center gap-3">
@@ -118,6 +120,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <p>Detail produk untuk "{product.name}" akan ditampilkan di sini. Saat ini, kami menggunakan deskripsi placeholder. Dalam aplikasi nyata, bagian ini akan berisi informasi rinci tentang spesifikasi, fitur, dan manfaat produk untuk membantu pelanggan membuat keputusan pembelian yang tepat.</p>
         </div>
       </div>
+
+      {/* Sticky Product Actions */}
+      <StickyProductActions product={product} onAddToCart={handleAddToCart} />
     </div>
   );
 }
