@@ -112,6 +112,7 @@ export function Footer() {
               <li><Link href="#" className="text-muted-foreground hover:text-primary transition-colors">Karir</Link></li>
               <li><Link href="#" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link></li>
               <li><Link href="#" className="text-muted-foreground hover:text-primary transition-colors">Mitra</Link></li>
+              <li><Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">Kontak Kami</Link></li> {/* Added Contact Us link */}
             </ul>
           </div>
 
