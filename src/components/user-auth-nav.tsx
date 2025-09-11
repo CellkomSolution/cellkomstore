@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { User, LogOut, LayoutDashboard } from "lucide-react";
+import { User, LogOut, LayoutDashboard, MessageSquare } from "lucide-react"; // Import MessageSquare
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,10 +13,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "@/context/session-context";
 import { useAdmin } from "@/hooks/use-admin";
+import { ChatWidget } from "./chat-widget"; // Import ChatWidget
 
 export function UserAuthNav() {
   const { session, user, profile, signOut, isLoading: isSessionLoading } = useSession();
   const { isAdmin, isAdminLoading } = useAdmin();
+  const [isGeneralChatOpen, setIsGeneralChatOpen] = React.useState(false); // State untuk chat umum
 
   if (isSessionLoading || isAdminLoading) {
     return <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />;
@@ -48,6 +50,10 @@ export function UserAuthNav() {
                 <span>Profil</span>
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => setIsGeneralChatOpen(true)}>
+              <MessageSquare className="mr-2 h-4 w-4" />
+              <span>Chat Admin</span>
+            </DropdownMenuItem>
             {isAdmin && (
               <DropdownMenuItem asChild>
                 <Link href="/admin/dashboard" className="cursor-pointer">
@@ -78,6 +84,14 @@ export function UserAuthNav() {
           <span className="sr-only">Akun</span>
         </Link>
       </Button>
+
+      {/* Render ChatWidget untuk chat umum, dikontrol oleh state isGeneralChatOpen */}
+      <ChatWidget 
+        productId={null} 
+        productName={null} 
+        open={isGeneralChatOpen} 
+        onOpenChange={setIsGeneralChatOpen} 
+      />
     </>
   );
 }

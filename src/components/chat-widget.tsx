@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"; // Hapus DialogTrigger
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageSquare, Send, Loader2, User as UserIcon } from "lucide-react";
@@ -12,21 +12,22 @@ import { formatDistanceToNow } from "date-fns";
 import { id } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getAdminUserId } from "@/lib/supabase/profiles"; // Import getAdminUserId dari modul profiles
-import { ChatMessage } from "@/lib/supabase/chats"; // Import ChatMessage dari modul chats
+import { getAdminUserId } from "@/lib/supabase/profiles";
+import { ChatMessage } from "@/lib/supabase/chats";
 
 interface ChatWidgetProps {
-  productId: string;
-  productName: string;
+  productId?: string | null; // Opsional
+  productName?: string | null; // Opsional
+  open: boolean; // Dikontrol secara eksternal
+  onOpenChange: (open: boolean) => void; // Dikontrol secara eksternal
 }
 
-export function ChatWidget({ productId, productName }: ChatWidgetProps) {
+export function ChatWidget({ productId, productName, open, onOpenChange }: ChatWidgetProps) {
   const { user, profile, isLoading: isSessionLoading } = useSession();
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = React.useState("");
   const [isLoadingMessages, setIsLoadingMessages] = React.useState(true);
   const [isSending, setIsSending] = React.useState(false);
-  const [isChatOpen, setIsChatOpen] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const [targetAdminId, setTargetAdminId] = React.useState<string | null>(null);
 
@@ -41,15 +42,24 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
   const fetchMessages = React.useCallback(async () => {
     if (!user || !targetAdminId) return;
     setIsLoadingMessages(true);
-    const { data, error } = await supabase
+
+    let query = supabase
       .from("chats")
       .select(`
         *,
         profiles (first_name, last_name, avatar_url, role)
       `)
-      .eq("product_id", productId)
-      .or(`(sender_id.eq.${user.id},receiver_id.eq.${targetAdminId}),(sender_id.eq.${targetAdminId},receiver_id.eq.${user.id})`)
       .order("created_at", { ascending: true });
+
+    if (productId) {
+      query = query.eq("product_id", productId);
+    } else {
+      query = query.is("product_id", null);
+    }
+
+    query = query.or(`(sender_id.eq.${user.id},receiver_id.eq.${targetAdminId}),(sender_id.eq.${targetAdminId},receiver_id.eq.${user.id})`);
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Error fetching messages:", error.message);
@@ -61,18 +71,21 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
   }, [user, productId, targetAdminId]);
 
   React.useEffect(() => {
-    if (isChatOpen && user && targetAdminId) {
+    if (open && user && targetAdminId) {
       fetchMessages();
 
+      const productFilter = productId ? `product_id=eq.${productId}` : `product_id=is.null`;
+      const channelName = `product_chat_${productId || 'general'}_${user.id}_${targetAdminId}`;
+
       const channel = supabase
-        .channel(`product_chat_${productId}_${user.id}_${targetAdminId}`)
+        .channel(channelName)
         .on(
           "postgres_changes",
           {
             event: "INSERT",
             schema: "public",
             table: "chats",
-            filter: `product_id=eq.${productId}`,
+            filter: productFilter,
           },
           (payload) => {
             const newMsg = payload.new as ChatMessage;
@@ -97,7 +110,7 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
         supabase.removeChannel(channel);
       };
     }
-  }, [isChatOpen, user, productId, targetAdminId, fetchMessages]);
+  }, [open, user, productId, targetAdminId, fetchMessages]);
 
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -112,7 +125,7 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
 
     setIsSending(true);
     const { data, error } = await supabase.from("chats").insert({
-      product_id: productId,
+      product_id: productId || null, // Pastikan null jika tidak ada productId
       sender_id: user.id,
       receiver_id: targetAdminId,
       message: newMessage.trim(),
@@ -137,16 +150,10 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
 
   if (!user) {
     return (
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="outline" size="icon" className="rounded-full h-12 w-12 shrink-0">
-            <MessageSquare className="h-6 w-6" />
-            <span className="sr-only">Chat Penjual</span>
-          </Button>
-        </DialogTrigger>
+      <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Chat Penjual</DialogTitle>
+            <DialogTitle>Chat {productName ? `tentang ${productName}` : 'Admin'}</DialogTitle>
           </DialogHeader>
           <p className="text-center text-muted-foreground">Anda harus masuk untuk memulai chat.</p>
           <Button asChild>
@@ -158,16 +165,10 @@ export function ChatWidget({ productId, productName }: ChatWidgetProps) {
   }
 
   return (
-    <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className="rounded-full h-12 w-12 shrink-0">
-          <MessageSquare className="h-6 w-6" />
-          <span className="sr-only">Chat Penjual</span>
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] flex flex-col h-[90vh] max-h-[600px]">
         <DialogHeader>
-          <DialogTitle>Chat tentang {productName}</DialogTitle>
+          <DialogTitle>Chat {productName ? `tentang ${productName}` : 'Umum'}</DialogTitle>
         </DialogHeader>
         <div className="flex-1 flex flex-col overflow-hidden border rounded-md bg-muted/20">
           {isLoadingMessages ? (
