@@ -60,11 +60,12 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
   });
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
 
-  const defaultValues = {
-    display_style: initialData?.display_style ?? 'split',
+  const defaultValues: HeroCarouselFormValues = {
+    display_style: (initialData?.display_style ?? 'split') as 'full' | 'split', // Explicitly cast to ensure type
     product_image_url: initialData?.product_image_url ?? "",
     alt: initialData?.alt ?? "",
     link_url: initialData?.link_url ?? null,
+    order: initialData?.order ?? undefined, // Match schema's `number | undefined`
     logo_url: initialData?.logo_url ?? null,
     product_name: initialData?.product_name ?? null,
     original_price: initialData?.original_price ?? null,
@@ -72,8 +73,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
     is_new: initialData?.is_new ?? false,
     hashtag: initialData?.hashtag ?? null,
     left_panel_bg_color: initialData?.left_panel_bg_color ?? null,
-    order: initialData?.order ?? 0,
-  } as HeroCarouselFormValues; // Explicit cast here
+  };
 
   const form = useForm<HeroCarouselFormValues>({ // Use the explicit type here
     resolver: zodResolver(formSchema),
