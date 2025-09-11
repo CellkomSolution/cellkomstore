@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { User, LogOut, LayoutDashboard } from "lucide-react"; // Import LayoutDashboard
+import { User, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,16 +10,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Menambahkan AvatarImage
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "@/context/session-context";
-import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin hook
+import { useAdmin } from "@/hooks/use-admin";
 
 export function UserAuthNav() {
-  const { session, user, signOut, isLoading: isSessionLoading } = useSession();
-  const { isAdmin, isAdminLoading } = useAdmin(); // Gunakan hook useAdmin
+  const { session, user, profile, signOut, isLoading: isSessionLoading } = useSession();
+  const { isAdmin, isAdminLoading } = useAdmin();
 
   if (isSessionLoading || isAdminLoading) {
-    return <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />; // Placeholder saat memuat
+    return <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />;
   }
 
   return (
@@ -29,9 +29,13 @@ export function UserAuthNav() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.user_metadata?.avatar_url || undefined} /> {/* Tambahkan avatar_url */}
+                <AvatarImage src={profile?.avatar_url || undefined} />
                 <AvatarFallback>
-                  {user?.email ? user.email[0].toUpperCase() : <User className="h-5 w-5" />}
+                  {profile?.first_name
+                    ? profile.first_name[0].toUpperCase()
+                    : user?.email
+                    ? user.email[0].toUpperCase()
+                    : <User className="h-5 w-5" />}
                 </AvatarFallback>
               </Avatar>
               <span className="sr-only">Akun</span>
@@ -44,7 +48,7 @@ export function UserAuthNav() {
                 <span>Profil</span>
               </Link>
             </DropdownMenuItem>
-            {isAdmin && ( // Tampilkan link dasbor admin hanya jika pengguna adalah admin
+            {isAdmin && (
               <DropdownMenuItem asChild>
                 <Link href="/admin/dashboard" className="cursor-pointer">
                   <LayoutDashboard className="mr-2 h-4 w-4" />

@@ -20,33 +20,26 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { AvatarUploader } from "@/components/avatar-uploader";
-import { Textarea } from "@/components/ui/textarea"; // Import Textarea
+import { Textarea } from "@/components/ui/textarea";
 
 const profileFormSchema = z.object({
   first_name: z.string().min(1, { message: "Nama depan tidak boleh kosong." }).optional().or(z.literal("")),
   last_name: z.string().min(1, { message: "Nama belakang tidak boleh kosong." }).optional().or(z.literal("")),
-  bio: z.string().max(500, { message: "Bio tidak boleh lebih dari 500 karakter." }).optional().or(z.literal("")), // Add bio field
+  bio: z.string().max(500, { message: "Bio tidak boleh lebih dari 500 karakter." }).optional().or(z.literal("")),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-interface ProfileData extends ProfileFormValues {
-  avatar_url?: string | null;
-}
-
 export default function ProfilePage() {
-  const { user, isLoading: isSessionLoading } = useSession();
+  const { user, profile, refetchProfile, isLoading: isSessionLoading } = useSession();
   const router = useRouter();
-
-  const [profile, setProfile] = React.useState<ProfileData | null>(null);
-  const [isProfileLoading, setIsProfileLoading] = React.useState(true);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       first_name: "",
       last_name: "",
-      bio: "", // Default value for bio
+      bio: "",
     },
     mode: "onChange",
   });
@@ -58,32 +51,14 @@ export default function ProfilePage() {
   }, [user, isSessionLoading, router]);
 
   React.useEffect(() => {
-    async function getProfile() {
-      if (user) {
-        setIsProfileLoading(true);
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("first_name, last_name, avatar_url, bio") // Select bio field
-          .eq("id", user.id)
-          .single();
-
-        if (error) {
-          console.error("Error fetching profile:", error);
-          toast.error("Gagal memuat profil: " + error.message);
-        } else if (data) {
-          setProfile(data);
-          form.reset({ 
-            first_name: data.first_name || "", 
-            last_name: data.last_name || "",
-            bio: data.bio || "", // Set bio value
-          });
-        }
-        setIsProfileLoading(false);
-      }
+    if (profile) {
+      form.reset({
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        bio: profile.bio || "",
+      });
     }
-
-    getProfile();
-  }, [user, form]);
+  }, [profile, form]);
 
   async function onSubmit(values: ProfileFormValues) {
     if (!user) return;
@@ -93,7 +68,7 @@ export default function ProfilePage() {
       .update({
         first_name: values.first_name,
         last_name: values.last_name,
-        bio: values.bio, // Update bio field
+        bio: values.bio,
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
@@ -101,8 +76,8 @@ export default function ProfilePage() {
     if (error) {
       toast.error("Gagal memperbarui profil: " + error.message);
     } else {
+      await refetchProfile();
       toast.success("Profil berhasil diperbarui!");
-      setProfile((prev) => ({ ...prev, ...values }));
     }
   }
 
@@ -117,11 +92,12 @@ export default function ProfilePage() {
     if (error) {
       toast.error("Gagal menyimpan avatar baru: " + error.message);
     } else {
-      setProfile((prev) => ({ ...prev, avatar_url: newUrl } as ProfileData));
+      await refetchProfile();
+      toast.success("Avatar berhasil diperbarui!");
     }
   }
 
-  if (isSessionLoading || isProfileLoading) {
+  if (isSessionLoading) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
         <p>Memuat profil...</p>

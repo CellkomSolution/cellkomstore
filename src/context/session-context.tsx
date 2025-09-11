@@ -5,12 +5,15 @@ import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { type Session, type User } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { type Profile } from "@/lib/supabase-queries";
 
 interface SessionContextType {
   session: Session | null;
   user: User | null;
+  profile: Profile | null;
   isLoading: boolean;
   signOut: () => Promise<void>;
+  refetchProfile: () => Promise<void>;
 }
 
 const SessionContext = React.createContext<SessionContextType | undefined>(undefined);
@@ -18,48 +21,62 @@ const SessionContext = React.createContext<SessionContextType | undefined>(undef
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = React.useState<Session | null>(null);
   const [user, setUser] = React.useState<User | null>(null);
+  const [profile, setProfile] = React.useState<Profile | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
-  React.useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        if (currentSession) {
-          setSession(currentSession);
-          setUser(currentSession.user);
-          if (pathname === "/auth") {
-            router.push("/"); // Redirect authenticated users from auth page to home
-          }
-        } else {
-          setSession(null);
-          setUser(null);
-          // Only redirect to /auth if the user is unauthenticated AND not on the home page or auth page
-          if (pathname !== "/auth" && pathname !== "/") {
-            router.push("/auth");
-          }
-        }
-        setIsLoading(false);
+  const refetchProfile = React.useCallback(async () => {
+    if (user) {
+      const { data: profileData, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      if (error) {
+        console.error("Error refetching profile:", error);
+      } else {
+        setProfile(profileData);
       }
-    );
+    }
+  }, [user]);
 
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      if (initialSession) {
-        setSession(initialSession);
-        setUser(initialSession.user);
+  React.useEffect(() => {
+    const fetchSessionAndProfile = async (currentSession: Session | null) => {
+      if (currentSession) {
+        setSession(currentSession);
+        setUser(currentSession.user);
+
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", currentSession.user.id)
+          .single();
+        setProfile(profileData);
+
         if (pathname === "/auth") {
           router.push("/");
         }
       } else {
-        // Unauthenticated
-        // Only redirect to /auth if the user is unauthenticated AND not on the home page or auth page
+        setSession(null);
+        setUser(null);
+        setProfile(null);
         if (pathname !== "/auth" && pathname !== "/") {
           router.push("/auth");
         }
       }
       setIsLoading(false);
+    };
+
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      fetchSessionAndProfile(initialSession);
     });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        fetchSessionAndProfile(currentSession);
+      }
+    );
 
     return () => subscription.unsubscribe();
   }, [pathname, router]);
@@ -75,7 +92,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <SessionContext.Provider value={{ session, user, isLoading, signOut }}>
+    <SessionContext.Provider value={{ session, user, profile, isLoading, signOut, refetchProfile }}>
       {children}
     </SessionContext.Provider>
   );

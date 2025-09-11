@@ -145,27 +145,28 @@ export interface Profile {
   last_name: string | null;
   avatar_url: string | null;
   role: 'user' | 'admin';
-  email: string | null; // Menambahkan email untuk tampilan
+  email: string | null;
+  bio?: string | null;
 }
 
 export async function getAllProfiles(): Promise<Profile[]> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, avatar_url, role, email"); // Mengambil email langsung dari profiles
+    .select("id, first_name, last_name, avatar_url, role, email, bio");
 
   if (error) {
     console.error("Error fetching all profiles:", error.message || JSON.stringify(error, null, 2) || "Unknown error object.");
     return [];
   }
 
-  // Data sekarang sudah sesuai dengan interface Profile
   return data.map(profile => ({
     id: profile.id,
     first_name: profile.first_name,
     last_name: profile.last_name,
     avatar_url: profile.avatar_url,
     role: profile.role,
-    email: profile.email, // Mengakses email langsung dari objek profil
+    email: profile.email,
+    bio: profile.bio,
   }));
 }
 
