@@ -175,8 +175,8 @@ export async function getAdminUserId(): Promise<string | null> {
     .from("profiles")
     .select("id")
     .eq("role", "admin")
-    .limit(1) // Get only one admin
-    .single();
+    .limit(1)
+    .maybeSingle(); // Changed from .single() to .maybeSingle()
 
   if (error) {
     console.error("Error fetching admin user ID:", error.message || error);
