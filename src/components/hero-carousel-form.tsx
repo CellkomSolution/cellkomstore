@@ -61,7 +61,9 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
 
   const defaultValues: HeroCarouselFormValues = {
-    display_style: (initialData?.display_style ?? 'split') as 'full' | 'split', // Explicitly cast to ensure type
+    display_style: (initialData?.display_style === 'full' || initialData?.display_style === 'split')
+      ? initialData.display_style
+      : 'split', // Ensure it's always 'full' or 'split'
     product_image_url: initialData?.product_image_url ?? "",
     alt: initialData?.alt ?? "",
     link_url: initialData?.link_url ?? null,
