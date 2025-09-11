@@ -107,7 +107,7 @@ export default function AdminProductsPage() {
                   <TableHead>Nama Produk</TableHead>
                   <TableHead>Kategori</TableHead>
                   <TableHead>Harga</TableHead>
-                  <TableHead>Stok</TableHead> {/* Placeholder for stock */}
+                  <TableHead>Stok</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
@@ -159,7 +159,7 @@ export default function AdminProductsPage() {
                       <TableCell className="font-medium">{product.name}</TableCell>
                       <TableCell>{product.category}</TableCell>
                       <TableCell>{formatRupiah(product.price)}</TableCell>
-                      <TableCell>100</TableCell>{/* Placeholder for stock */}
+                      <TableCell>100</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="outline" size="icon" asChild>
