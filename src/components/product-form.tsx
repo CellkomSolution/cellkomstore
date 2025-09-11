@@ -64,6 +64,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
   const router = useRouter();
   const [imagePreview, setImagePreview] = React.useState<string | null>(initialData?.imageUrl || null);
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -251,46 +252,56 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
         <FormItem>
           <FormLabel>Gambar Produk</FormLabel>
           <FormControl>
-            <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 hover:bg-muted/30 relative">
+            <div>
               {imagePreview ? (
-                <>
+                <div className="relative h-48 w-full max-w-md">
                   <Image
                     src={imagePreview}
                     alt="Product Preview"
                     fill
                     style={{ objectFit: "contain" }}
-                    className="p-2"
+                    className="p-2 border rounded-lg"
                   />
                   <Button
                     type="button"
                     variant="destructive"
                     size="icon"
-                    className="absolute top-2 right-2 rounded-full"
+                    className="absolute top-2 right-2 rounded-full h-6 w-6"
                     onClick={removeImage}
                     disabled={loading || isUploadingImage}
                   >
                     <XCircle className="h-4 w-4" />
                     <span className="sr-only">Hapus Gambar</span>
                   </Button>
-                </>
+                </div>
               ) : (
-                <>
+                <div
+                  className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 hover:bg-muted/30"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   <Input
+                    ref={fileInputRef}
                     type="file"
                     accept="image/*"
-                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    className="hidden"
                     onChange={handleImageUpload}
                     disabled={loading || isUploadingImage}
                   />
                   {isUploadingImage ? (
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <>
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                      <p className="mt-2 text-sm text-muted-foreground">Mengunggah...</p>
+                    </>
                   ) : (
-                    <UploadCloud className="h-8 w-8 text-muted-foreground" />
+                    <div className="text-center">
+                      <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        <span className="font-semibold text-primary">Klik untuk mengunggah</span> atau seret & lepas
+                      </p>
+                      <p className="text-xs text-muted-foreground">PNG, JPG, WEBP</p>
+                    </div>
                   )}
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {isUploadingImage ? "Mengunggah..." : "Klik untuk mengunggah atau seret & lepas"}
-                  </p>
-                </>
+                </div>
               )}
             </div>
           </FormControl>
