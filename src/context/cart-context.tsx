@@ -11,8 +11,8 @@ export interface CartItem extends Product {
 interface CartContextType {
   items: CartItem[];
   addItem: (item: Product) => void;
-  removeItem: (itemId: string) => void; // Diperbarui ke string
-  updateItemQuantity: (itemId: string, quantity: number) => void; // Diperbarui ke string
+  removeItem: (itemId: string) => void;
+  updateItemQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -27,21 +27,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prevItems) => {
       const existingItem = prevItems.find((i) => i.id === product.id);
       if (existingItem) {
+        // If item exists, update its quantity
         return prevItems.map((i) =>
           i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
+      // If item doesn't exist, add it to the cart
       return [...prevItems, { ...product, quantity: 1 }];
     });
     toast.success(`${product.name} ditambahkan ke keranjang!`);
   };
 
-  const removeItem = (itemId: string) => { // Diperbarui ke string
+  const removeItem = (itemId: string) => {
     setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
     toast.error("Item dihapus dari keranjang.");
   };
 
-  const updateItemQuantity = (itemId: string, quantity: number) => { // Diperbarui ke string
+  const updateItemQuantity = (itemId: string, quantity: number) => {
     if (quantity <= 0) {
       removeItem(itemId);
     } else {
