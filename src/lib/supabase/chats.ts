@@ -10,13 +10,13 @@ export interface ChatMessage {
   created_at: string;
   product_id: string | null;
   is_read: boolean;
-  sender_profile?: {
+  sender_profile: { // Made required
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
   };
-  receiver_profile?: {
+  receiver_profile: { // Made required
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
@@ -55,14 +55,14 @@ interface RawChatData {
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
-  }> | null;
+  }>; // Made required, but still an array
   receiver_profile: Array<{
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
-  }> | null;
-  products: Array<{ // Changed to expect an array
+  }>; // Made required, but still an array
+  products: Array<{
     name: string;
     image_url: string;
   }> | null;
