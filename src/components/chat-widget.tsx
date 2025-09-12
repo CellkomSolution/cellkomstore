@@ -12,26 +12,26 @@ import { id } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAdminUserId } from "@/lib/supabase/profiles";
-import { ChatMessage, getChatMessages, markMessagesAsRead } from "@/lib/supabase/chats"; // Import markMessagesAsRead
-import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile hook
+import { ChatMessage, getChatMessages, markMessagesAsRead } from "@/lib/supabase/chats";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-} from "@/components/ui/drawer"; // Import Drawer components
+} from "@/components/ui/drawer";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"; // Import Sheet components
+} from "@/components/ui/sheet";
 
 interface ChatWidgetProps {
-  productId?: string | null; // Opsional
-  productName?: string | null; // Opsional
-  open: boolean; // Dikontrol secara eksternal
-  onOpenChange: (open: boolean) => void; // Dikontrol secara eksternal
+  productId?: string | null;
+  productName?: string | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function ChatWidget({ productId, productName, open, onOpenChange }: ChatWidgetProps) {
@@ -42,12 +42,15 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
   const [isSending, setIsSending] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const [targetAdminId, setTargetAdminId] = React.useState<string | null>(null);
-  const isMobile = useIsMobile(); // Determine if it's a mobile view
+  const [isLoadingAdminId, setIsLoadingAdminId] = React.useState(true); // New state for admin ID loading
+  const isMobile = useIsMobile();
 
   React.useEffect(() => {
     async function loadAdminId() {
+      setIsLoadingAdminId(true);
       const id = await getAdminUserId();
       setTargetAdminId(id);
+      setIsLoadingAdminId(false);
     }
     loadAdminId();
   }, []);
@@ -55,13 +58,11 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
   const fetchMessages = React.useCallback(async () => {
     if (!user || !targetAdminId) return;
     
-    // Pencegahan: Jika pengguna adalah admin yang sama dengan target admin,
-    // ini bukan skenario chat pelanggan-ke-admin yang dimaksud.
     if (user.id === targetAdminId) {
       setIsLoadingMessages(false);
-      setMessages([]); // Kosongkan pesan sebelumnya
+      setMessages([]);
       toast.info("Anda tidak dapat memulai chat dengan diri sendiri melalui widget ini.");
-      onOpenChange(false); // Tutup widget chat
+      onOpenChange(false);
       return;
     }
 
@@ -70,7 +71,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     setMessages(fetchedMessages);
     setIsLoadingMessages(false);
 
-    // Tandai pesan dari admin ke user sebagai sudah dibaca
     try {
       await markMessagesAsRead(targetAdminId, user.id, productId ?? null);
     } catch (error) {
@@ -82,7 +82,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     if (open && user && targetAdminId) {
       fetchMessages();
 
-      // Pencegahan duplikat channel jika user.id === targetAdminId
       if (user.id === targetAdminId) {
         return;
       }
@@ -106,11 +105,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
               (newMsg.sender_id === user.id && newMsg.receiver_id === targetAdminId) ||
               (newMsg.sender_id === targetAdminId && newMsg.receiver_id === user.id)
             ) {
-              // When a new message comes in, we need to fetch the sender's profile
-              // as the payload.new might not contain the joined profile data.
-              // For simplicity and to ensure consistency with the full message structure,
-              // we'll refetch all messages.
-              fetchMessages(); // Refetch all messages to get full profile data
+              fetchMessages();
             }
           }
         )
@@ -133,7 +128,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
       return;
     }
 
-    // Pencegahan: Jika pengguna adalah admin yang sama dengan target admin
     if (user.id === targetAdminId) {
       toast.info("Anda tidak dapat mengirim pesan ke diri sendiri melalui widget ini.");
       setNewMessage("");
@@ -162,6 +156,115 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     setIsSending(false);
   };
 
+  const Title = () => <p>Chat {productName ? `tentang ${productName}` : 'Admin'}</p>;
+
+  // Render loading state for the widget itself
+  if (isSessionLoading || isLoadingAdminId) {
+    const Content = () => (
+      <div className="flex-1 flex flex-col items-center justify-center text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
+        <p className="text-muted-foreground">Memuat informasi chat...</p>
+      </div>
+    );
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="h-[300px] flex flex-col p-4">
+            <DrawerHeader className="text-center">
+              <DrawerTitle><Title /></DrawerTitle>
+            </DrawerHeader>
+            <Content />
+          </DrawerContent>
+        </Drawer>
+      );
+    } else {
+      return (
+        <Sheet open={open} onOpenChange={onOpenChange}>
+          <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
+            <SheetHeader>
+              <SheetTitle><Title /></SheetTitle>
+            </SheetHeader>
+            <Content />
+          </SheetContent>
+        </Sheet>
+      );
+    }
+  }
+
+  // Render login prompt if user is not logged in
+  if (!user) {
+    const Content = () => (
+      <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
+        <MessageSquare className="h-16 w-16 text-muted-foreground" />
+        <p className="text-muted-foreground">Anda harus masuk untuk memulai chat.</p>
+        <Button asChild>
+          <a href="/auth">Masuk / Daftar</a>
+        </Button>
+      </div>
+    );
+
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="h-[300px] flex flex-col p-4">
+            <DrawerHeader className="text-center">
+              <DrawerTitle><Title /></DrawerTitle>
+            </DrawerHeader>
+            <Content />
+          </DrawerContent>
+        </Drawer>
+      );
+    } else {
+      return (
+        <Sheet open={open} onOpenChange={onOpenChange}>
+          <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
+            <SheetHeader>
+              <SheetTitle><Title /></SheetTitle>
+            </SheetHeader>
+            <Content />
+          </SheetContent>
+        </Sheet>
+      );
+    }
+  }
+
+  // Render "No Admin" message if no admin ID is found after loading
+  if (!targetAdminId) {
+    const Content = () => (
+      <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
+        <MessageSquare className="h-16 w-16 text-muted-foreground" />
+        <p className="font-semibold">Admin tidak tersedia untuk chat.</p>
+        <p className="text-sm text-muted-foreground">
+          Silakan coba lagi nanti atau hubungi dukungan.
+        </p>
+      </div>
+    );
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="h-[300px] flex flex-col p-4">
+            <DrawerHeader className="text-center">
+              <DrawerTitle><Title /></DrawerTitle>
+            </DrawerHeader>
+            <Content />
+          </DrawerContent>
+        </Drawer>
+      );
+    } else {
+      return (
+        <Sheet open={open} onOpenChange={onOpenChange}>
+          <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
+            <SheetHeader>
+              <SheetTitle><Title /></SheetTitle>
+            </SheetHeader>
+            <Content />
+          </SheetContent>
+        </Sheet>
+      );
+    }
+  }
+
+  // Actual chat content
   const ChatContent = (
     <>
       <div className="flex-1 flex flex-col overflow-hidden border rounded-md bg-muted/20">
@@ -181,10 +284,10 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                   <div
                     key={msg.id}
                     className={`flex items-start gap-3 ${
-                      msg.sender_id === user?.id ? "justify-end" : "justify-start"
+                      msg.sender_id === user.id ? "justify-end" : "justify-start"
                     }`}
                   >
-                    {msg.sender_id !== user?.id && (
+                    {msg.sender_id !== user.id && (
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={msg.sender_profile.avatar_url || undefined} />
                         <AvatarFallback>
@@ -194,17 +297,17 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                     )}
                     <div
                       className={`max-w-[70%] p-3 rounded-lg ${
-                        msg.sender_id === user?.id
+                        msg.sender_id === user.id
                           ? "bg-primary text-primary-foreground rounded-br-none"
                           : "bg-card text-foreground rounded-bl-none border"
                       }`}
                     >
                       <p className="text-sm">{msg.message}</p>
-                      <p className={`text-xs mt-1 ${msg.sender_id === user?.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                      <p className={`text-xs mt-1 ${msg.sender_id === user.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                         {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
                       </p>
                     </div>
-                    {msg.sender_id === user?.id && (
+                    {msg.sender_id === user.id && (
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={msg.sender_profile.avatar_url || undefined} />
                         <AvatarFallback>
@@ -236,48 +339,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     </>
   );
 
-  if (isSessionLoading || !targetAdminId) {
-    return null;
-  }
-
-  if (!user) {
-    // If not logged in, show a simple dialog to prompt login
-    const Title = () => <p>Chat {productName ? `tentang ${productName}` : 'Admin'}</p>;
-    const Content = () => (
-      <>
-        <p className="text-center text-muted-foreground">Anda harus masuk untuk memulai chat.</p>
-        <Button asChild>
-          <a href="/auth">Masuk / Daftar</a>
-        </Button>
-      </>
-    );
-
-    if (isMobile) {
-      return (
-        <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="h-[300px] flex flex-col p-4">
-            <DrawerHeader className="text-center">
-              <DrawerTitle><Title /></DrawerTitle>
-            </DrawerHeader>
-            <Content />
-          </DrawerContent>
-        </Drawer>
-      );
-    } else {
-      return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-          <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
-            <SheetHeader>
-              <SheetTitle><Title /></SheetTitle>
-            </SheetHeader>
-            <Content />
-          </SheetContent>
-        </Sheet>
-      );
-    }
-  }
-
-  // Render actual chat widget based on device
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
