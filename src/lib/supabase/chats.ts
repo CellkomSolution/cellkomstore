@@ -35,9 +35,9 @@ export interface ChatConversation {
   user_first_name: string | null;
   user_last_name: string | null;
   user_avatar_url: string | null;
-  product_id: string | null; // This will be null for the unified buyer chat summary
-  product_name: string | null; // This will be null for the unified buyer chat summary
-  product_image_url: string | null; // This will be null for the unified buyer chat summary
+  product_id: string | null; // This will now represent the product_id of the last message, or null
+  product_name: string | null; // This will now represent the product_name of the last message, or null
+  product_image_url: string | null; // This will now represent the product_image_url of the last message, or null
   last_message: string;
   last_message_time: string;
   unread_count: number;
@@ -101,7 +101,7 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
 
   for (const chat of rawChats) {
     const otherParticipantId = chat.sender_id === adminId ? chat.receiver_id : chat.sender_id;
-    const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
+    const conversationKey = otherParticipantId; // Group by user_id only
 
     // Safely extract the first element from the profile arrays
     const senderProfile = chat.sender_profile && chat.sender_profile.length > 0 ? chat.sender_profile[0] : null;
@@ -118,9 +118,9 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
         user_first_name: otherParticipantProfile?.first_name || null,
         user_last_name: otherParticipantProfile?.last_name || null,
         user_avatar_url: otherParticipantProfile?.avatar_url || null,
-        product_id: chat.product_id,
-        product_name: productData?.name || null,
-        product_image_url: productData?.image_url || null,
+        product_id: chat.product_id, // Product of the latest message
+        product_name: productData?.name || null, // Product name of the latest message
+        product_image_url: productData?.image_url || null, // Product image of the latest message
         last_message: chat.message,
         last_message_time: chat.created_at,
         unread_count: 0,

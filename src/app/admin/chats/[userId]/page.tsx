@@ -15,13 +15,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Profile } from "@/lib/supabase/profiles"; 
 import { getChatMessages, markMessagesAsRead, ChatMessage } from "@/lib/supabase/chats";
-import { getProductById } from "@/lib/supabase/products";
+import { getProductById, Product } from "@/lib/supabase/products";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function AdminChatDetailPage({ params }: { params: Promise<{ userId: string; productId: string }> }) {
-  const { userId, productId: rawProductId } = React.use(params);
-  const productId = rawProductId === 'general' ? null : rawProductId;
+export default function AdminChatDetailPage({ params }: { params: Promise<{ userId: string }> }) {
+  const { userId } = React.use(params);
   const router = useRouter();
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();
 
@@ -30,13 +29,12 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
   const [isLoadingMessages, setIsLoadingMessages] = React.useState(true);
   const [isSending, setIsSending] = React.useState(false);
   const [otherUserProfile, setOtherUserProfile] = React.useState<Profile | null>(null);
-  const [productInfo, setProductInfo] = React.useState<{ name: string; imageUrl: string } | null>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   const adminId = adminUser?.id;
 
   React.useEffect(() => {
-    async function loadUserProfileAndProduct() {
+    async function loadUserProfile() {
       if (adminId && adminUser) {
         const { data: userProfileData, error: userProfileError } = await supabase
           .from("profiles")
@@ -50,26 +48,49 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
           return;
         }
         setOtherUserProfile(userProfileData);
-
-        if (productId) {
-          const product = await getProductById(productId);
-          if (product) {
-            setProductInfo({ name: product.name, imageUrl: product.imageUrl });
-          }
-        }
       }
     }
-    loadUserProfileAndProduct();
-  }, [userId, productId, adminUser, adminId, router]);
+    loadUserProfile();
+  }, [userId, adminUser, adminId, router]);
 
   const fetchMessages = React.useCallback(async () => {
     if (!adminUser || !adminId || !otherUserProfile) return;
     setIsLoadingMessages(true);
     try {
-      const fetchedMessages = await getChatMessages(userId, adminId, productId);
-      setMessages(fetchedMessages);
+      const fetchedMessages = await getChatMessages(userId, adminId);
       
-      await markMessagesAsRead(userId, adminId, productId);
+      const finalMessages: ChatMessage[] = [];
+      const productsIntroduced = new Set<string>(); // To track products for system messages
+
+      for (const msg of fetchedMessages) {
+        // Add system message for product context if it's the first time this product is mentioned
+        if (msg.product_id && !productsIntroduced.has(msg.product_id)) {
+          const product = await getProductById(msg.product_id);
+          if (product) {
+            finalMessages.push({
+              id: `system-product-intro-${msg.product_id}-${msg.id}`, // Unique ID for system message
+              sender_id: 'system-id', // Dummy ID for system messages
+              receiver_id: adminId, // Dummy ID
+              message: `Percakapan ini dimulai terkait produk: ${product.name}`,
+              created_at: msg.created_at, // Use message's timestamp for ordering
+              product_id: product.id,
+              is_read: true,
+              updated_at: msg.created_at,
+              sender_profile: [],
+              receiver_profile: [],
+              products: [{ name: product.name, image_url: product.imageUrl }],
+              type: 'system',
+            });
+            productsIntroduced.add(msg.product_id);
+          }
+        }
+        finalMessages.push(msg);
+      }
+
+      setMessages(finalMessages);
+      
+      // Mark messages as read
+      await markMessagesAsRead(userId, adminId);
     } catch (error) {
       console.error("Error in fetchMessages for AdminChatDetailPage:", error);
       toast.error("Gagal memuat pesan chat.");
@@ -77,22 +98,21 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
     } finally {
       setIsLoadingMessages(false);
     }
-  }, [adminUser, adminId, otherUserProfile, userId, productId]);
+  }, [adminUser, adminId, otherUserProfile, userId]);
 
   React.useEffect(() => {
     if (adminUser && adminId && otherUserProfile) {
       fetchMessages();
 
-      const productFilter = productId ? `product_id=eq.${productId}` : `product_id=is.null`;
       const channel = supabase
-        .channel(`admin_chat_${userId}_${productId || 'general'}`)
+        .channel(`admin_chat_user_${userId}`)
         .on(
           "postgres_changes",
           {
             event: "INSERT",
             schema: "public",
             table: "chats",
-            filter: productFilter,
+            filter: `or(sender_id.eq.${userId},receiver_id.eq.${userId})`, // Listen for messages involving this user
           },
           (payload) => {
             const newMsg = payload.new as ChatMessage;
@@ -100,13 +120,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
               (newMsg.sender_id === userId && newMsg.receiver_id === adminId) ||
               (newMsg.sender_id === adminId && newMsg.receiver_id === userId)
             ) {
-              // When a new message comes in, we need to fetch the sender's profile
-              // as the payload.new might not contain the joined profile data.
-              // However, getChatMessages already fetches profiles, so we can just refetch all messages.
-              // For real-time updates, it's better to append and then update the specific profile if needed.
-              // For simplicity and to ensure consistency with the full message structure,
-              // we'll refetch all messages.
-              fetchMessages(); // Refetch all messages to get full profile data
+              fetchMessages(); // Refetch all messages to get full profile data and re-evaluate system messages
             }
           }
         )
@@ -116,7 +130,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
         supabase.removeChannel(channel);
       };
     }
-  }, [adminUser, adminId, otherUserProfile, userId, productId, fetchMessages]);
+  }, [adminUser, adminId, otherUserProfile, userId, fetchMessages]);
 
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -128,10 +142,10 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
 
     setIsSending(true);
     const { data, error } = await supabase.from("chats").insert({
-      product_id: productId,
       sender_id: adminUser.id,
       receiver_id: userId,
       message: newMessage.trim(),
+      // product_id is not set here, as it's a general chat from admin side
     }).select(`
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
@@ -185,12 +199,6 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
               <p className="text-sm text-muted-foreground">{otherUserProfile.email}</p>
             </div>
           </div>
-          {productInfo && (
-            <Link href={`/product/${productId}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary hover:underline">
-              <Image src={productInfo.imageUrl} alt={productInfo.name} width={32} height={32} className="rounded-md object-cover" />
-              <span className="line-clamp-1">{productInfo.name}</span>
-            </Link>
-          )}
         </CardHeader>
         <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
           {isLoadingMessages ? (
@@ -209,36 +217,60 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
                     <div
                       key={msg.id}
                       className={`flex items-start gap-3 ${
-                        msg.sender_id === adminUser?.id ? "justify-end" : "justify-start"
+                        msg.type === 'system' ? 'justify-center' : (msg.sender_id === adminUser?.id ? "justify-end" : "justify-start")
                       }`}
                     >
-                      {msg.sender_id !== adminUser?.id && (
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
-                          <AvatarFallback>
-                            {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
-                          </AvatarFallback>
-                        </Avatar>
-                      )}
-                      <div
-                        className={`max-w-[70%] p-3 rounded-lg ${
-                          msg.sender_id === adminUser?.id
-                            ? "bg-primary text-primary-foreground rounded-br-none"
-                            : "bg-card text-foreground rounded-bl-none border"
-                        }`}
-                      >
-                        <p className="text-sm">{msg.message}</p>
-                        <p className={`text-xs mt-1 ${msg.sender_id === adminUser?.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                          {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
-                        </p>
-                      </div>
-                      {msg.sender_id === adminUser?.id && (
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
-                          <AvatarFallback>
-                            {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
-                          </AvatarFallback>
-                        </Avatar>
+                      {msg.type === 'system' ? (
+                        <div className="w-full text-center text-muted-foreground text-sm my-2">
+                          {msg.products?.[0] && (
+                            <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
+                              <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                              <span>
+                                Percakapan tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
+                              </span>
+                            </div>
+                          )}
+                          {!msg.products?.[0] && msg.message} {/* Fallback if product info is missing for some reason */}
+                        </div>
+                      ) : (
+                        <>
+                          {msg.sender_id !== adminUser?.id && (
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
+                              <AvatarFallback>
+                                {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
+                          <div
+                            className={`max-w-[70%] p-3 rounded-lg ${
+                              msg.sender_id === adminUser?.id
+                                ? "bg-primary text-primary-foreground rounded-br-none"
+                                : "bg-card text-foreground rounded-bl-none border"
+                            }`}
+                          >
+                            <p className="text-sm">{msg.message}</p>
+                            {msg.product_id && msg.products?.[0] && (
+                              <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
+                                <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                                <span className="text-xs text-muted-foreground line-clamp-1">
+                                  Tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
+                                </span>
+                              </div>
+                            )}
+                            <p className={`text-xs mt-1 ${msg.sender_id === adminUser?.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                              {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
+                            </p>
+                          </div>
+                          {msg.sender_id === adminUser?.id && (
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
+                              <AvatarFallback>
+                                {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
+                        </>
                       )}
                     </div>
                   ))
