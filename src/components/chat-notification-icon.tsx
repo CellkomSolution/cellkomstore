@@ -5,7 +5,7 @@ import { MessageSquare, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/context/session-context";
-import { getUserConversations, ChatConversation, ChatMessage } from "@/lib/supabase/chats"; // Import ChatConversation
+import { getUserUnifiedConversation, ChatConversation, ChatMessage } from "@/lib/supabase/chats"; // Import getUserUnifiedConversation
 import { supabase } from "@/integrations/supabase/client";
 import { ChatWidget } from "./chat-widget";
 import { useAdmin } from "@/hooks/use-admin";
@@ -13,60 +13,45 @@ import { useAdmin } from "@/hooks/use-admin";
 export function ChatNotificationIcon() {
   const { user, isLoading: isSessionLoading } = useSession();
   const { isAdmin } = useAdmin();
-  const [unreadConversations, setUnreadConversations] = React.useState<ChatConversation[]>([]);
+  const [unifiedConversation, setUnifiedConversation] = React.useState<ChatConversation | null>(null);
   const [totalUnreadCount, setTotalUnreadCount] = React.useState(0);
   const [isLoadingConversations, setIsLoadingConversations] = React.useState(true);
   const [isChatOpen, setIsChatOpen] = React.useState(false);
   const [activeChatProductId, setActiveChatProductId] = React.useState<string | null>(null);
   const [activeChatProductName, setActiveChatProductName] = React.useState<string | null>(null);
 
-  const fetchConversations = React.useCallback(async () => {
+  const fetchUnifiedConversation = React.useCallback(async () => {
     if (!user || isAdmin) {
-      setUnreadConversations([]);
+      setUnifiedConversation(null);
       setTotalUnreadCount(0);
       setIsLoadingConversations(false);
       return;
     }
     setIsLoadingConversations(true);
-    const conversations = await getUserConversations(user.id);
-    const unread = conversations.filter(conv => conv.unread_count > 0);
-    setUnreadConversations(unread);
-    setTotalUnreadCount(unread.reduce((sum, conv) => sum + conv.unread_count, 0));
+    const conversation = await getUserUnifiedConversation(user.id);
+    setUnifiedConversation(conversation);
+    setTotalUnreadCount(conversation?.unread_count || 0);
     setIsLoadingConversations(false);
   }, [user, isAdmin]);
 
   React.useEffect(() => {
     if (!isSessionLoading && user && !isAdmin) {
-      fetchConversations();
+      fetchUnifiedConversation();
 
+      // Subscribe to all messages where this user is the receiver
       const channel = supabase
-        .channel(`user_unread_messages_${user.id}`)
+        .channel(`user_unified_messages_${user.id}`)
         .on(
           "postgres_changes",
           {
-            event: "INSERT",
+            event: "*", // Listen for INSERT and UPDATE
             schema: "public",
             table: "chats",
             filter: `receiver_id=eq.${user.id}`,
           },
           (payload) => {
-            // If a new message is received by this user, refetch conversations
-            fetchConversations();
-          }
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "chats",
-            filter: `receiver_id=eq.${user.id}`,
-          },
-          (payload) => {
-            // If a message was unread and is now read, refetch conversations
-            if (payload.old.is_read === false && payload.new.is_read === true) {
-              fetchConversations();
-            }
+            // If a new message is received or an existing one is marked read, refetch
+            fetchUnifiedConversation();
           }
         )
         .subscribe();
@@ -75,19 +60,12 @@ export function ChatNotificationIcon() {
         supabase.removeChannel(channel);
       };
     }
-  }, [isSessionLoading, user, isAdmin, fetchConversations]);
+  }, [isSessionLoading, user, isAdmin, fetchUnifiedConversation]);
 
   const handleChatIconClick = () => {
-    if (totalUnreadCount > 0 && unreadConversations.length > 0) {
-      // Open the chat for the most recent unread conversation
-      const mostRecentUnread = unreadConversations[0]; // Assuming sorted by last_message_time descending
-      setActiveChatProductId(mostRecentUnread.product_id);
-      setActiveChatProductName(mostRecentUnread.product_name);
-    } else {
-      // Open a general chat
-      setActiveChatProductId(null);
-      setActiveChatProductName(null);
-    }
+    // When the icon is clicked, always open the unified chat with no specific product context initially
+    setActiveChatProductId(null);
+    setActiveChatProductName(null);
     setIsChatOpen(true);
   };
 
@@ -112,8 +90,8 @@ export function ChatNotificationIcon() {
         <span className="sr-only">Chat</span>
       </Button>
       <ChatWidget
-        productId={activeChatProductId}
-        productName={activeChatProductName}
+        productId={activeChatProductId} // This will be null, but the prop is kept for product page initiation
+        productName={activeChatProductName} // This will be null, but the prop is kept for product page initiation
         open={isChatOpen}
         onOpenChange={setIsChatOpen}
       />

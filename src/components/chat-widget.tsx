@@ -86,16 +86,18 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     }
 
     setIsLoadingMessages(true);
-    const fetchedMessages = await getChatMessages(user.id, targetAdminId, productId ?? null);
+    // Fetch all messages between the user and the admin
+    const fetchedMessages = await getChatMessages(user.id, targetAdminId);
     setMessages(fetchedMessages);
     setIsLoadingMessages(false);
 
     try {
-      await markMessagesAsRead(targetAdminId, user.id, productId ?? null);
+      // Mark all unread messages from admin to user as read
+      await markMessagesAsRead(targetAdminId, user.id);
     } catch (error) {
       console.error("Failed to mark messages as read in ChatWidget:", error);
     }
-  }, [user, productId, targetAdminId, onOpenChange]);
+  }, [user, targetAdminId, onOpenChange]);
 
   React.useEffect(() => {
     if (open && user && targetAdminId) {
@@ -105,8 +107,8 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
         return;
       }
 
-      const productFilter = productId ? `product_id=eq.${productId}` : `product_id=is.null`;
-      const channelName = `product_chat_${productId || 'general'}_${user.id}_${targetAdminId}`;
+      // Subscribe to all messages between the user and the admin
+      const channelName = `unified_chat_${user.id}_${targetAdminId}`;
 
       const channel = supabase
         .channel(channelName)
@@ -116,7 +118,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
             event: "INSERT",
             schema: "public",
             table: "chats",
-            filter: productFilter,
+            filter: `or(sender_id.eq.${user.id},receiver_id.eq.${user.id})`, // Listen for messages involving this user
           },
           (payload) => {
             const newMsg = payload.new as ChatMessage;
@@ -134,7 +136,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
         supabase.removeChannel(channel);
       };
     }
-  }, [open, user, productId, targetAdminId, fetchMessages]);
+  }, [open, user, targetAdminId, fetchMessages]);
 
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -155,14 +157,15 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
 
     setIsSending(true);
     const { data, error } = await supabase.from("chats").insert({
-      product_id: productId || null,
+      product_id: productId || null, // Still associate message with product if initiated from product page
       sender_id: user.id,
       receiver_id: targetAdminId,
       message: newMessage.trim(),
     }).select(`
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
-      receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role)
+      receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
+      products (name, image_url)
     `).single();
 
     if (error) {
@@ -332,6 +335,14 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                       }`}
                     >
                       <p className="text-sm">{msg.message}</p>
+                      {msg.product_id && msg.products?.[0] && ( // Display product link if message is associated with a product
+                        <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
+                          <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                          <span className="text-xs text-muted-foreground line-clamp-1">
+                            Tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
+                          </span>
+                        </div>
+                      )}
                       <p className={`text-xs mt-1 ${msg.sender_id === user.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                         {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
                       </p>

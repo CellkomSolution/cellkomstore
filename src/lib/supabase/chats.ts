@@ -34,9 +34,9 @@ export interface ChatConversation {
   user_first_name: string | null;
   user_last_name: string | null;
   user_avatar_url: string | null;
-  product_id: string | null;
-  product_name: string | null;
-  product_image_url: string | null;
+  product_id: string | null; // This will be null for the unified buyer chat summary
+  product_name: string | null; // This will be null for the unified buyer chat summary
+  product_image_url: string | null; // This will be null for the unified buyer chat summary
   last_message: string;
   last_message_time: string;
   unread_count: number;
@@ -137,8 +137,25 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
   );
 }
 
-export async function getUserConversations(currentUserId: string): Promise<ChatConversation[]> {
-  const { data, error } = await supabase
+// New function to get a single summary conversation for a user with the admin
+export async function getUserUnifiedConversation(currentUserId: string): Promise<ChatConversation | null> {
+  // First, find the admin user ID
+  const { data: adminProfileData, error: adminProfileError } = await supabase
+    .from("profiles")
+    .select("id, first_name, last_name, avatar_url")
+    .eq("role", "admin")
+    .limit(1)
+    .maybeSingle();
+
+  if (adminProfileError || !adminProfileData) {
+    console.error("Error fetching admin profile:", adminProfileError?.message || "Admin not found");
+    return null;
+  }
+
+  const adminId = adminProfileData.id;
+
+  // Fetch all messages between the current user and the admin
+  const { data: messagesData, error: messagesError } = await supabase
     .from('chats')
     .select(`
       id,
@@ -153,56 +170,45 @@ export async function getUserConversations(currentUserId: string): Promise<ChatC
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
       products (name, image_url)
     `)
-    .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
-    .order('created_at', { ascending: false });
+    .or(`and(sender_id.eq.${currentUserId},receiver_id.eq.${adminId}),and(sender_id.eq.${adminId},receiver_id.eq.${currentUserId})`)
+    .order('created_at', { ascending: false }); // Order by newest first to easily get last message
 
-  if (error) {
-    console.error("Error fetching user chat conversations:", error.message || error);
-    return [];
+  if (messagesError) {
+    console.error("Error fetching unified user chat messages:", messagesError.message || messagesError);
+    return null;
   }
 
-  const rawChats = data as RawChatData[];
-  const conversationsMap = new Map<string, ChatConversation>();
+  const allMessages = messagesData as RawChatData[];
 
-  for (const chat of rawChats) {
-    const otherParticipantId = chat.sender_id === currentUserId ? chat.receiver_id : chat.sender_id;
-    const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
+  let lastMessage = "Mulai percakapan Anda";
+  let lastMessageTime = new Date().toISOString();
+  let unreadCount = 0;
 
-    const senderProfile = chat.sender_profile && chat.sender_profile.length > 0 ? chat.sender_profile[0] : null;
-    const receiverProfile = chat.receiver_profile && chat.receiver_profile.length > 0 ? chat.receiver_profile[0] : null;
-    
-    const otherParticipantProfile = chat.sender_id === otherParticipantId ? senderProfile : receiverProfile;
+  if (allMessages.length > 0) {
+    const latestMessage = allMessages[0];
+    lastMessage = latestMessage.message;
+    lastMessageTime = latestMessage.created_at;
 
-    const productData = chat.products && chat.products.length > 0 ? chat.products[0] : null;
-
-    if (!conversationsMap.has(conversationKey)) {
-      conversationsMap.set(conversationKey, {
-        user_id: otherParticipantId, // This is the admin's ID in this context
-        user_first_name: otherParticipantProfile?.first_name || null,
-        user_last_name: otherParticipantProfile?.last_name || null,
-        user_avatar_url: otherParticipantProfile?.avatar_url || null,
-        product_id: chat.product_id,
-        product_name: productData?.name || null,
-        product_image_url: productData?.image_url || null,
-        last_message: chat.message,
-        last_message_time: chat.created_at,
-        unread_count: 0, // Will be calculated below
-      });
-    }
-
-    const conversation = conversationsMap.get(conversationKey)!;
-    // Count unread messages *received by the current user* from this specific other participant and product
-    if (chat.receiver_id === currentUserId && chat.sender_id === otherParticipantId && !chat.is_read) {
-      conversation.unread_count++;
-    }
+    // Count unread messages received by the current user
+    unreadCount = allMessages.filter(msg => msg.receiver_id === currentUserId && !msg.is_read).length;
   }
 
-  return Array.from(conversationsMap.values()).sort((a, b) =>
-    new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime()
-  );
+  return {
+    user_id: adminId, // The "other participant" in this unified view is the admin
+    user_first_name: adminProfileData.first_name,
+    user_last_name: adminProfileData.last_name,
+    user_avatar_url: adminProfileData.avatar_url,
+    product_id: null, // No specific product for the unified summary
+    product_name: null, // No specific product for the unified summary
+    product_image_url: null, // No specific product for the unified summary
+    last_message: lastMessage,
+    last_message_time: lastMessageTime,
+    unread_count: unreadCount,
+  };
 }
 
-export async function getChatMessages(userId: string, adminId: string, productId: string | null): Promise<ChatMessage[]> {
+
+export async function getChatMessages(userId: string, adminId: string): Promise<ChatMessage[]> {
   let query = supabase
     .from("chats")
     .select(`
@@ -213,13 +219,7 @@ export async function getChatMessages(userId: string, adminId: string, productId
     `)
     .order("created_at", { ascending: true });
 
-  if (productId) {
-    query = query.eq("product_id", productId);
-  } else {
-    query = query.is("product_id", null);
-  }
-
-  // Corrected 'or' clause syntax with outer 'or()' wrapper
+  // Fetch all messages between the user and the admin, regardless of product_id
   query = query.or(`or(and(sender_id.eq.${userId},receiver_id.eq.${adminId}),and(sender_id.eq.${adminId},receiver_id.eq.${userId}))`);
 
   const { data, error } = await query;
@@ -231,19 +231,13 @@ export async function getChatMessages(userId: string, adminId: string, productId
   return data as ChatMessage[];
 }
 
-export async function markMessagesAsRead(userId: string, adminId: string, productId: string | null): Promise<void> {
+export async function markMessagesAsRead(userId: string, adminId: string): Promise<void> {
   let query = supabase
     .from("chats")
-    .update({ is_read: true }) // Removed updated_at: new Date().toISOString()
-    .eq("sender_id", userId)
-    .eq("receiver_id", adminId)
-    .eq("is_read", false);
-
-  if (productId) {
-    query = query.eq("product_id", productId);
-  } else {
-    query = query.is("product_id", null);
-  }
+    .update({ is_read: true, updated_at: new Date().toISOString() })
+    .eq("sender_id", userId) // Messages sent by the user
+    .eq("receiver_id", adminId) // Received by the admin
+    .eq("is_read", false); // That are unread
 
   const { error } = await query;
 
