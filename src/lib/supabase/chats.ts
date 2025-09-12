@@ -50,18 +50,18 @@ interface RawChatData {
   message: string;
   created_at: string;
   is_read: boolean;
-  sender_profile: {
+  sender_profile: Array<{ // Changed to expect an array
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
-  } | null;
-  receiver_profile: {
+  }> | null;
+  receiver_profile: Array<{ // Changed to expect an array
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
-  } | null;
+  }> | null;
   products: {
     name: string;
     image_url: string;
@@ -99,7 +99,9 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
     const otherParticipantId = chat.sender_id === adminId ? chat.receiver_id : chat.sender_id;
     const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
 
-    const otherParticipantProfile = chat.sender_id === otherParticipantId ? chat.sender_profile : chat.receiver_profile;
+    // Safely access the first element of the profile array
+    const otherParticipantProfileArray = chat.sender_id === otherParticipantId ? chat.sender_profile : chat.receiver_profile;
+    const otherParticipantProfile = otherParticipantProfileArray && otherParticipantProfileArray.length > 0 ? otherParticipantProfileArray[0] : null;
 
     if (!conversationsMap.has(conversationKey)) {
       conversationsMap.set(conversationKey, {
