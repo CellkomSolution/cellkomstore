@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getChatConversations, ChatConversation, ChatMessage } from "@/lib/supabase/chats"; // Import ChatMessage
+import { getChatConversations, ChatConversation, ChatMessage } from "@/lib/supabase/chats";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Loader2, User as UserIcon } from "lucide-react";
@@ -13,16 +13,16 @@ import { id } from "date-fns/locale";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useSession } from "@/context/session-context"; // Import useSession
-import { supabase } from "@/integrations/supabase/client"; // Import supabase client
-import { toast } from "sonner"; // Import toast
+import { useSession } from "@/context/session-context";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function AdminChatsPage() {
-  const { user, isLoading: isSessionLoading } = useSession(); // Get user from session
+  const { user, isLoading: isSessionLoading } = useSession();
   const [conversations, setConversations] = React.useState<ChatConversation[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   
-  const adminId = user?.id; // Use the logged-in user's ID as adminId
+  const adminId = user?.id;
 
   const fetchConversations = React.useCallback(async () => {
     if (!adminId) return;
@@ -33,17 +33,17 @@ export default function AdminChatsPage() {
     } catch (error) {
       console.error("Error in fetchConversations for AdminChatsPage:", error);
       toast.error("Gagal memuat percakapan chat.");
-      setConversations([]); // Ensure state is reset even on error
+      setConversations([]);
     } finally {
       setIsLoading(false);
     }
   }, [adminId]);
 
   React.useEffect(() => {
-    if (!isSessionLoading && adminId) { // This condition is important
+    if (!isSessionLoading && adminId) {
       fetchConversations();
 
-      // Set up real-time subscription
+      // Set up real-time subscription ONLY if adminId is available
       const channel = supabase
         .channel(`admin_conversations_${adminId}`)
         .on(
@@ -52,13 +52,12 @@ export default function AdminChatsPage() {
             event: "INSERT",
             schema: "public",
             table: "chats",
-            filter: `receiver_id=eq.${adminId}`, // Only listen for messages sent TO this admin
+            filter: `receiver_id=eq.${adminId}`,
           },
           async (payload) => {
             const newMsg = payload.new as ChatMessage;
             await fetchConversations();
-            // Access sender_profile for the name
-            toast.info(`Pesan baru dari ${newMsg.sender_profile?.first_name || 'Pengguna'}!`);
+            toast.info(`Pesan baru dari ${newMsg.sender_profile.first_name || 'Pengguna'}!`);
           }
         )
         .subscribe();
@@ -69,7 +68,7 @@ export default function AdminChatsPage() {
     }
   }, [isSessionLoading, adminId, fetchConversations]);
 
-  if (isSessionLoading || isLoading) { // Combine loading states
+  if (isSessionLoading || isLoading) {
     return (
       <div className="space-y-6 py-8">
         <h2 className="text-2xl font-bold">Memuat Percakapan Chat...</h2>
@@ -93,7 +92,7 @@ export default function AdminChatsPage() {
     );
   }
 
-  if (!adminId) { // If user is not logged in or adminId is somehow null
+  if (!adminId) {
     return (
       <div className="space-y-6 py-8 text-center">
         <h2 className="text-2xl font-bold">Manajemen Chat</h2>
