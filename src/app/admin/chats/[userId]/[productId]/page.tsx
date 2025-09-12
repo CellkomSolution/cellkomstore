@@ -65,14 +65,17 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
   const fetchMessages = React.useCallback(async () => {
     if (!adminUser || !adminId || !otherUserProfile) return; // Use adminId directly
     setIsLoadingMessages(true);
-    const fetchedMessages = await getChatMessages(userId, adminId, productId); // Use adminId directly
-    setMessages(fetchedMessages);
-    setIsLoadingMessages(false);
-    
     try {
+      const fetchedMessages = await getChatMessages(userId, adminId, productId); // Use adminId directly
+      setMessages(fetchedMessages);
+      
       await markMessagesAsRead(userId, adminId, productId); // Use adminId directly
     } catch (error) {
-      console.error("Failed to mark messages as read:", error);
+      console.error("Error in fetchMessages for AdminChatDetailPage:", error);
+      toast.error("Gagal memuat pesan chat.");
+      setMessages([]); // Ensure state is reset even on error
+    } finally {
+      setIsLoadingMessages(false);
     }
   }, [adminUser, adminId, otherUserProfile, userId, productId]); // Add adminId to dependencies
 
@@ -80,6 +83,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
     if (adminUser && adminId && otherUserProfile) { // Use adminId directly
       fetchMessages();
 
+      const productFilter = productId ? `product_id=eq.${productId}` : `product_id=is.null`; // Corrected filter syntax
       const channel = supabase
         .channel(`admin_chat_${userId}_${productId || 'general'}`)
         .on(
@@ -88,7 +92,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
             event: "INSERT",
             schema: "public",
             table: "chats",
-            filter: `product_id=eq.${productId}`,
+            filter: productFilter, // Use the corrected filter
           },
           (payload) => {
             const newMsg = payload.new as ChatMessage;

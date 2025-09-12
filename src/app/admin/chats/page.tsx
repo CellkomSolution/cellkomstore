@@ -27,13 +27,20 @@ export default function AdminChatsPage() {
   const fetchConversations = React.useCallback(async () => {
     if (!adminId) return;
     setIsLoading(true);
-    const fetchedConversations = await getChatConversations(adminId);
-    setConversations(fetchedConversations);
-    setIsLoading(false);
+    try {
+      const fetchedConversations = await getChatConversations(adminId);
+      setConversations(fetchedConversations);
+    } catch (error) {
+      console.error("Error in fetchConversations for AdminChatsPage:", error);
+      toast.error("Gagal memuat percakapan chat.");
+      setConversations([]); // Ensure state is reset even on error
+    } finally {
+      setIsLoading(false);
+    }
   }, [adminId]);
 
   React.useEffect(() => {
-    if (!isSessionLoading && adminId) {
+    if (!isSessionLoading && adminId) { // This condition is important
       fetchConversations();
 
       // Set up real-time subscription
@@ -49,10 +56,6 @@ export default function AdminChatsPage() {
           },
           async (payload) => {
             const newMsg = payload.new as ChatMessage;
-            // Re-fetch conversations to update the list and unread counts
-            // This is simpler than trying to update individual conversation objects
-            // and ensures consistency. For very high-volume chats, a more granular
-            // update might be needed, but for typical admin chat, this is fine.
             await fetchConversations();
             toast.info(`Pesan baru dari ${newMsg.profiles?.first_name || 'Pengguna'}!`);
           }
