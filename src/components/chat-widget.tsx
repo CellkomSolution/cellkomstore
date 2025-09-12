@@ -46,7 +46,9 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
   const [targetAdminId, setTargetAdminId] = React.useState<string | null>(null);
   const [isLoadingAdminId, setIsLoadingAdminId] = React.useState(true);
   const isMobile = useIsMobile();
-  const [productDetails, setProductDetails] = React.useState<{ name: string; imageUrl: string } | null>(null); // New state for product details
+
+  // State to hold product details if chat is initiated from a product page
+  const [initialProductContext, setInitialProductContext] = React.useState<{ id: string; name: string; imageUrl: string } | null>(null);
 
   React.useEffect(() => {
     async function loadAdminId() {
@@ -58,20 +60,21 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     loadAdminId();
   }, []);
 
+  // Fetch initial product details if productId is provided
   React.useEffect(() => {
-    async function loadProductDetails() {
+    async function loadInitialProductContext() {
       if (productId) {
         const product = await getProductById(productId);
         if (product) {
-          setProductDetails({ name: product.name, imageUrl: product.imageUrl });
+          setInitialProductContext({ id: product.id, name: product.name, imageUrl: product.imageUrl });
         } else {
-          setProductDetails(null);
+          setInitialProductContext(null);
         }
       } else {
-        setProductDetails(null);
+        setInitialProductContext(null);
       }
     }
-    loadProductDetails();
+    loadInitialProductContext();
   }, [productId]);
 
   const fetchMessages = React.useCallback(async () => {
@@ -88,7 +91,29 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     setIsLoadingMessages(true);
     // Fetch all messages between the user and the admin
     const fetchedMessages = await getChatMessages(user.id, targetAdminId);
-    setMessages(fetchedMessages);
+    
+    let finalMessages: ChatMessage[] = fetchedMessages;
+
+    // If there's an initial product context, prepend a system message
+    if (initialProductContext) {
+      const systemProductMessage: ChatMessage = {
+        id: `system-product-intro-${initialProductContext.id}`, // Unique ID for system message
+        sender_id: 'system-id', // Dummy ID for system messages
+        receiver_id: user.id, // Dummy ID
+        message: `Percakapan ini dimulai terkait produk: ${initialProductContext.name}`,
+        created_at: new Date().toISOString(), // Use current time or earliest message time
+        product_id: initialProductContext.id,
+        is_read: true,
+        updated_at: new Date().toISOString(),
+        sender_profile: [], // System messages don't have profiles
+        receiver_profile: [],
+        products: [{ name: initialProductContext.name, image_url: initialProductContext.imageUrl }],
+        type: 'system',
+      };
+      finalMessages = [systemProductMessage, ...fetchedMessages];
+    }
+
+    setMessages(finalMessages);
     setIsLoadingMessages(false);
 
     try {
@@ -97,7 +122,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     } catch (error) {
       console.error("Failed to mark messages as read in ChatWidget:", error);
     }
-  }, [user, targetAdminId, onOpenChange]);
+  }, [user, targetAdminId, onOpenChange, initialProductContext]); // Add initialProductContext to dependencies
 
   React.useEffect(() => {
     if (open && user && targetAdminId) {
@@ -290,16 +315,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
   const ChatContent = (
     <>
       <div className="flex-1 flex flex-col overflow-hidden border rounded-md bg-muted/20">
-        {/* Product Info at the top of the chat */}
-        {productDetails && (
-          <div className="flex items-center gap-3 p-3 border-b bg-card">
-            <Image src={productDetails.imageUrl} alt={productDetails.name} width={48} height={48} className="rounded-md object-cover" />
-            <div>
-              <p className="font-semibold text-sm line-clamp-1">{productDetails.name}</p>
-              <p className="text-xs text-muted-foreground">Produk yang dibicarakan</p>
-            </div>
-          </div>
-        )}
         {isLoadingMessages ? (
           <div className="flex-1 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -316,44 +331,60 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                   <div
                     key={msg.id}
                     className={`flex items-start gap-3 ${
-                      msg.sender_id === user.id ? "justify-end" : "justify-start"
+                      msg.type === 'system' ? 'justify-center' : (msg.sender_id === user.id ? "justify-end" : "justify-start")
                     }`}
                   >
-                    {msg.sender_id !== user.id && (
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
-                        <AvatarFallback>
-                          {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
-                        </AvatarFallback>
-                      </Avatar>
-                    )}
-                    <div
-                      className={`max-w-[70%] p-3 rounded-lg ${
-                        msg.sender_id === user.id
-                          ? "bg-primary text-primary-foreground rounded-br-none"
-                          : "bg-card text-foreground rounded-bl-none border"
-                      }`}
-                    >
-                      <p className="text-sm">{msg.message}</p>
-                      {msg.product_id && msg.products?.[0] && ( // Display product link if message is associated with a product
-                        <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
-                          <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
-                          <span className="text-xs text-muted-foreground line-clamp-1">
-                            Tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
-                          </span>
+                    {msg.type === 'system' ? (
+                      <div className="w-full text-center text-muted-foreground text-sm my-2">
+                        {msg.products?.[0] && (
+                          <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
+                            <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                            <span>
+                              Percakapan tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
+                            </span>
+                          </div>
+                        )}
+                        {!msg.products?.[0] && msg.message} {/* Fallback if product info is missing for some reason */}
+                      </div>
+                    ) : (
+                      <>
+                        {msg.sender_id !== user.id && (
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
+                            <AvatarFallback>
+                              {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div
+                          className={`max-w-[70%] p-3 rounded-lg ${
+                            msg.sender_id === user.id
+                              ? "bg-primary text-primary-foreground rounded-br-none"
+                              : "bg-card text-foreground rounded-bl-none border"
+                          }`}
+                        >
+                          <p className="text-sm">{msg.message}</p>
+                          {msg.product_id && msg.products?.[0] && (
+                            <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
+                              <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                              <span className="text-xs text-muted-foreground line-clamp-1">
+                                Tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
+                              </span>
+                            </div>
+                          )}
+                          <p className={`text-xs mt-1 ${msg.sender_id === user.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                            {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
+                          </p>
                         </div>
-                      )}
-                      <p className={`text-xs mt-1 ${msg.sender_id === user.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                        {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
-                      </p>
-                    </div>
-                    {msg.sender_id === user.id && (
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
-                        <AvatarFallback>
-                          {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
-                        </AvatarFallback>
-                      </Avatar>
+                        {msg.sender_id === user.id && (
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
+                            <AvatarFallback>
+                              {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                      </>
                     )}
                   </div>
                 ))
