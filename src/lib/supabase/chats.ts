@@ -167,7 +167,7 @@ export async function getChatMessages(userId: string, adminId: string, productId
 export async function markMessagesAsRead(userId: string, adminId: string, productId: string | null): Promise<void> {
   let query = supabase
     .from("chats")
-    .update({ is_read: true, updated_at: new Date().toISOString() })
+    .update({ is_read: true }) // Removed updated_at: new Date().toISOString()
     .eq("sender_id", userId)
     .eq("receiver_id", adminId)
     .eq("is_read", false);

@@ -69,8 +69,7 @@ export default function ProfilePage() {
         first_name: values.first_name,
         last_name: values.last_name,
         bio: values.bio,
-        updated_at: new Date().toISOString(),
-      })
+      }) // Removed updated_at: new Date().toISOString()
       .eq("id", user.id);
 
     if (error) {
@@ -86,7 +85,7 @@ export default function ProfilePage() {
 
     const { error } = await supabase
       .from("profiles")
-      .update({ avatar_url: newUrl, updated_at: new Date().toISOString() })
+      .update({ avatar_url: newUrl }) // Removed updated_at: new Date().toISOString()
       .eq("id", user.id);
 
     if (error) {

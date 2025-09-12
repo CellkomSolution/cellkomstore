@@ -37,7 +37,7 @@ export default function AdminUsersPage() {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ role: newRole, updated_at: new Date().toISOString() })
+        .update({ role: newRole }) // Removed updated_at: new Date().toISOString()
         .eq("id", userId);
 
       if (error) {
