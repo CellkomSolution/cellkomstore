@@ -61,7 +61,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         setSession(null);
         setUser(null);
         setProfile(null);
-        if (pathname !== "/auth" && pathname !== "/") {
+        // Only redirect to /auth if the current path is not / (homepage), /auth, /product/*, or /category/*
+        if (
+          pathname !== "/auth" &&
+          pathname !== "/" &&
+          !pathname.startsWith('/product/') &&
+          !pathname.startsWith('/category/')
+        ) {
           router.push("/auth");
         }
       }
