@@ -27,7 +27,6 @@ export interface ChatMessage {
     name: string;
     image_url: string;
   }> | null;
-  type?: 'user' | 'system'; // New: 'user' for regular messages, 'system' for product context
 }
 
 export interface ChatConversation {

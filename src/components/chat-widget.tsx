@@ -47,9 +47,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
   const [isLoadingAdminId, setIsLoadingAdminId] = React.useState(true);
   const isMobile = useIsMobile();
 
-  // State to hold product details if chat is initiated from a product page
-  const [initialProductContext, setInitialProductContext] = React.useState<{ id: string; name: string; imageUrl: string } | null>(null);
-
   React.useEffect(() => {
     async function loadAdminId() {
       setIsLoadingAdminId(true);
@@ -59,23 +56,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     }
     loadAdminId();
   }, []);
-
-  // Fetch initial product details if productId is provided
-  React.useEffect(() => {
-    async function loadInitialProductContext() {
-      if (productId) {
-        const product = await getProductById(productId);
-        if (product) {
-          setInitialProductContext({ id: product.id, name: product.name, imageUrl: product.imageUrl });
-        } else {
-          setInitialProductContext(null);
-        }
-      } else {
-        setInitialProductContext(null);
-      }
-    }
-    loadInitialProductContext();
-  }, [productId]);
 
   const fetchMessages = React.useCallback(async () => {
     if (!user || !targetAdminId) return;
@@ -92,28 +72,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     // Fetch all messages between the user and the admin
     const fetchedMessages = await getChatMessages(user.id, targetAdminId);
     
-    let finalMessages: ChatMessage[] = fetchedMessages;
-
-    // If there's an initial product context, prepend a system message
-    if (initialProductContext) {
-      const systemProductMessage: ChatMessage = {
-        id: `system-product-intro-${initialProductContext.id}`, // Unique ID for system message
-        sender_id: 'system-id', // Dummy ID for system messages
-        receiver_id: user.id, // Dummy ID
-        message: `Percakapan ini dimulai terkait produk: ${initialProductContext.name}`,
-        created_at: new Date().toISOString(), // Use current time or earliest message time
-        product_id: initialProductContext.id,
-        is_read: true,
-        updated_at: new Date().toISOString(),
-        sender_profile: [], // System messages don't have profiles
-        receiver_profile: [],
-        products: [{ name: initialProductContext.name, image_url: initialProductContext.imageUrl }],
-        type: 'system',
-      };
-      finalMessages = [systemProductMessage, ...fetchedMessages];
-    }
-
-    setMessages(finalMessages);
+    setMessages(fetchedMessages);
     setIsLoadingMessages(false);
 
     try {
@@ -122,7 +81,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     } catch (error) {
       console.error("Failed to mark messages as read in ChatWidget:", error);
     }
-  }, [user, targetAdminId, onOpenChange, initialProductContext]); // Add initialProductContext to dependencies
+  }, [user, targetAdminId, onOpenChange]);
 
   React.useEffect(() => {
     if (open && user && targetAdminId) {
@@ -327,27 +286,31 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                   Belum ada pesan. Mulai chat Anda sekarang!
                 </p>
               ) : (
-                messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex items-start gap-3 ${
-                      msg.type === 'system' ? 'justify-center' : (msg.sender_id === user.id ? "justify-end" : "justify-start")
-                    }`}
-                  >
-                    {msg.type === 'system' ? (
-                      <div className="w-full text-center text-muted-foreground text-sm my-2">
-                        {msg.products?.[0] && (
-                          <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
-                            <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
-                            <span>
-                              Percakapan tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
-                            </span>
+                messages.map((msg, index) => {
+                  const previousMessage = messages[index - 1];
+                  // Determine if a product card should be shown before this message
+                  const showProductCard = msg.product_id && (
+                    !previousMessage || previousMessage.product_id !== msg.product_id
+                  );
+
+                  return (
+                    <React.Fragment key={msg.id}>
+                      {showProductCard && msg.products?.[0] && (
+                        <div className="flex justify-center my-4">
+                          <div className="inline-flex items-center gap-3 p-3 bg-card rounded-lg border shadow-sm max-w-xs w-full">
+                            <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={48} height={48} className="rounded-md object-cover" />
+                            <div className="flex-1">
+                              <p className="font-semibold text-sm line-clamp-1">{msg.products[0].name}</p>
+                              <a href={`/product/${msg.product_id}`} className="text-xs text-blue-600 hover:underline">Lihat Produk</a>
+                            </div>
                           </div>
-                        )}
-                        {!msg.products?.[0] && msg.message} {/* Fallback if product info is missing for some reason */}
-                      </div>
-                    ) : (
-                      <>
+                        </div>
+                      )}
+                      <div
+                        className={`flex items-start gap-3 ${
+                          msg.sender_id === user.id ? "justify-end" : "justify-start"
+                        }`}
+                      >
                         {msg.sender_id !== user.id && (
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
@@ -364,14 +327,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                           }`}
                         >
                           <p className="text-sm">{msg.message}</p>
-                          {msg.product_id && msg.products?.[0] && (
-                            <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
-                              <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
-                              <span className="text-xs text-muted-foreground line-clamp-1">
-                                Tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
-                              </span>
-                            </div>
-                          )}
+                          {/* Removed inline product link, now handled by showProductCard logic */}
                           <p className={`text-xs mt-1 ${msg.sender_id === user.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                             {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
                           </p>
@@ -384,10 +340,10 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                             </AvatarFallback>
                           </Avatar>
                         )}
-                      </>
-                    )}
-                  </div>
-                ))
+                      </div>
+                    </React.Fragment>
+                  );
+                })
               )}
               <div ref={messagesEndRef} />
             </div>
