@@ -10,6 +10,7 @@ export interface ChatMessage {
   created_at: string;
   product_id: string | null;
   is_read: boolean;
+  updated_at: string; // Menambahkan kolom updated_at
   sender_profile: Array<{
     first_name: string | null;
     last_name: string | null;
@@ -50,6 +51,7 @@ interface RawChatData {
   message: string;
   created_at: string;
   is_read: boolean;
+  updated_at: string; // Menambahkan kolom updated_at
   sender_profile: Array<{
     first_name: string | null;
     last_name: string | null;
@@ -79,6 +81,7 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
       message,
       created_at,
       is_read,
+      updated_at,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
       products (name, image_url)
@@ -150,7 +153,6 @@ export async function getChatMessages(userId: string, adminId: string, productId
     query = query.is("product_id", null);
   }
 
-  // Corrected OR clause with AND grouping and quoted UUIDs
   query = query.or(`and(sender_id.eq."${userId}",receiver_id.eq."${adminId}"),and(sender_id.eq."${adminId}",receiver_id.eq."${userId}")`);
 
   const { data, error } = await query;
