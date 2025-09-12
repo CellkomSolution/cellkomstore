@@ -12,7 +12,7 @@ import { id } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAdminUserId } from "@/lib/supabase/profiles";
-import { ChatMessage, getChatMessages } from "@/lib/supabase/chats"; // Import getChatMessages
+import { ChatMessage, getChatMessages, markMessagesAsRead } from "@/lib/supabase/chats"; // Import markMessagesAsRead
 import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile hook
 import {
   Drawer,
@@ -69,6 +69,13 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     const fetchedMessages = await getChatMessages(user.id, targetAdminId, productId);
     setMessages(fetchedMessages);
     setIsLoadingMessages(false);
+
+    // Tandai pesan dari admin ke user sebagai sudah dibaca
+    try {
+      await markMessagesAsRead(targetAdminId, user.id, productId);
+    } catch (error) {
+      console.error("Failed to mark messages as read in ChatWidget:", error);
+    }
   }, [user, productId, targetAdminId, onOpenChange]); // Added onOpenChange to dependencies
 
   React.useEffect(() => {
