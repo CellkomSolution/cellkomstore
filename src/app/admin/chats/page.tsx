@@ -57,7 +57,7 @@ export default function AdminChatsPage() {
           async (payload) => {
             const newMsg = payload.new as ChatMessage;
             await fetchConversations();
-            toast.info(`Pesan baru dari ${newMsg.sender_profile.first_name || 'Pengguna'}!`);
+            toast.info(`Pesan baru dari ${newMsg.sender_profile[0]?.first_name || 'Pengguna'}!`);
           }
         )
         .subscribe();

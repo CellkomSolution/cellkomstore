@@ -10,18 +10,18 @@ export interface ChatMessage {
   created_at: string;
   product_id: string | null;
   is_read: boolean;
-  sender_profile: {
+  sender_profile: Array<{ // Changed to Array
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
-  };
-  receiver_profile: {
+  }>;
+  receiver_profile: Array<{ // Changed to Array
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
-  };
+  }>;
   products?: {
     name: string;
     image_url: string;
