@@ -43,15 +43,15 @@ interface JoinedChatData {
   message: string;
   created_at: string;
   is_read: boolean;
-  profiles: { // Changed to single object
+  profiles: { // Changed to array
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
-  } | null; // Changed to single object or null
-  products: { // Changed to single object
+  }[] | null; // Changed to array or null
+  products: { // Changed to array
     name: string;
     image_url: string;
-  } | null; // Changed to single object or null
+  }[] | null; // Changed to array or null
 }
 
 export async function getChatConversations(adminId: string): Promise<ChatConversation[]> {
@@ -85,9 +85,9 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
     const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
 
     if (!conversationsMap.has(conversationKey)) {
-      // Access directly, as per the updated JoinedChatData interface
-      const userProfile = chat.profiles || null; // No .[0]
-      const productInfo = chat.products || null; // No .[0]
+      // Access the first element of the array, if it exists
+      const userProfile = chat.profiles?.[0] || null;
+      const productInfo = chat.products?.[0] || null;
 
       conversationsMap.set(conversationKey, {
         user_id: otherParticipantId,

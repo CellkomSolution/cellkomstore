@@ -66,13 +66,13 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     }
 
     setIsLoadingMessages(true);
-    const fetchedMessages = await getChatMessages(user.id, targetAdminId, productId);
+    const fetchedMessages = await getChatMessages(user.id, targetAdminId, productId ?? null); // Fix: Add ?? null
     setMessages(fetchedMessages);
     setIsLoadingMessages(false);
 
     // Tandai pesan dari admin ke user sebagai sudah dibaca
     try {
-      await markMessagesAsRead(targetAdminId, user.id, productId);
+      await markMessagesAsRead(targetAdminId, user.id, productId ?? null); // Fix: Add ?? null
     } catch (error) {
       console.error("Failed to mark messages as read in ChatWidget:", error);
     }
