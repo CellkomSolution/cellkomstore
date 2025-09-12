@@ -12,6 +12,7 @@ import Image from "next/image";
 import { UserAuthNav } from "./user-auth-nav";
 import { getAppSettings, AppSettings } from "@/lib/supabase/app-settings"; // Import dari modul app-settings
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChatNotificationIcon } from "./chat-notification-icon"; // Import ChatNotificationIcon
 
 export function Header() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -94,6 +95,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-2">
+            <ChatNotificationIcon /> {/* Added ChatNotificationIcon here */}
             <CartSheet />
             <UserAuthNav />
             <ThemeToggle />

@@ -13,12 +13,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "@/context/session-context";
 import { useAdmin } from "@/hooks/use-admin";
-import { ChatWidget } from "./chat-widget"; // Import ChatWidget
+// import { ChatWidget } from "./chat-widget"; // ChatWidget is now handled by ChatNotificationIcon or ProductDetailPage
 
 export function UserAuthNav() {
   const { session, user, profile, signOut, isLoading: isSessionLoading } = useSession();
   const { isAdmin, isAdminLoading } = useAdmin();
-  const [isGeneralChatOpen, setIsGeneralChatOpen] = React.useState(false); // State untuk chat umum
+  // const [isGeneralChatOpen, setIsGeneralChatOpen] = React.useState(false); // No longer needed here
 
   if (isSessionLoading || isAdminLoading) {
     return <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />;
@@ -50,19 +50,15 @@ export function UserAuthNav() {
                 <span>Profil</span>
               </Link>
             </DropdownMenuItem>
-            {isAdmin ? (
+            {isAdmin && (
               <DropdownMenuItem asChild>
                 <Link href="/admin/chats" className="cursor-pointer">
                   <MessageSquare className="mr-2 h-4 w-4" />
                   <span>Kelola Chat</span>
                 </Link>
               </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem className="cursor-pointer" onClick={() => setIsGeneralChatOpen(true)}>
-                <MessageSquare className="mr-2 h-4 w-4" />
-                <span>Chat Admin</span>
-              </DropdownMenuItem>
             )}
+            {/* Removed "Chat Admin" for non-admin users, now handled by ChatNotificationIcon */}
             {isAdmin && (
               <DropdownMenuItem asChild>
                 <Link href="/admin/dashboard" className="cursor-pointer">
@@ -94,15 +90,7 @@ export function UserAuthNav() {
         </Link>
       </Button>
 
-      {/* Render ChatWidget for general chat only if not admin */}
-      {!isAdmin && (
-        <ChatWidget 
-          productId={null} 
-          productName={null} 
-          open={isGeneralChatOpen} 
-          onOpenChange={setIsGeneralChatOpen} 
-        />
-      )}
+      {/* ChatWidget for general chat is now handled by ChatNotificationIcon */}
     </>
   );
 }

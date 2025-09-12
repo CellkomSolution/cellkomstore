@@ -185,3 +185,17 @@ export async function markMessagesAsRead(userId: string, adminId: string, produc
     throw error;
   }
 }
+
+export async function getUnreadMessageCount(userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("chats")
+    .select("*", { count: "exact", head: true })
+    .eq("receiver_id", userId)
+    .eq("is_read", false);
+
+  if (error) {
+    console.error("Error fetching unread message count:", error.message || error);
+    return 0;
+  }
+  return count || 0;
+}
