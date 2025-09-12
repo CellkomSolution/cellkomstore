@@ -4,7 +4,7 @@ import * as React from "react";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, ShieldCheck, Truck, Store, ShoppingCart } from "lucide-react"; // Import ShoppingCart
+import { Star, ShieldCheck, Truck, Store, ShoppingCart, MessageSquare } from "lucide-react"; // Import MessageSquare
 import { useCart } from "@/context/cart-context";
 import { Product, getProductById, getProductsByCategory } from "@/lib/supabase/products"; // Import getProductsByCategory
 import { formatRupiah } from "@/lib/utils";
@@ -113,7 +113,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             )}
           </div>
 
-          {/* Desktop Buy Now / Add to Cart buttons */}
+          {/* Desktop Buy Now / Add to Cart / Chat buttons */}
           {!isMobile && (
             <div className="flex flex-col sm:flex-row gap-3 mt-6 mb-8">
               <Button variant="outline" size="lg" className="flex-1 h-12 text-base" onClick={handleBuyNow}>
@@ -122,6 +122,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               <Button size="lg" className="flex-1 h-12 text-base" onClick={handleAddToCart}>
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 Tambah ke Keranjang
+              </Button>
+              <Button variant="outline" size="lg" className="flex-1 h-12 text-base" onClick={() => setIsChatOpen(true)}>
+                <MessageSquare className="h-5 w-5 mr-2" />
+                Chat Penjual
               </Button>
             </div>
           )}
