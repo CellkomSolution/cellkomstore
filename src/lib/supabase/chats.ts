@@ -153,7 +153,8 @@ export async function getChatMessages(userId: string, adminId: string, productId
     query = query.is("product_id", null);
   }
 
-  query = query.or(`and(sender_id.eq."${userId}",receiver_id.eq."${adminId}"),and(sender_id.eq."${adminId}",receiver_id.eq."${userId}")`);
+  // Corrected 'or' clause syntax with outer 'or()' wrapper
+  query = query.or(`or(and(sender_id.eq.${userId},receiver_id.eq.${adminId}),and(sender_id.eq.${adminId},receiver_id.eq.${userId}))`);
 
   const { data, error } = await query;
 
