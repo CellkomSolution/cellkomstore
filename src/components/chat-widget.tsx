@@ -94,7 +94,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     
     let finalMessages: ChatMessage[] = fetchedMessages;
 
-    // If there's an initial product context, prepend a system message
+    // If there's an initial product context, append a system message to the end of fetched messages
     if (initialProductContext) {
       const systemProductMessage: ChatMessage = {
         id: `system-product-intro-${initialProductContext.id}`, // Unique ID for system message
@@ -110,7 +110,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
         products: [{ name: initialProductContext.name, image_url: initialProductContext.imageUrl }],
         type: 'system',
       };
-      finalMessages = [systemProductMessage, ...fetchedMessages];
+      finalMessages = [...fetchedMessages, systemProductMessage]; // Append to the end
     }
 
     setMessages(finalMessages);
