@@ -10,19 +10,19 @@ export interface ChatMessage {
   created_at: string;
   product_id: string | null;
   is_read: boolean;
-  sender_profile: { // Made required
+  sender_profile: {
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
   };
-  receiver_profile: { // Made required
+  receiver_profile: {
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
   };
-  products?: { // Remains optional as it's not always joined in getChatMessages
+  products?: {
     name: string;
     image_url: string;
   };
@@ -50,19 +50,19 @@ interface RawChatData {
   message: string;
   created_at: string;
   is_read: boolean;
-  sender_profile: Array<{
+  sender_profile: Array<{ // Still an array from Supabase select
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
-  }>; // Made required, but still an array
-  receiver_profile: Array<{
+  }>;
+  receiver_profile: Array<{ // Still an array from Supabase select
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
-  }>; // Made required, but still an array
-  products: Array<{ // Changed to expect an array
+  }>;
+  products: Array<{
     name: string;
     image_url: string;
   }> | null;
@@ -99,9 +99,11 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
     const otherParticipantId = chat.sender_id === adminId ? chat.receiver_id : chat.sender_id;
     const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
 
-    // Safely access the first element of the profile array
-    const otherParticipantProfileArray = chat.sender_id === otherParticipantId ? chat.sender_profile : chat.receiver_profile;
-    const otherParticipantProfile = otherParticipantProfileArray && otherParticipantProfileArray.length > 0 ? otherParticipantProfileArray[0] : null;
+    // Safely extract the first element from the profile arrays
+    const senderProfile = chat.sender_profile && chat.sender_profile.length > 0 ? chat.sender_profile[0] : null;
+    const receiverProfile = chat.receiver_profile && chat.receiver_profile.length > 0 ? chat.receiver_profile[0] : null;
+    
+    const otherParticipantProfile = chat.sender_id === otherParticipantId ? senderProfile : receiverProfile;
 
     // Safely access the first element of the products array
     const productData = chat.products && chat.products.length > 0 ? chat.products[0] : null;
@@ -113,8 +115,8 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
         user_last_name: otherParticipantProfile?.last_name || null,
         user_avatar_url: otherParticipantProfile?.avatar_url || null,
         product_id: chat.product_id,
-        product_name: productData?.name || null, // Use productData
-        product_image_url: productData?.image_url || null, // Use productData
+        product_name: productData?.name || null,
+        product_image_url: productData?.image_url || null,
         last_message: chat.message,
         last_message_time: chat.created_at,
         unread_count: 0,
