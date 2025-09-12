@@ -10,13 +10,13 @@ export interface ChatMessage {
   created_at: string;
   product_id: string | null;
   is_read: boolean;
-  sender_profile: Array<{ // Changed to Array
+  sender_profile: Array<{
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
   }>;
-  receiver_profile: Array<{ // Changed to Array
+  receiver_profile: Array<{
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
@@ -50,13 +50,13 @@ interface RawChatData {
   message: string;
   created_at: string;
   is_read: boolean;
-  sender_profile: Array<{ // Still an array from Supabase select
+  sender_profile: Array<{
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
   }>;
-  receiver_profile: Array<{ // Still an array from Supabase select
+  receiver_profile: Array<{
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
@@ -150,7 +150,8 @@ export async function getChatMessages(userId: string, adminId: string, productId
     query = query.is("product_id", null);
   }
 
-  query = query.or(`sender_id.eq.${userId}.and.receiver_id.eq.${adminId},sender_id.eq.${adminId}.and.receiver_id.eq.${userId}`);
+  // Corrected OR clause with AND grouping and quoted UUIDs
+  query = query.or(`and(sender_id.eq."${userId}",receiver_id.eq."${adminId}"),and(sender_id.eq."${adminId}",receiver_id.eq."${userId}")`);
 
   const { data, error } = await query;
 
