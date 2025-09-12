@@ -186,9 +186,9 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                   >
                     {msg.sender_id !== user?.id && (
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={msg.sender_profile?.avatar_url || undefined} />
+                        <AvatarImage src={msg.sender_profile.avatar_url || undefined} />
                         <AvatarFallback>
-                          {msg.sender_profile?.first_name ? msg.sender_profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                          {msg.sender_profile.first_name ? msg.sender_profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
                         </AvatarFallback>
                       </Avatar>
                     )}
@@ -206,9 +206,9 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                     </div>
                     {msg.sender_id === user?.id && (
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={msg.sender_profile?.avatar_url || undefined} />
+                        <AvatarImage src={msg.sender_profile.avatar_url || undefined} />
                         <AvatarFallback>
-                          {msg.sender_profile?.first_name ? msg.sender_profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                          {msg.sender_profile.first_name ? msg.sender_profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
                         </AvatarFallback>
                       </Avatar>
                     )}

@@ -22,7 +22,7 @@ export interface ChatMessage {
     avatar_url: string | null;
     role: 'user' | 'admin';
   };
-  products?: {
+  products?: { // Remains optional as it's not always joined in getChatMessages
     name: string;
     image_url: string;
   };
@@ -62,7 +62,7 @@ interface RawChatData {
     avatar_url: string | null;
     role: 'user' | 'admin';
   }>; // Made required, but still an array
-  products: Array<{
+  products: Array<{ // Changed to expect an array
     name: string;
     image_url: string;
   }> | null;
