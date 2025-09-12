@@ -129,7 +129,8 @@ export async function getChatMessages(userId: string, adminId: string, productId
     query = query.is("product_id", null);
   }
 
-  query = query.or(`(sender_id.eq.${userId},receiver_id.eq.${adminId}),(sender_id.eq.${adminId},receiver_id.eq.${userId})`);
+  // Menggunakan sintaks .and. untuk kondisi OR yang lebih robust
+  query = query.or(`sender_id.eq.${userId}.and.receiver_id.eq.${adminId},sender_id.eq.${adminId}.and.receiver_id.eq.${userId}`);
 
   const { data, error } = await query;
 

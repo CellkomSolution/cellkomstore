@@ -12,7 +12,7 @@ import { id } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAdminUserId } from "@/lib/supabase/profiles";
-import { ChatMessage } from "@/lib/supabase/chats";
+import { ChatMessage, getChatMessages } from "@/lib/supabase/chats"; // Import getChatMessages
 import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile hook
 import {
   Drawer,
@@ -54,38 +54,31 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
 
   const fetchMessages = React.useCallback(async () => {
     if (!user || !targetAdminId) return;
+    
+    // Pencegahan: Jika pengguna adalah admin yang sama dengan target admin,
+    // ini bukan skenario chat pelanggan-ke-admin yang dimaksud.
+    if (user.id === targetAdminId) {
+      setIsLoadingMessages(false);
+      setMessages([]); // Kosongkan pesan sebelumnya
+      toast.info("Anda tidak dapat memulai chat dengan diri sendiri melalui widget ini.");
+      onOpenChange(false); // Tutup widget chat
+      return;
+    }
+
     setIsLoadingMessages(true);
-
-    let query = supabase
-      .from("chats")
-      .select(`
-        *,
-        profiles (first_name, last_name, avatar_url, role)
-      `)
-      .order("created_at", { ascending: true });
-
-    if (productId) {
-      query = query.eq("product_id", productId);
-    } else {
-      query = query.is("product_id", null);
-    }
-
-    query = query.or(`(sender_id.eq.${user.id},receiver_id.eq.${targetAdminId}),(sender_id.eq.${targetAdminId},receiver_id.eq.${user.id})`);
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error("Error fetching messages:", error.message);
-      toast.error("Gagal memuat pesan chat.");
-    } else {
-      setMessages(data || []);
-    }
+    const fetchedMessages = await getChatMessages(user.id, targetAdminId, productId);
+    setMessages(fetchedMessages);
     setIsLoadingMessages(false);
-  }, [user, productId, targetAdminId]);
+  }, [user, productId, targetAdminId, onOpenChange]); // Added onOpenChange to dependencies
 
   React.useEffect(() => {
     if (open && user && targetAdminId) {
       fetchMessages();
+
+      // Pencegahan duplikat channel jika user.id === targetAdminId
+      if (user.id === targetAdminId) {
+        return;
+      }
 
       const productFilter = productId ? `product_id=eq.${productId}` : `product_id=is.null`;
       const channelName = `product_chat_${productId || 'general'}_${user.id}_${targetAdminId}`;
@@ -133,6 +126,13 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     e.preventDefault();
     if (!newMessage.trim() || !user || isSending || !targetAdminId) {
       if (!targetAdminId) toast.error("Admin tidak ditemukan untuk chat.");
+      return;
+    }
+
+    // Pencegahan: Jika pengguna adalah admin yang sama dengan target admin
+    if (user.id === targetAdminId) {
+      toast.info("Anda tidak dapat mengirim pesan ke diri sendiri melalui widget ini.");
+      setNewMessage("");
       return;
     }
 
