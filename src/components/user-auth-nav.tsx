@@ -50,10 +50,19 @@ export function UserAuthNav() {
                 <span>Profil</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer" onClick={() => setIsGeneralChatOpen(true)}>
-              <MessageSquare className="mr-2 h-4 w-4" />
-              <span>Chat Admin</span>
-            </DropdownMenuItem>
+            {isAdmin ? (
+              <DropdownMenuItem asChild>
+                <Link href="/admin/chats" className="cursor-pointer">
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  <span>Kelola Chat</span>
+                </Link>
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem className="cursor-pointer" onClick={() => setIsGeneralChatOpen(true)}>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                <span>Chat Admin</span>
+              </DropdownMenuItem>
+            )}
             {isAdmin && (
               <DropdownMenuItem asChild>
                 <Link href="/admin/dashboard" className="cursor-pointer">
@@ -85,13 +94,15 @@ export function UserAuthNav() {
         </Link>
       </Button>
 
-      {/* Render ChatWidget untuk chat umum, dikontrol oleh state isGeneralChatOpen */}
-      <ChatWidget 
-        productId={null} 
-        productName={null} 
-        open={isGeneralChatOpen} 
-        onOpenChange={setIsGeneralChatOpen} 
-      />
+      {/* Render ChatWidget for general chat only if not admin */}
+      {!isAdmin && (
+        <ChatWidget 
+          productId={null} 
+          productName={null} 
+          open={isGeneralChatOpen} 
+          onOpenChange={setIsGeneralChatOpen} 
+        />
+      )}
     </>
   );
 }
