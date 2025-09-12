@@ -33,11 +33,11 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
   const [productInfo, setProductInfo] = React.useState<{ name: string; imageUrl: string } | null>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
-  const adminId = adminUser?.id; // Use the logged-in admin's ID directly
+  const adminId = adminUser?.id;
 
   React.useEffect(() => {
     async function loadUserProfileAndProduct() {
-      if (adminId && adminUser) { // Ensure adminId is available
+      if (adminId && adminUser) {
         const { data: userProfileData, error: userProfileError } = await supabase
           .from("profiles")
           .select("*")
@@ -60,30 +60,30 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
       }
     }
     loadUserProfileAndProduct();
-  }, [userId, productId, adminUser, adminId, router]); // Add adminId to dependencies
+  }, [userId, productId, adminUser, adminId, router]);
 
   const fetchMessages = React.useCallback(async () => {
-    if (!adminUser || !adminId || !otherUserProfile) return; // Use adminId directly
+    if (!adminUser || !adminId || !otherUserProfile) return;
     setIsLoadingMessages(true);
     try {
-      const fetchedMessages = await getChatMessages(userId, adminId, productId); // Use adminId directly
+      const fetchedMessages = await getChatMessages(userId, adminId, productId);
       setMessages(fetchedMessages);
       
-      await markMessagesAsRead(userId, adminId, productId); // Use adminId directly
+      await markMessagesAsRead(userId, adminId, productId);
     } catch (error) {
       console.error("Error in fetchMessages for AdminChatDetailPage:", error);
       toast.error("Gagal memuat pesan chat.");
-      setMessages([]); // Ensure state is reset even on error
+      setMessages([]);
     } finally {
       setIsLoadingMessages(false);
     }
-  }, [adminUser, adminId, otherUserProfile, userId, productId]); // Add adminId to dependencies
+  }, [adminUser, adminId, otherUserProfile, userId, productId]);
 
   React.useEffect(() => {
-    if (adminUser && adminId && otherUserProfile) { // Use adminId directly
+    if (adminUser && adminId && otherUserProfile) {
       fetchMessages();
 
-      const productFilter = productId ? `product_id=eq.${productId}` : `product_id=is.null`; // Corrected filter syntax
+      const productFilter = productId ? `product_id=eq.${productId}` : `product_id=is.null`;
       const channel = supabase
         .channel(`admin_chat_${userId}_${productId || 'general'}`)
         .on(
@@ -92,25 +92,21 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
             event: "INSERT",
             schema: "public",
             table: "chats",
-            filter: productFilter, // Use the corrected filter
+            filter: productFilter,
           },
           (payload) => {
             const newMsg = payload.new as ChatMessage;
             if (
-              (newMsg.sender_id === userId && newMsg.receiver_id === adminId) || // Use adminId directly
-              (newMsg.sender_id === adminId && newMsg.receiver_id === userId) // Use adminId directly
+              (newMsg.sender_id === userId && newMsg.receiver_id === adminId) ||
+              (newMsg.sender_id === adminId && newMsg.receiver_id === userId)
             ) {
-              supabase.from('profiles').select('first_name, last_name, avatar_url, role').eq('id', newMsg.sender_id).single()
-                .then(({ data: profileData, error: profileError }) => {
-                  if (!profileError && profileData) {
-                    setMessages((prev) => [...prev, { ...newMsg, profiles: profileData }]);
-                  } else {
-                    setMessages((prev) => [...prev, newMsg]);
-                  }
-                });
-              if (newMsg.sender_id === userId) {
-                markMessagesAsRead(userId, adminId, productId); // Use adminId directly
-              }
+              // When a new message comes in, we need to fetch the sender's profile
+              // as the payload.new might not contain the joined profile data.
+              // However, getChatMessages already fetches profiles, so we can just refetch all messages.
+              // For real-time updates, it's better to append and then update the specific profile if needed.
+              // For simplicity and to ensure consistency with the full message structure,
+              // we'll refetch all messages.
+              fetchMessages(); // Refetch all messages to get full profile data
             }
           }
         )
@@ -120,7 +116,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
         supabase.removeChannel(channel);
       };
     }
-  }, [adminUser, adminId, otherUserProfile, userId, productId, fetchMessages]); // Add adminId to dependencies
+  }, [adminUser, adminId, otherUserProfile, userId, productId, fetchMessages]);
 
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -128,7 +124,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !adminUser || isSending || !adminId || !otherUserProfile) return; // Use adminId directly
+    if (!newMessage.trim() || !adminUser || isSending || !adminId || !otherUserProfile) return;
 
     setIsSending(true);
     const { data, error } = await supabase.from("chats").insert({
@@ -138,7 +134,8 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
       message: newMessage.trim(),
     }).select(`
       *,
-      profiles (first_name, last_name, avatar_url, role)
+      sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
+      receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role)
     `).single();
 
     if (error) {
@@ -151,7 +148,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
     setIsSending(false);
   };
 
-  if (isSessionLoading || !adminId || !otherUserProfile) { // Use adminId directly
+  if (isSessionLoading || !adminId || !otherUserProfile) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -217,9 +214,9 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
                     >
                       {msg.sender_id !== adminUser?.id && (
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={otherUserProfile.avatar_url || undefined} />
+                          <AvatarImage src={msg.sender_profile?.avatar_url || undefined} />
                           <AvatarFallback>
-                            {otherUserProfile.first_name ? otherUserProfile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                            {msg.sender_profile?.first_name ? msg.sender_profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
                           </AvatarFallback>
                         </Avatar>
                       )}
@@ -237,9 +234,9 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
                       </div>
                       {msg.sender_id === adminUser?.id && (
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={adminProfile?.avatar_url || undefined} />
+                          <AvatarImage src={msg.sender_profile?.avatar_url || undefined} />
                           <AvatarFallback>
-                            {adminProfile?.first_name ? adminProfile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                            {msg.sender_profile?.first_name ? msg.sender_profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
                           </AvatarFallback>
                         </Avatar>
                       )}

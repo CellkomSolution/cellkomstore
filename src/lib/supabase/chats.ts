@@ -10,7 +10,13 @@ export interface ChatMessage {
   created_at: string;
   product_id: string | null;
   is_read: boolean;
-  profiles?: {
+  sender_profile?: { // Changed from 'profiles' to 'sender_profile'
+    first_name: string | null;
+    last_name: string | null;
+    avatar_url: string | null;
+    role: 'user' | 'admin';
+  };
+  receiver_profile?: { // Added for receiver's profile
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
@@ -36,35 +42,45 @@ export interface ChatConversation {
 }
 
 // Define a specific interface for the data returned by the select query in getChatConversations
-interface JoinedChatData {
+interface RawChatData {
+  id: string;
   sender_id: string;
   receiver_id: string;
   product_id: string | null;
   message: string;
   created_at: string;
   is_read: boolean;
-  profiles: { // Changed to array
+  sender_profile: {
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
-  }[] | null; // Changed to array or null
-  products: { // Changed to array
+    role: 'user' | 'admin';
+  } | null;
+  receiver_profile: {
+    first_name: string | null;
+    last_name: string | null;
+    avatar_url: string | null;
+    role: 'user' | 'admin';
+  } | null;
+  products: {
     name: string;
     image_url: string;
-  }[] | null; // Changed to array or null
+  } | null;
 }
 
 export async function getChatConversations(adminId: string): Promise<ChatConversation[]> {
   const { data, error } = await supabase
     .from('chats')
     .select(`
+      id,
       sender_id,
       receiver_id,
       product_id,
       message,
       created_at,
       is_read,
-      profiles!sender_id (first_name, last_name, avatar_url),
+      sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
+      receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
       products (name, image_url)
     `)
     .or(`sender_id.eq.${adminId},receiver_id.eq.${adminId}`)
@@ -75,28 +91,25 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
     return [];
   }
 
-  // Cast the fetched data to the more precise interface
-  const typedData = data as JoinedChatData[];
+  const rawChats = data as RawChatData[];
 
   const conversationsMap = new Map<string, ChatConversation>();
 
-  for (const chat of typedData) {
+  for (const chat of rawChats) {
     const otherParticipantId = chat.sender_id === adminId ? chat.receiver_id : chat.sender_id;
     const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
 
-    if (!conversationsMap.has(conversationKey)) {
-      // Access the first element of the array, if it exists
-      const userProfile = chat.profiles?.[0] || null;
-      const productInfo = chat.products?.[0] || null;
+    const otherParticipantProfile = chat.sender_id === otherParticipantId ? chat.sender_profile : chat.receiver_profile;
 
+    if (!conversationsMap.has(conversationKey)) {
       conversationsMap.set(conversationKey, {
         user_id: otherParticipantId,
-        user_first_name: userProfile?.first_name || null,
-        user_last_name: userProfile?.last_name || null,
-        user_avatar_url: userProfile?.avatar_url || null,
+        user_first_name: otherParticipantProfile?.first_name || null,
+        user_last_name: otherParticipantProfile?.last_name || null,
+        user_avatar_url: otherParticipantProfile?.avatar_url || null,
         product_id: chat.product_id,
-        product_name: productInfo?.name || null,
-        product_image_url: productInfo?.image_url || null,
+        product_name: chat.products?.name || null,
+        product_image_url: chat.products?.image_url || null,
         last_message: chat.message,
         last_message_time: chat.created_at,
         unread_count: 0,
@@ -104,7 +117,7 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
     }
 
     const conversation = conversationsMap.get(conversationKey)!;
-    if (chat.receiver_id === adminId && !chat.is_read) {
+    if (chat.receiver_id === adminId && chat.sender_id === otherParticipantId && !chat.is_read) {
       conversation.unread_count++;
     }
   }
@@ -119,7 +132,8 @@ export async function getChatMessages(userId: string, adminId: string, productId
     .from("chats")
     .select(`
       *,
-      profiles (first_name, last_name, avatar_url, role)
+      sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
+      receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role)
     `)
     .order("created_at", { ascending: true });
 
@@ -129,7 +143,6 @@ export async function getChatMessages(userId: string, adminId: string, productId
     query = query.is("product_id", null);
   }
 
-  // Menggunakan sintaks .and. untuk kondisi OR yang lebih robust
   query = query.or(`sender_id.eq.${userId}.and.receiver_id.eq.${adminId},sender_id.eq.${adminId}.and.receiver_id.eq.${userId}`);
 
   const { data, error } = await query;

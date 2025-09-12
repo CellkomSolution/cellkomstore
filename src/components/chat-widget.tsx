@@ -66,17 +66,17 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     }
 
     setIsLoadingMessages(true);
-    const fetchedMessages = await getChatMessages(user.id, targetAdminId, productId ?? null); // Fix: Add ?? null
+    const fetchedMessages = await getChatMessages(user.id, targetAdminId, productId ?? null);
     setMessages(fetchedMessages);
     setIsLoadingMessages(false);
 
     // Tandai pesan dari admin ke user sebagai sudah dibaca
     try {
-      await markMessagesAsRead(targetAdminId, user.id, productId ?? null); // Fix: Add ?? null
+      await markMessagesAsRead(targetAdminId, user.id, productId ?? null);
     } catch (error) {
       console.error("Failed to mark messages as read in ChatWidget:", error);
     }
-  }, [user, productId, targetAdminId, onOpenChange]); // Added onOpenChange to dependencies
+  }, [user, productId, targetAdminId, onOpenChange]);
 
   React.useEffect(() => {
     if (open && user && targetAdminId) {
@@ -106,14 +106,11 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
               (newMsg.sender_id === user.id && newMsg.receiver_id === targetAdminId) ||
               (newMsg.sender_id === targetAdminId && newMsg.receiver_id === user.id)
             ) {
-              supabase.from('profiles').select('first_name, last_name, avatar_url, role').eq('id', newMsg.sender_id).single()
-                .then(({ data: profileData, error: profileError }) => {
-                  if (!profileError && profileData) {
-                    setMessages((prev) => [...prev, { ...newMsg, profiles: profileData }]);
-                  } else {
-                    setMessages((prev) => [...prev, newMsg]);
-                  }
-                });
+              // When a new message comes in, we need to fetch the sender's profile
+              // as the payload.new might not contain the joined profile data.
+              // For simplicity and to ensure consistency with the full message structure,
+              // we'll refetch all messages.
+              fetchMessages(); // Refetch all messages to get full profile data
             }
           }
         )
@@ -145,13 +142,14 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
 
     setIsSending(true);
     const { data, error } = await supabase.from("chats").insert({
-      product_id: productId || null, // Pastikan null jika tidak ada productId
+      product_id: productId || null,
       sender_id: user.id,
       receiver_id: targetAdminId,
       message: newMessage.trim(),
     }).select(`
       *,
-      profiles (first_name, last_name, avatar_url, role)
+      sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
+      receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role)
     `).single();
 
     if (error) {
@@ -188,9 +186,9 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                   >
                     {msg.sender_id !== user?.id && (
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={msg.profiles?.avatar_url || undefined} />
+                        <AvatarImage src={msg.sender_profile?.avatar_url || undefined} />
                         <AvatarFallback>
-                          {msg.profiles?.first_name ? msg.profiles.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                          {msg.sender_profile?.first_name ? msg.sender_profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
                         </AvatarFallback>
                       </Avatar>
                     )}
@@ -208,9 +206,9 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                     </div>
                     {msg.sender_id === user?.id && (
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={profile?.avatar_url || undefined} />
+                        <AvatarImage src={msg.sender_profile?.avatar_url || undefined} />
                         <AvatarFallback>
-                          {profile?.first_name ? profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                          {msg.sender_profile?.first_name ? msg.sender_profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
                         </AvatarFallback>
                       </Avatar>
                     )}
