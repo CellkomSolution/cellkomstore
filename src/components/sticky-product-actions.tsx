@@ -2,11 +2,14 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, MessageSquare } from "lucide-react"; // Import MessageSquare
+import { ShoppingCart, MessageSquare } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
 import { Product } from "@/lib/supabase/products";
-import { ChatWidget } from "./chat-widget"; // Import ChatWidget
-import Link from "next/link";
+import { ChatWidget } from "./chat-widget";
+import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile
+import { useSession } from "@/context/session-context"; // Import useSession
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface StickyProductActionsProps {
   product: Product;
@@ -14,12 +17,24 @@ interface StickyProductActionsProps {
 }
 
 export function StickyProductActions({ product, onAddToCart }: StickyProductActionsProps) {
-  const [isChatOpen, setIsChatOpen] = React.useState(false); // State untuk mengontrol ChatWidget
+  const isMobile = useIsMobile(); // Use the hook
+  const { user } = useSession(); // Get user from session
+  const router = useRouter();
+  const [isChatOpen, setIsChatOpen] = React.useState(false);
 
   const handleBuyNow = () => {
+    if (!user) {
+      toast.error("Anda harus login untuk melanjutkan pembelian.");
+      router.push("/auth");
+      return;
+    }
     onAddToCart();
-    window.location.href = "/checkout"; 
+    router.push("/checkout"); 
   };
+
+  if (!isMobile) {
+    return null; // Render nothing on desktop
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 shadow-lg z-40">
@@ -36,7 +51,6 @@ export function StickyProductActions({ product, onAddToCart }: StickyProductActi
           Tambah ke Keranjang
         </Button>
       </div>
-      {/* Render ChatWidget di sini, dikontrol oleh state isChatOpen */}
       <ChatWidget 
         productId={product.id} 
         productName={product.name} 

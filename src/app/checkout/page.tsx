@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
+import { useSession } from "@/context/session-context"; // Import useSession
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nama harus diisi (min. 2 karakter)." }),
@@ -31,6 +32,7 @@ const formSchema = z.object({
 
 export default function CheckoutPage() {
   const { items, totalPrice, totalItems, clearCart } = useCart();
+  const { user, isLoading: isSessionLoading } = useSession(); // Get user and loading state from session
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -44,10 +46,15 @@ export default function CheckoutPage() {
   });
 
   React.useEffect(() => {
+    if (!isSessionLoading && !user) {
+      toast.error("Anda harus login untuk melanjutkan checkout.");
+      router.replace("/auth");
+      return;
+    }
     if (totalItems === 0) {
       router.replace("/");
     }
-  }, [totalItems, router]);
+  }, [totalItems, router, user, isSessionLoading]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log("Order submitted:", values);
@@ -61,6 +68,14 @@ export default function CheckoutPage() {
     toast.info("Pesanan Anda telah dibatalkan.");
     router.push("/");
   };
+
+  if (isSessionLoading || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <p>Memuat...</p>
+      </div>
+    );
+  }
 
   if (totalItems === 0) {
     return (

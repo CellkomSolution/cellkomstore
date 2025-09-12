@@ -16,9 +16,23 @@ import { Separator } from "./ui/separator";
 import Image from "next/image";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
+import { useSession } from "@/context/session-context"; // Import useSession
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function CartSheet() {
   const { items, totalItems, totalPrice, removeItem, updateItemQuantity } = useCart();
+  const { user } = useSession(); // Get user from session
+  const router = useRouter();
+
+  const handleCheckoutClick = () => {
+    if (!user) {
+      toast.error("Anda harus login untuk melanjutkan checkout.");
+      router.push("/auth");
+    } else {
+      router.push("/checkout");
+    }
+  };
 
   return (
     <Sheet>
@@ -82,8 +96,8 @@ export function CartSheet() {
                         <span>{formatRupiah(totalPrice)}</span>
                     </div>
                     <SheetClose asChild>
-                      <Button size="lg" className="w-full" asChild>
-                        <Link href="/checkout">Checkout</Link>
+                      <Button size="lg" className="w-full" onClick={handleCheckoutClick}>
+                        Checkout
                       </Button>
                     </SheetClose>
                 </div>
