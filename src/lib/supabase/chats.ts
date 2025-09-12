@@ -10,13 +10,13 @@ export interface ChatMessage {
   created_at: string;
   product_id: string | null;
   is_read: boolean;
-  sender_profile?: { // Changed from 'profiles' to 'sender_profile'
+  sender_profile?: {
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
   };
-  receiver_profile?: { // Added for receiver's profile
+  receiver_profile?: {
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
@@ -50,22 +50,22 @@ interface RawChatData {
   message: string;
   created_at: string;
   is_read: boolean;
-  sender_profile: Array<{ // Changed to expect an array
+  sender_profile: Array<{
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
   }> | null;
-  receiver_profile: Array<{ // Changed to expect an array
+  receiver_profile: Array<{
     first_name: string | null;
     last_name: string | null;
     avatar_url: string | null;
     role: 'user' | 'admin';
   }> | null;
-  products: {
+  products: Array<{ // Changed to expect an array
     name: string;
     image_url: string;
-  } | null;
+  }> | null;
 }
 
 export async function getChatConversations(adminId: string): Promise<ChatConversation[]> {
@@ -103,6 +103,9 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
     const otherParticipantProfileArray = chat.sender_id === otherParticipantId ? chat.sender_profile : chat.receiver_profile;
     const otherParticipantProfile = otherParticipantProfileArray && otherParticipantProfileArray.length > 0 ? otherParticipantProfileArray[0] : null;
 
+    // Safely access the first element of the products array
+    const productData = chat.products && chat.products.length > 0 ? chat.products[0] : null;
+
     if (!conversationsMap.has(conversationKey)) {
       conversationsMap.set(conversationKey, {
         user_id: otherParticipantId,
@@ -110,8 +113,8 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
         user_last_name: otherParticipantProfile?.last_name || null,
         user_avatar_url: otherParticipantProfile?.avatar_url || null,
         product_id: chat.product_id,
-        product_name: chat.products?.name || null,
-        product_image_url: chat.products?.image_url || null,
+        product_name: productData?.name || null, // Use productData
+        product_image_url: productData?.image_url || null, // Use productData
         last_message: chat.message,
         last_message_time: chat.created_at,
         unread_count: 0,
