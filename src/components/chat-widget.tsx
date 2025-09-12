@@ -26,6 +26,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import Image from "next/image"; // Import Image component
+import { getProductById } from "@/lib/supabase/products"; // Import getProductById
 
 interface ChatWidgetProps {
   productId?: string | null;
@@ -42,8 +44,9 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
   const [isSending, setIsSending] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const [targetAdminId, setTargetAdminId] = React.useState<string | null>(null);
-  const [isLoadingAdminId, setIsLoadingAdminId] = React.useState(true); // New state for admin ID loading
+  const [isLoadingAdminId, setIsLoadingAdminId] = React.useState(true);
   const isMobile = useIsMobile();
+  const [productDetails, setProductDetails] = React.useState<{ name: string; imageUrl: string } | null>(null); // New state for product details
 
   React.useEffect(() => {
     async function loadAdminId() {
@@ -54,6 +57,22 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     }
     loadAdminId();
   }, []);
+
+  React.useEffect(() => {
+    async function loadProductDetails() {
+      if (productId) {
+        const product = await getProductById(productId);
+        if (product) {
+          setProductDetails({ name: product.name, imageUrl: product.imageUrl });
+        } else {
+          setProductDetails(null);
+        }
+      } else {
+        setProductDetails(null);
+      }
+    }
+    loadProductDetails();
+  }, [productId]);
 
   const fetchMessages = React.useCallback(async () => {
     if (!user || !targetAdminId) return;
@@ -268,6 +287,16 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
   const ChatContent = (
     <>
       <div className="flex-1 flex flex-col overflow-hidden border rounded-md bg-muted/20">
+        {/* Product Info at the top of the chat */}
+        {productDetails && (
+          <div className="flex items-center gap-3 p-3 border-b bg-card">
+            <Image src={productDetails.imageUrl} alt={productDetails.name} width={48} height={48} className="rounded-md object-cover" />
+            <div>
+              <p className="font-semibold text-sm line-clamp-1">{productDetails.name}</p>
+              <p className="text-xs text-muted-foreground">Produk yang dibicarakan</p>
+            </div>
+          </div>
+        )}
         {isLoadingMessages ? (
           <div className="flex-1 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />

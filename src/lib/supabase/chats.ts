@@ -23,10 +23,10 @@ export interface ChatMessage {
     avatar_url: string | null;
     role: 'user' | 'admin';
   }>;
-  products?: {
+  products?: Array<{ // Changed to array of objects
     name: string;
     image_url: string;
-  };
+  }> | null;
 }
 
 export interface ChatConversation {
@@ -137,13 +137,79 @@ export async function getChatConversations(adminId: string): Promise<ChatConvers
   );
 }
 
+export async function getUserConversations(currentUserId: string): Promise<ChatConversation[]> {
+  const { data, error } = await supabase
+    .from('chats')
+    .select(`
+      id,
+      sender_id,
+      receiver_id,
+      product_id,
+      message,
+      created_at,
+      is_read,
+      updated_at,
+      sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
+      receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
+      products (name, image_url)
+    `)
+    .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error("Error fetching user chat conversations:", error.message || error);
+    return [];
+  }
+
+  const rawChats = data as RawChatData[];
+  const conversationsMap = new Map<string, ChatConversation>();
+
+  for (const chat of rawChats) {
+    const otherParticipantId = chat.sender_id === currentUserId ? chat.receiver_id : chat.sender_id;
+    const conversationKey = `${otherParticipantId}-${chat.product_id || 'general'}`;
+
+    const senderProfile = chat.sender_profile && chat.sender_profile.length > 0 ? chat.sender_profile[0] : null;
+    const receiverProfile = chat.receiver_profile && chat.receiver_profile.length > 0 ? chat.receiver_profile[0] : null;
+    
+    const otherParticipantProfile = chat.sender_id === otherParticipantId ? senderProfile : receiverProfile;
+
+    const productData = chat.products && chat.products.length > 0 ? chat.products[0] : null;
+
+    if (!conversationsMap.has(conversationKey)) {
+      conversationsMap.set(conversationKey, {
+        user_id: otherParticipantId, // This is the admin's ID in this context
+        user_first_name: otherParticipantProfile?.first_name || null,
+        user_last_name: otherParticipantProfile?.last_name || null,
+        user_avatar_url: otherParticipantProfile?.avatar_url || null,
+        product_id: chat.product_id,
+        product_name: productData?.name || null,
+        product_image_url: productData?.image_url || null,
+        last_message: chat.message,
+        last_message_time: chat.created_at,
+        unread_count: 0, // Will be calculated below
+      });
+    }
+
+    const conversation = conversationsMap.get(conversationKey)!;
+    // Count unread messages *received by the current user* from this specific other participant and product
+    if (chat.receiver_id === currentUserId && chat.sender_id === otherParticipantId && !chat.is_read) {
+      conversation.unread_count++;
+    }
+  }
+
+  return Array.from(conversationsMap.values()).sort((a, b) =>
+    new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime()
+  );
+}
+
 export async function getChatMessages(userId: string, adminId: string, productId: string | null): Promise<ChatMessage[]> {
   let query = supabase
     .from("chats")
     .select(`
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
-      receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role)
+      receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
+      products (name, image_url)
     `)
     .order("created_at", { ascending: true });
 
