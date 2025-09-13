@@ -11,6 +11,7 @@ import { formatDistanceToNow } from "date-fns";
 import { id } from "date-fns/locale";
 import { getChatParticipants } from "@/lib/supabase/chats";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client"; // Menambahkan import ini
 
 export default function ChatsPage() {
   const { user: adminUser, isLoading: isSessionLoading } = useSession();
