@@ -43,7 +43,9 @@ export async function getChatMessages(user1Id: string, user2Id: string): Promise
 
   return data.map(chat => ({
     ...chat,
-    products: chat.products ? chat.products.map(mapProductData) : [],
+    // Jika chat.products ada (berarti ada product_id), map objek tunggal tersebut dan bungkus dalam array.
+    // Jika tidak ada, gunakan array kosong.
+    products: chat.products ? [mapProductData(chat.products)] : [],
   })) as ChatMessage[];
 }
 
