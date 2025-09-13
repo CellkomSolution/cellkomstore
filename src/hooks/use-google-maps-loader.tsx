@@ -4,6 +4,8 @@ import * as React from "react";
 import { Loader as GoogleMapsLoader } from "@googlemaps/js-api-loader";
 import { toast } from "sonner";
 
+import "google.maps"; // Menambahkan ini untuk membantu TypeScript mengenali tipe global 'google'
+
 interface UseGoogleMapsLoaderOptions {
   // Opsi ini masih bisa ada jika komponen ingin mendeklarasikan apa yang ingin mereka gunakan,
   // tetapi loader yang sebenarnya akan memuat set yang tetap untuk konsistensi.
@@ -13,7 +15,7 @@ interface UseGoogleMapsLoaderOptions {
 // Gunakan variabel global untuk menyimpan instance Loader tunggal dan promis-nya
 // Ini memastikan bahwa ia hanya dibuat sekali dengan set opsi yang konsisten.
 let googleMapsLoaderInstance: GoogleMapsLoader | null = null;
-let googleMapsLoadPromise: Promise<void> | null = null;
+let googleMapsLoadPromise: Promise<typeof google> | null = null; // Tipe diubah di sini
 
 export function useGoogleMapsLoader(options?: UseGoogleMapsLoaderOptions) {
   const [isLoaded, setIsLoaded] = React.useState(false);
