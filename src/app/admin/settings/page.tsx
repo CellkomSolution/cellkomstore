@@ -39,7 +39,8 @@ const formSchema = z.object({
   right_header_text_enabled: z.boolean().optional().default(false),
   right_header_text_content: z.string().nullable().optional().or(z.literal("")),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
-  download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().optional().or(z.literal("")), // New field
+  download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().optional().or(z.literal("")),
+  download_app_text: z.string().nullable().optional().or(z.literal("")), // New field
 }).superRefine((data, ctx) => {
   if (data.scrolling_text_enabled && (!data.scrolling_text_content || data.scrolling_text_content.trim() === '')) {
     ctx.addIssue({
@@ -53,6 +54,13 @@ const formSchema = z.object({
       code: z.ZodIssueCode.custom,
       message: "Konten teks kanan header tidak boleh kosong jika diaktifkan.",
       path: ['right_header_text_content'],
+    });
+  }
+  if (data.download_app_url && (!data.download_app_text || data.download_app_text.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Teks unduhan aplikasi tidak boleh kosong jika URL diaktifkan.",
+      path: ['download_app_text'],
     });
   }
 });
@@ -80,7 +88,8 @@ export default function AdminSettingsPage() {
       right_header_text_enabled: false,
       right_header_text_content: null,
       right_header_text_link: null,
-      download_app_url: null, // Default value for new field
+      download_app_url: null,
+      download_app_text: null, // Default value for new field
     },
   });
 
@@ -106,7 +115,8 @@ export default function AdminSettingsPage() {
           right_header_text_enabled: settings.right_header_text_enabled || false,
           right_header_text_content: settings.right_header_text_content || null,
           right_header_text_link: settings.right_header_text_link || null,
-          download_app_url: settings.download_app_url || null, // Set value for new field
+          download_app_url: settings.download_app_url || null,
+          download_app_text: settings.download_app_text || null, // Set value for new field
         });
       }
       setIsLoading(false);
@@ -440,6 +450,24 @@ export default function AdminSettingsPage() {
                   </FormItem>
                 )}
               />
+              {form.watch("download_app_url") && ( // Only show text input if URL is provided
+                <FormField
+                  control={form.control}
+                  name="download_app_text"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Teks Unduhan Aplikasi</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Download Aplikasi Cellkom" {...field} value={field.value ?? ""} />
+                      </FormControl>
+                      <FormDescription>
+                        Teks yang akan ditampilkan untuk tautan unduhan aplikasi.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
