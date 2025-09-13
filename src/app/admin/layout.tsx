@@ -97,6 +97,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Button>
           <Button
             variant="ghost"
+            className={cn("w-full justify-start", pathname.startsWith("/admin/featured-brands") && "bg-muted hover:bg-muted")}
+            asChild
+          >
+            <Link href="/admin/featured-brands">
+              <ImageIcon className="mr-2 h-4 w-4" />
+              Merek Unggulan
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
             className={cn("w-full justify-start", pathname === "/admin/users" && "bg-muted hover:bg-muted")}
             asChild
           >
