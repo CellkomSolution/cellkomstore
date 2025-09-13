@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PaymentMethodForm } from "@/components/payment-method-form";
+import { PaymentMethodForm, PaymentMethodFormValues } from "@/components/payment-method-form";
 import { toast } from "sonner";
 import { createPaymentMethod } from "@/lib/supabase/payment-methods";
 
@@ -11,7 +11,7 @@ export default function NewPaymentMethodPage() {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: PaymentMethodFormValues) => {
     setLoading(true);
     try {
       const methodData = {

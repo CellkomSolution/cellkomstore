@@ -33,11 +33,11 @@ const formSchema = z.object({
   name: z.string().min(3, { message: "Nama metode pembayaran minimal 3 karakter." }).max(100, { message: "Nama metode pembayaran maksimal 100 karakter." }),
   type: z.enum(['bank_transfer', 'e_wallet', 'card', 'other'], { message: "Tipe metode pembayaran harus dipilih." }),
   details: z.string().optional().nullable(), // JSON string for details
-  is_active: z.boolean().default(true), // Removed .optional()
-  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0), // Removed .optional() and added default
+  is_active: z.boolean().default(true),
+  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
-type PaymentMethodFormValues = z.infer<typeof formSchema>; // Explicitly define form values type
+export type PaymentMethodFormValues = z.infer<typeof formSchema>; // Explicitly define form values type
 
 interface PaymentMethodFormProps {
   initialData?: PaymentMethod | null;
@@ -52,8 +52,9 @@ export function PaymentMethodForm({ initialData, onSubmit, loading = false }: Pa
       name: initialData?.name ?? "",
       type: initialData?.type ?? 'bank_transfer',
       details: initialData?.details ? JSON.stringify(initialData.details, null, 2) : null,
-      is_active: initialData?.is_active ?? true, // Ensure this is always boolean
-      order: initialData?.order ?? 0, // Ensure this is always number
+      // Explicitly ensure is_active and order are boolean/number, not boolean | undefined or number | undefined
+      is_active: initialData?.is_active !== undefined ? initialData.is_active : true,
+      order: initialData?.order !== undefined ? initialData.order : 0,
     },
   });
 

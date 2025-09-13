@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PaymentMethodForm } from "@/components/payment-method-form";
+import { PaymentMethodForm, PaymentMethodFormValues } from "@/components/payment-method-form";
 import { toast } from "sonner";
 import { getPaymentMethodById, updatePaymentMethod, PaymentMethod } from "@/lib/supabase/payment-methods";
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Reusing skeleton
@@ -31,7 +31,7 @@ export default function EditPaymentMethodPage({ params }: { params: { id: string
     fetchPaymentMethod();
   }, [id, router]);
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: PaymentMethodFormValues) => {
     setIsSubmitting(true);
     try {
       if (!initialData) {
