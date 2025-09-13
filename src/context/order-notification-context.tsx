@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
 import { Order } from "@/lib/supabase/orders"; // Import Order type
-import { Clock, Package, CheckCircle, XCircle } from "lucide-react"; // Import icons
+import { Clock, Package, CheckCircle, XCircle, ShoppingBag } from "lucide-react"; // Import icons, including ShoppingBag
 
 interface OrderNotificationProviderProps {
   children: React.ReactNode;
