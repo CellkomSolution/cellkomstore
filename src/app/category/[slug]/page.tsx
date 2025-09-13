@@ -7,8 +7,14 @@ import { getProductsByCategory, Product, SortOption } from "@/lib/supabase/produ
 import { getCategoryBySlug, Category } from "@/lib/supabase/categories"; // Import getCategoryBySlug, Category dari modul categories
 import { SortDropdown } from "@/components/sort-dropdown";
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+interface CategoryPageProps {
+  params: Promise<{ slug: string }>; // Menyesuaikan tipe params menjadi Promise
+}
+
+export default function CategoryPage({ params }: CategoryPageProps) {
+  // Menggunakan React.use() untuk meng-unwrap params
+  const unwrappedParams = React.use(params);
+  const { slug } = unwrappedParams;
   
   const [categoryName, setCategoryName] = React.useState<string | null>(null);
   const [products, setProducts] = React.useState<Product[]>([]);
