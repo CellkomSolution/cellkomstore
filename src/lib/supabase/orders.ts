@@ -125,7 +125,7 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
     .select(`
       *,
       user_profile:profiles!user_id(id, first_name, last_name, avatar_url, email),
-      order_items:order_items_order_id_fkey(*, products(id, name, price, original_price, image_url, location, rating, sold_count, category, is_flash_sale, description)),
+      order_items:order_items_order_id_fkey(*, products:products!order_items_product_id_fkey(id, name, price, original_price, image_url, location, rating, sold_count, category, is_flash_sale, description)),
       payment_method:payment_methods!orders_payment_method_id_fkey(id, name, type, details)
     `)
     .eq("id", orderId)
