@@ -16,14 +16,11 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "@/context/session-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { usePathname } from "next/navigation"; // Import usePathname
-import { ScrollArea } from "@/components/ui/scroll-area"; // Import ScrollArea
 
-export default function AdminChatsPage() { // Changed to default export
+export default function AdminChatsPage() {
   const { user, isLoading: isSessionLoading } = useSession();
   const [conversations, setConversations] = React.useState<ChatConversation[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
-  const pathname = usePathname(); // Get current pathname
   
   const adminId = user?.id;
 
@@ -57,9 +54,9 @@ export default function AdminChatsPage() { // Changed to default export
             table: "chats",
             filter: `receiver_id=eq.${adminId}`,
           },
-          (payload) => {
+          async (payload) => {
             // Refetch all conversations to update unread counts and last messages
-            fetchConversations();
+            await fetchConversations();
             const newMsg = payload.new as ChatMessage;
             // Only show toast if it's a new message from a user
             if (payload.eventType === 'INSERT' && newMsg.sender_id !== adminId) {
@@ -77,16 +74,32 @@ export default function AdminChatsPage() { // Changed to default export
 
   if (isSessionLoading || isLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        <p className="ml-2">Memuat percakapan...</p>
+      <div className="space-y-6 py-8">
+        <h2 className="text-2xl font-bold">Memuat Percakapan Chat...</h2>
+        <Card>
+          <CardHeader><CardTitle><Loader2 className="h-5 w-5 animate-spin inline-block mr-2" /> Memuat...</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center space-x-4">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   if (!adminId) {
     return (
-      <div className="flex h-full items-center justify-center text-center p-4">
+      <div className="space-y-6 py-8 text-center">
+        <h2 className="text-2xl font-bold">Manajemen Chat</h2>
         <p className="text-muted-foreground">
           Anda harus login sebagai admin untuk melihat percakapan chat.
         </p>
@@ -95,52 +108,93 @@ export default function AdminChatsPage() { // Changed to default export
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b">
-        <h2 className="text-xl font-bold">Percakapan</h2>
-      </div>
-      <ScrollArea className="flex-1">
-        <div className="divide-y">
-          {conversations.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">
-              Belum ada percakapan chat yang dimulai.
-            </div>
-          ) : (
-            conversations.map((conv) => (
-              <Link 
-                href={`/admin/chats/${conv.user_id}`} 
-                key={conv.user_id}
-                className={`flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors ${pathname.includes(conv.user_id) ? 'bg-muted' : ''}`}
-              >
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={conv.user_avatar_url || undefined} />
-                  <AvatarFallback>
-                    {conv.user_first_name ? conv.user_first_name[0].toUpperCase() : <UserIcon className="h-5 w-5" />}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium truncate">
-                      {conv.user_first_name || "Pengguna"} {conv.user_last_name || ""}
-                    </div>
-                    <p className="text-xs text-muted-foreground flex-shrink-0 ml-2">
-                      {formatDistanceToNow(new Date(conv.last_message_time), { addSuffix: true, locale: id })}
-                    </p>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
-                    {conv.last_message}
-                  </p>
-                  {conv.unread_count > 0 && (
-                    <Badge variant="destructive" className="mt-1">
-                      {conv.unread_count} Pesan Baru
-                    </Badge>
-                  )}
-                </div>
-              </Link>
-            ))
-          )}
-        </div>
-      </ScrollArea>
+    <div className="space-y-6 py-8">
+      <h2 className="text-2xl font-bold">Manajemen Chat</h2>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Daftar Percakapan</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[60px]">Pengguna</TableHead>
+                  <TableHead>Detail Percakapan</TableHead>
+                  <TableHead className="w-[150px]">Pesan Terakhir</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {conversations.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                      Belum ada percakapan chat yang dimulai.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  conversations.map((conv) => (
+                    <TableRow key={conv.user_id}> {/* Key is now just user_id */}
+                      <TableCell>
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={conv.user_avatar_url || undefined} />
+                          <AvatarFallback>
+                            {conv.user_first_name ? conv.user_first_name[0].toUpperCase() : <UserIcon className="h-5 w-5" />}
+                          </AvatarFallback>
+                        </Avatar>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">
+                          {conv.user_first_name || "Pengguna"} {conv.user_last_name || ""}
+                        </div>
+                        {conv.product_id && ( // Display product info if the last message was about a product
+                          <div className="flex items-center text-sm text-muted-foreground mt-1">
+                            {conv.product_image_url && (
+                              <Image
+                                src={conv.product_image_url}
+                                alt={conv.product_name || "Produk"}
+                                width={24}
+                                height={24}
+                                className="rounded-sm object-cover mr-2"
+                              />
+                            )}
+                            <span className="line-clamp-1">Tentang: {conv.product_name || "Produk Tidak Dikenal"}</span>
+                          </div>
+                        )}
+                        {!conv.product_id && ( // Display general chat if no product in last message
+                          <div className="flex items-center text-sm text-muted-foreground mt-1">
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            <span>Chat Umum</span>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-sm line-clamp-2">{conv.last_message}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {formatDistanceToNow(new Date(conv.last_message_time), { addSuffix: true, locale: id })}
+                        </p>
+                        {conv.unread_count > 0 && (
+                          <Badge variant="destructive" className="mt-1">
+                            {conv.unread_count} Pesan Baru
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button asChild size="sm">
+                          <Link href={`/admin/chats/${conv.user_id}`}> {/* Link to unified chat page */}
+                            Lihat Chat
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

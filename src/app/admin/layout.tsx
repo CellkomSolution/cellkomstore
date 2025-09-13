@@ -95,7 +95,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Pengguna
             </Link>
           </Button>
-          {/* Removed Chat link from main admin sidebar */}
+          <Button 
+            variant="ghost" 
+            className={cn("w-full justify-start", pathname.startsWith("/admin/chats") && "bg-muted hover:bg-muted")} 
+            asChild
+          >
+            <Link href="/admin/chats">
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Chat
+            </Link>
+          </Button>
           <Separator className="my-4" />
           <Button 
             variant="ghost" 
