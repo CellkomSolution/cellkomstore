@@ -23,18 +23,14 @@ import {
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
 import { useSession } from "@/context/session-context";
-import { AddressAutocompleteInput } from "@/components/address-autocomplete-input";
-import { GoogleMapPicker } from "@/components/google-map-picker";
 import { createOrder } from "@/lib/supabase/orders"; // Import createOrder
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nama harus diisi (min. 2 karakter)." }),
   fullAddress: z.string().min(10, { message: "Alamat lengkap harus diisi (min. 10 karakter)." }),
-  city: z.string().min(3, { message: "Kota harus diisi." }),
-  postalCode: z.string().optional().nullable(),
+  nagari: z.string().min(3, { message: "Nagari harus diisi." }),
+  kecamatan: z.string().min(3, { message: "Kecamatan harus diisi." }),
   phone: z.string().min(10, { message: "Nomor telepon tidak valid." }).max(15),
-  latitude: z.number().optional().nullable(),
-  longitude: z.number().optional().nullable(),
 });
 
 export default function CheckoutPage() {
@@ -42,22 +38,14 @@ export default function CheckoutPage() {
   const { user, isLoading: isSessionLoading } = useSession();
   const router = useRouter();
 
-  const [mapCenter, setMapCenter] = React.useState<{ lat: number; lng: number }>({
-    lat: -6.2088, // Default to Jakarta
-    lng: 106.8456,
-  });
-  const [markerPosition, setMarkerPosition] = React.useState<{ lat: number; lng: number } | null>(null);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       fullAddress: "",
-      city: "",
-      postalCode: null,
+      nagari: "",
+      kecamatan: "",
       phone: "",
-      latitude: null,
-      longitude: null,
     },
   });
 
@@ -72,29 +60,6 @@ export default function CheckoutPage() {
       router.replace("/");
     }
   }, [totalItems, router, user, isSessionLoading]);
-
-  const handlePlaceSelect = (place: {
-    address: string;
-    lat: number;
-    lng: number;
-    city?: string;
-    postalCode?: string;
-  }) => {
-    form.setValue("fullAddress", place.address, { shouldValidate: true });
-    form.setValue("city", place.city || "", { shouldValidate: true });
-    form.setValue("postalCode", place.postalCode || null, { shouldValidate: true });
-    form.setValue("latitude", place.lat, { shouldValidate: true });
-    form.setValue("longitude", place.lng, { shouldValidate: true });
-    setMapCenter({ lat: place.lat, lng: place.lng });
-    setMarkerPosition({ lat: place.lat, lng: place.lng });
-  };
-
-  const handleMapClick = (lat: number, lng: number) => {
-    setMarkerPosition({ lat, lng });
-    form.setValue("latitude", lat, { shouldValidate: true });
-    form.setValue("longitude", lng, { shouldValidate: true });
-    toast.info("Lokasi peta diperbarui. Anda mungkin perlu menyesuaikan alamat lengkap secara manual.");
-  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
@@ -112,10 +77,8 @@ export default function CheckoutPage() {
       const newOrder = await createOrder(user.id, items, {
         name: values.name,
         fullAddress: values.fullAddress,
-        city: values.city,
-        postalCode: values.postalCode,
-        latitude: values.latitude,
-        longitude: values.longitude,
+        nagari: values.nagari,
+        kecamatan: values.kecamatan,
         phone: values.phone,
       });
 
@@ -188,26 +151,6 @@ export default function CheckoutPage() {
                     name="fullAddress"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cari Alamat</FormLabel>
-                        <FormControl>
-                          <AddressAutocompleteInput
-                            onPlaceSelect={handlePlaceSelect}
-                            defaultValue={field.value}
-                            disabled={form.formState.isSubmitting}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Mulai ketik alamat Anda dan pilih dari saran.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="fullAddress"
-                    render={({ field }) => (
-                      <FormItem>
                         <FormLabel>Alamat Lengkap</FormLabel>
                         <FormControl>
                           <Input placeholder="Jl. Jenderal Sudirman No. 52-53" {...field} />
@@ -221,12 +164,12 @@ export default function CheckoutPage() {
                   />
                   <FormField
                     control={form.control}
-                    name="city"
+                    name="nagari"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Kota</FormLabel>
+                        <FormLabel>Nagari</FormLabel>
                         <FormControl>
-                          <Input placeholder="Jakarta" {...field} />
+                          <Input placeholder="Contoh: Koto Gadang" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -234,12 +177,12 @@ export default function CheckoutPage() {
                   />
                   <FormField
                     control={form.control}
-                    name="postalCode"
+                    name="kecamatan"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Kode Pos (Opsional)</FormLabel>
+                        <FormLabel>Kecamatan</FormLabel>
                         <FormControl>
-                          <Input placeholder="12345" {...field} value={field.value ?? ""} />
+                          <Input placeholder="Contoh: IV Koto" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -258,21 +201,6 @@ export default function CheckoutPage() {
                       </FormItem>
                     )}
                   />
-                  <FormItem>
-                    <FormLabel>Pilih Lokasi di Peta</FormLabel>
-                    <FormControl>
-                      <GoogleMapPicker
-                        center={mapCenter}
-                        markerPosition={markerPosition}
-                        onMapClick={handleMapClick}
-                        className="h-80"
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Klik pada peta untuk menyesuaikan lokasi pengiriman.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
                    <Button type="submit" size="lg" className="w-full mt-6" disabled={form.formState.isSubmitting}>
                     {form.formState.isSubmitting ? "Membuat Pesanan..." : "Buat Pesanan"}
                   </Button>

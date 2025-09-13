@@ -22,10 +22,8 @@ export interface Order {
   status: 'pending' | 'processing' | 'completed' | 'cancelled';
   shipping_address_name: string;
   shipping_address_full: string;
-  shipping_address_city: string;
-  shipping_address_postal_code: string | null;
-  shipping_address_latitude: number | null;
-  shipping_address_longitude: number | null;
+  shipping_address_nagari: string;
+  shipping_address_kecamatan: string;
   contact_phone: string;
   payment_method_id: string | null;
   created_at: string;
@@ -41,10 +39,8 @@ export async function createOrder(
   shippingInfo: {
     name: string;
     fullAddress: string;
-    city: string;
-    postalCode: string | null;
-    latitude: number | null;
-    longitude: number | null;
+    nagari: string;
+    kecamatan: string;
     phone: string;
   }
 ): Promise<Order | null> {
@@ -58,10 +54,8 @@ export async function createOrder(
       status: 'pending',
       shipping_address_name: shippingInfo.name,
       shipping_address_full: shippingInfo.fullAddress,
-      shipping_address_city: shippingInfo.city,
-      shipping_address_postal_code: shippingInfo.postalCode,
-      shipping_address_latitude: shippingInfo.latitude,
-      shipping_address_longitude: shippingInfo.longitude,
+      shipping_address_nagari: shippingInfo.nagari,
+      shipping_address_kecamatan: shippingInfo.kecamatan,
       contact_phone: shippingInfo.phone,
     })
     .select()

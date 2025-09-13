@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import * => React from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -143,7 +143,7 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
               <h3 className="font-semibold text-lg mb-2">Alamat Pengiriman</h3>
               <div className="space-y-1 text-muted-foreground text-sm">
                 <p className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> {order.shipping_address_name}</p>
-                <p className="flex items-start gap-2"><MapPin className="h-4 w-4 mt-1" /> {order.shipping_address_full}, {order.shipping_address_city} {order.shipping_address_postal_code}</p>
+                <p className="flex items-start gap-2"><MapPin className="h-4 w-4 mt-1" /> {order.shipping_address_full}, {order.shipping_address_nagari}, {order.shipping_address_kecamatan}</p>
                 <p className="flex items-center gap-2"><Phone className="h-4 w-4" /> {order.contact_phone}</p>
               </div>
             </div>
