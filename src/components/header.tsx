@@ -11,17 +11,23 @@ import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSettings } from "@/lib/supabase/app-settings";
-import { useCart } from "@/context/cart-context"; // Import useCart
-import { ChatNotificationIcon } from "./chat-notification-icon"; // Import ChatNotificationIcon
-import { AdminChatNotificationIcon } from "./admin-chat-notification-icon"; // Import AdminChatNotificationIcon
-import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
+import { useCart } from "@/context/cart-context";
+import { ChatNotificationIcon } from "./chat-notification-icon";
+import { AdminChatNotificationIcon } from "./admin-chat-notification-icon";
+import { useAdmin } from "@/hooks/use-admin";
+import { useRouter } from "next/navigation"; // Import useRouter
+import { CartSheet } from "./cart-sheet"; // Import CartSheet
+import { ChatWidget } from "./chat-widget"; // Import ChatWidget
 
 export function Header() {
   const { session, isLoading: isAuthLoading, user } = useAuth();
-  const { totalItems } = useCart(); // Dapatkan totalItems dari useCart
-  const { isAdmin } = useAdmin(); // Dapatkan status admin
+  const { totalItems } = useCart();
+  const { isAdmin } = useAdmin();
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+  const [searchQuery, setSearchQuery] = useState(""); // State untuk input pencarian
+  const [isGeneralChatOpen, setIsGeneralChatOpen] = useState(false); // State untuk ChatWidget umum
+  const router = useRouter(); // Inisialisasi useRouter
 
   useEffect(() => {
     const fetchAppSettings = async () => {
@@ -43,6 +49,14 @@ export function Header() {
     fetchAppSettings();
   }, []);
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery(""); // Bersihkan input setelah pencarian
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300">
@@ -53,12 +67,6 @@ export function Header() {
             </a>
           </div>
           <div className="flex space-x-4">
-            {/* <a href="#" className="hover:underline">
-              Jual di Cellkom
-            </a>
-            <a href="#" className="hover:underline">
-              Cellkom Ticket Reward
-            </a> */}
             <a href="#" className="hover:underline">
               Bantuan
             </a>
@@ -79,51 +87,62 @@ export function Header() {
         </div>
 
         <div className="flex-1 max-w-xl hidden lg:block">
-          <div className="relative">
+          <form onSubmit={handleSearch} className="relative">
             <Input
               type="search"
               placeholder="Cari produk..."
               className="w-full pl-10 pr-4 rounded-full bg-gray-100 dark:bg-gray-700 border-none focus-visible:ring-0"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
-          </div>
+            <Button type="submit" variant="ghost" size="icon" className="absolute right-0 top-1/2 -translate-y-1/2 h-full w-10 rounded-full">
+              <Search className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+              <span className="sr-only">Cari</span>
+            </Button>
+          </form>
         </div>
 
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="lg:hidden">
+          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => router.push(`/search`)}>
             <Search className="h-5 w-5" />
+            <span className="sr-only">Cari</span>
           </Button>
-          <Button variant="ghost" size="icon" className="relative">
-            <ShoppingCart className="h-5 w-5" />
-            {totalItems > 0 && ( // Tampilkan badge hanya jika ada item
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary p-1 text-xs text-primary-foreground">
-                {totalItems}
-              </span>
-            )}
-          </Button>
+          <CartSheet /> {/* Mengganti tombol keranjang dengan CartSheet */}
           <Button variant="ghost" size="icon">
             <Heart className="h-5 w-5" />
+            <span className="sr-only">Favorit</span>
           </Button>
           {user && isAdmin ? (
             <AdminChatNotificationIcon />
           ) : user && !isAdmin ? (
             <ChatNotificationIcon />
           ) : (
-            <Button variant="ghost" size="icon">
-              <MessageSquare className="h-5 w-5" />
-            </Button>
+            <>
+              <Button variant="ghost" size="icon" onClick={() => setIsGeneralChatOpen(true)}>
+                <MessageSquare className="h-5 w-5" />
+                <span className="sr-only">Chat</span>
+              </Button>
+              <ChatWidget
+                productId={null}
+                productName={null}
+                open={isGeneralChatOpen}
+                onOpenChange={setIsGeneralChatOpen}
+              />
+            </>
           )}
           <Button variant="ghost" size="icon">
             <Bell className="h-5 w-5" />
+            <span className="sr-only">Notifikasi</span>
           </Button>
           {isAuthLoading ? (
             <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
           ) : session ? (
             <UserNav />
           ) : (
-            <Link href="/auth"> {/* Perbaiki tautan ke /auth */}
+            <Link href="/auth">
               <Button variant="ghost" size="icon">
                 <User className="h-5 w-5" />
+                <span className="sr-only">Akun</span>
               </Button>
             </Link>
           )}
