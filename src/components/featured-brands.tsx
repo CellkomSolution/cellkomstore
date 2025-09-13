@@ -1,49 +1,88 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const brands = [
-  { name: "Kurumi", logoSrc: "/kurumi-logo.png", slug: "kurumi" },
-  { name: "Redigo", logoSrc: "/redigo-logo.png", slug: "redigo" },
-  { name: "Premier League", logoSrc: "/premier-league-logo.png", slug: "premier-league" },
-  { name: "Samsung", logoSrc: null, slug: "samsung" },
-  { name: "Apple", logoSrc: null, slug: "apple" },
-  { name: "Xiaomi", logoSrc: null, slug: "xiaomi" },
-];
+interface FeaturedBrand {
+  id: string;
+  image_url: string;
+  link_url: string;
+  order: number;
+}
 
-export function FeaturedBrands() {
+export const FeaturedBrands = () => {
+  const [brands, setBrands] = useState<FeaturedBrand[]>([]);
+  const [title, setTitle] = useState<string>("Brand Pilihan");
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchFeaturedBrands = async () => {
+      setLoading(true);
+      const { data: brandsData, error: brandsError } = await supabase
+        .from("featured_brands")
+        .select("*")
+        .order("order", { ascending: true });
+
+      const { data: settingsData, error: settingsError } = await supabase
+        .from("app_settings")
+        .select("featured_brands_title")
+        .single();
+
+      if (brandsError) {
+        console.error("Error fetching featured brands:", brandsError.message);
+      } else {
+        setBrands(brandsData || []);
+      }
+
+      if (settingsError) {
+        console.error("Error fetching featured brands title:", settingsError.message);
+      } else {
+        setTitle(settingsData?.featured_brands_title || "Brand Pilihan");
+      }
+      setLoading(false);
+    };
+
+    fetchFeaturedBrands();
+  }, []);
+
   return (
     <section className="bg-card p-4 rounded-lg border">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">Brand Pilihan</h2>
+        <h2 className="text-xl font-bold">{title}</h2>
         <Link href="/brands" className="text-sm font-semibold text-primary hover:underline flex items-center">
-          Lihat Semua <ChevronRight className="h-4 w-4" />
+          Lihat Semua
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+            stroke="currentColor"
+            className="w-4 h-4 ml-1"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
         </Link>
       </div>
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
-        {brands.map((brand) => (
-          <Link href={`/brand/${brand.slug}`} key={brand.name}>
-            <Card className="p-4 flex items-center justify-center aspect-square hover:shadow-md transition-shadow">
-              {brand.logoSrc ? (
-                <div className="relative w-full h-full">
-                  <Image
-                    src={brand.logoSrc}
-                    alt={`${brand.name} logo`}
-                    fill
-                    style={{ objectFit: "contain" }}
-                    className="p-2"
-                  />
-                </div>
-              ) : (
-                <span className="font-bold text-muted-foreground">{brand.name}</span>
-              )}
-            </Card>
-          </Link>
-        ))}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {loading ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="w-full h-24 rounded-lg" />
+          ))
+        ) : brands.length === 0 ? (
+          <p className="col-span-full text-center text-muted-foreground">Belum ada merek unggulan untuk ditampilkan.</p>
+        ) : (
+          brands.map((brand) => (
+            <Link href={brand.link_url || "#"} key={brand.id} target="_blank" rel="noopener noreferrer">
+              <Card className="flex items-center justify-center p-2 h-24 hover:shadow-md transition-shadow">
+                <img src={brand.image_url} alt="Brand Logo" className="max-h-full max-w-full object-contain" />
+              </Card>
+            </Link>
+          ))
+        )}
       </div>
     </section>
   );
-}
+};
