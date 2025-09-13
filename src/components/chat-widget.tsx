@@ -26,8 +26,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import Image from "next/image"; // Import Image component
-import { getProductById } from "@/lib/supabase/products"; // Import getProductById
+import Image from "next/image";
+import { getProductById } from "@/lib/supabase/products";
 
 interface ChatWidgetProps {
   productId?: string | null;
@@ -47,9 +47,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
   const [isLoadingAdminId, setIsLoadingAdminId] = React.useState(true);
   const isMobile = useIsMobile();
 
-  // State to hold product details if chat is initiated from a product page
-  const [initialProductContext, setInitialProductContext] = React.useState<{ id: string; name: string; imageUrl: string } | null>(null);
-
   React.useEffect(() => {
     async function loadAdminId() {
       setIsLoadingAdminId(true);
@@ -59,23 +56,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     }
     loadAdminId();
   }, []);
-
-  // Fetch initial product details if productId is provided
-  React.useEffect(() => {
-    async function loadInitialProductContext() {
-      if (productId) {
-        const product = await getProductById(productId);
-        if (product) {
-          setInitialProductContext({ id: product.id, name: product.name, imageUrl: product.imageUrl });
-        } else {
-          setInitialProductContext(null);
-        }
-      } else {
-        setInitialProductContext(null);
-      }
-    }
-    loadInitialProductContext();
-  }, [productId]);
 
   const fetchMessages = React.useCallback(async () => {
     if (!user || !targetAdminId) return;
@@ -89,40 +69,44 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     }
 
     setIsLoadingMessages(true);
-    // Fetch all messages between the user and the admin
     const fetchedMessages = await getChatMessages(user.id, targetAdminId);
     
-    let finalMessages: ChatMessage[] = fetchedMessages;
+    const finalMessages: ChatMessage[] = [];
+    const productsIntroduced = new Set<string>();
 
-    // If there's an initial product context, append a system message to the end of fetched messages
-    if (initialProductContext) {
-      const systemProductMessage: ChatMessage = {
-        id: `system-product-intro-${initialProductContext.id}`, // Unique ID for system message
-        sender_id: 'system-id', // Dummy ID for system messages
-        receiver_id: user.id, // Dummy ID
-        message: `Percakapan ini dimulai terkait produk: ${initialProductContext.name}`,
-        created_at: new Date().toISOString(), // Use current time or earliest message time
-        product_id: initialProductContext.id,
-        is_read: true,
-        updated_at: new Date().toISOString(),
-        sender_profile: [], // System messages don't have profiles
-        receiver_profile: [],
-        products: [{ name: initialProductContext.name, image_url: initialProductContext.imageUrl }],
-        type: 'system',
-      };
-      finalMessages = [...fetchedMessages, systemProductMessage]; // Append to the end
+    for (const msg of fetchedMessages) {
+      if (msg.product_id && !productsIntroduced.has(msg.product_id)) {
+        const product = await getProductById(msg.product_id);
+        if (product) {
+          finalMessages.push({
+            id: `system-product-intro-${msg.product_id}-${msg.id}`,
+            sender_id: 'system-id',
+            receiver_id: user.id,
+            message: `Percakapan ini dimulai terkait produk: ${product.name}`,
+            created_at: msg.created_at,
+            product_id: product.id,
+            is_read: true,
+            updated_at: msg.created_at,
+            sender_profile: [],
+            receiver_profile: [],
+            products: [{ name: product.name, image_url: product.imageUrl }],
+            type: 'system',
+          });
+          productsIntroduced.add(msg.product_id);
+        }
+      }
+      finalMessages.push(msg);
     }
 
     setMessages(finalMessages);
     setIsLoadingMessages(false);
 
     try {
-      // Mark all unread messages from admin to user as read
       await markMessagesAsRead(targetAdminId, user.id);
     } catch (error) {
       console.error("Failed to mark messages as read in ChatWidget:", error);
     }
-  }, [user, targetAdminId, onOpenChange, initialProductContext]); // Add initialProductContext to dependencies
+  }, [user, targetAdminId, onOpenChange]);
 
   React.useEffect(() => {
     if (open && user && targetAdminId) {
@@ -132,7 +116,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
         return;
       }
 
-      // Subscribe to all messages between the user and the admin
       const channelName = `unified_chat_${user.id}_${targetAdminId}`;
 
       const channel = supabase
@@ -143,7 +126,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
             event: "INSERT",
             schema: "public",
             table: "chats",
-            filter: `or(sender_id.eq.${user.id},receiver_id.eq.${user.id})`, // Listen for messages involving this user
+            filter: `or(sender_id.eq.${user.id},receiver_id.eq.${user.id})`,
           },
           (payload) => {
             const newMsg = payload.new as ChatMessage;
@@ -182,7 +165,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
 
     setIsSending(true);
     const { data, error } = await supabase.from("chats").insert({
-      product_id: productId || null, // Still associate message with product if initiated from product page
+      product_id: productId || null,
       sender_id: user.id,
       receiver_id: targetAdminId,
       message: newMessage.trim(),
@@ -205,7 +188,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
 
   const Title = () => <p>Chat {productName ? `tentang ${productName}` : 'Admin'}</p>;
 
-  // Render loading state for the widget itself
   if (isSessionLoading || isLoadingAdminId) {
     const Content = () => (
       <div className="flex-1 flex flex-col items-center justify-center text-center">
@@ -238,7 +220,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     }
   }
 
-  // Render login prompt if user is not logged in
   if (!user) {
     const Content = () => (
       <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
@@ -275,7 +256,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     }
   }
 
-  // Render "No Admin" message if no admin ID is found after loading
   if (!targetAdminId) {
     const Content = () => (
       <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
@@ -311,7 +291,6 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     }
   }
 
-  // Actual chat content
   const ChatContent = (
     <>
       <div className="flex-1 flex flex-col overflow-hidden border rounded-md bg-muted/20">
@@ -344,7 +323,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                             </span>
                           </div>
                         )}
-                        {!msg.products?.[0] && msg.message} {/* Fallback if product info is missing for some reason */}
+                        {!msg.products?.[0] && msg.message}
                       </div>
                     ) : (
                       <>
@@ -380,7 +359,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
                             <AvatarFallback>
-                              {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                              {profile?.first_name ? profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
                             </AvatarFallback>
                           </Avatar>
                         )}
