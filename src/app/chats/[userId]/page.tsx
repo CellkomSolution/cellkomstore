@@ -20,11 +20,11 @@ import Link from "next/link";
 import Image from "next/image";
 
 interface AdminChatDetailPageProps {
-  params: { userId: string } | Promise<{ userId: string }>; // Menyesuaikan tipe params
+  params: { userId: string }; // Menggunakan tipe yang sebenarnya diterima oleh komponen klien
 }
 
 export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps) {
-  const { userId } = params as { userId: string }; // Type assertion for params
+  const { userId } = params; // Langsung mengakses userId karena params adalah objek biasa
   const router = useRouter();
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();
 
@@ -184,7 +184,6 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
 
   return (
     <Card className="h-full flex flex-col">
-      {/* Mengganti CardHeader dengan div untuk tata letak kustom */}
       <div className="border-b p-4 flex flex-row items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.push("/chats")}>
