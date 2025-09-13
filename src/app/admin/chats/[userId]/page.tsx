@@ -44,14 +44,14 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
         if (userProfileError) {
           console.error("Error fetching user profile:", userProfileError.message);
           toast.error("Gagal memuat profil pengguna.");
-          router.push("/admin/chats");
+          // No redirect here, just show empty state or error in the panel
           return;
         }
         setOtherUserProfile(userProfileData);
       }
     }
     loadUserProfile();
-  }, [userId, adminUser, adminId, router]);
+  }, [userId, adminUser, adminId]);
 
   const fetchMessages = React.useCallback(async () => {
     if (!adminUser || !adminId || !otherUserProfile) return;
@@ -164,7 +164,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
 
   if (isSessionLoading || !adminId || !otherUserProfile) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
+      <div className="flex h-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         <p className="ml-2">Memuat percakapan...</p>
       </div>
@@ -172,130 +172,118 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
   }
 
   return (
-    <div className="space-y-6 py-8">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-5 w-5" />
-          <span className="sr-only">Kembali</span>
-        </Button>
-        <h2 className="text-2xl font-bold">
-          Chat dengan {otherUserProfile.first_name || "Pengguna"} {otherUserProfile.last_name || ""}
-        </h2>
-      </div>
-
-      <Card className="flex flex-col h-[calc(100vh-200px)]">
-        <CardHeader className="border-b p-4 flex flex-row items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={otherUserProfile.avatar_url || undefined} />
-              <AvatarFallback>
-                {otherUserProfile.first_name ? otherUserProfile.first_name[0].toUpperCase() : <UserIcon className="h-5 w-5" />}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle className="text-lg">
-                {otherUserProfile.first_name || "Pengguna"} {otherUserProfile.last_name || ""}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">{otherUserProfile.email}</p>
-            </div>
+    <div className="flex flex-col h-full">
+      <CardHeader className="border-b p-4 flex flex-row items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={otherUserProfile.avatar_url || undefined} />
+            <AvatarFallback>
+              {otherUserProfile.first_name ? otherUserProfile.first_name[0].toUpperCase() : <UserIcon className="h-5 w-5" />}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <CardTitle className="text-lg">
+              {otherUserProfile.first_name || "Pengguna"} {otherUserProfile.last_name || ""}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">{otherUserProfile.email}</p>
           </div>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
-          {isLoadingMessages ? (
-            <div className="flex-1 flex items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                {messages.length === 0 ? (
-                  <p className="text-center text-muted-foreground text-sm">
-                    Belum ada pesan. Mulai chat Anda sekarang!
-                  </p>
-                ) : (
-                  messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex items-start gap-3 ${
-                        msg.type === 'system' ? 'justify-center' : (msg.sender_id === adminUser?.id ? "justify-end" : "justify-start")
-                      }`}
-                    >
-                      {msg.type === 'system' ? (
-                        <div className="w-full text-center text-muted-foreground text-sm my-2">
-                          {msg.products?.[0] && (
-                            <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
+        {isLoadingMessages ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <ScrollArea className="flex-1 p-4">
+            <div className="space-y-4">
+              {messages.length === 0 ? (
+                <p className="text-center text-muted-foreground text-sm">
+                  Belum ada pesan. Mulai chat Anda sekarang!
+                </p>
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex items-start gap-3 ${
+                      msg.type === 'system' ? 'justify-center' : (msg.sender_id === adminUser?.id ? "justify-end" : "justify-start")
+                    }`}
+                  >
+                    {msg.type === 'system' ? (
+                      <div className="w-full text-center text-muted-foreground text-sm my-2">
+                        {msg.products?.[0] && (
+                          <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
+                            <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                            <span>
+                              Percakapan tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
+                            </span>
+                          </div>
+                        )}
+                        {!msg.products?.[0] && msg.message} {/* Fallback if product info is missing for some reason */}
+                      </div>
+                    ) : (
+                      <>
+                        {msg.sender_id !== adminUser?.id && (
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
+                            <AvatarFallback>
+                              {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div
+                          className={`max-w-[70%] p-3 rounded-lg ${
+                            msg.sender_id === adminUser?.id
+                                ? "bg-primary text-primary-foreground rounded-br-none"
+                                : "bg-card text-foreground rounded-bl-none border"
+                          }`}
+                        >
+                          <p className="text-sm">{msg.message}</p>
+                          {msg.product_id && msg.products?.[0] && (
+                            <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
                               <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
-                              <span>
-                                Percakapan tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
+                              <span className="text-xs text-muted-foreground line-clamp-1">
+                                Tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
                               </span>
                             </div>
                           )}
-                          {!msg.products?.[0] && msg.message} {/* Fallback if product info is missing for some reason */}
+                          <p className={`text-xs mt-1 ${msg.sender_id === adminUser?.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                            {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
+                          </p>
                         </div>
-                      ) : (
-                        <>
-                          {msg.sender_id !== adminUser?.id && (
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
-                              <AvatarFallback>
-                                {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
-                              </AvatarFallback>
-                            </Avatar>
-                          )}
-                          <div
-                            className={`max-w-[70%] p-3 rounded-lg ${
-                              msg.sender_id === adminUser?.id
-                                ? "bg-primary text-primary-foreground rounded-br-none"
-                                : "bg-card text-foreground rounded-bl-none border"
-                            }`}
-                          >
-                            <p className="text-sm">{msg.message}</p>
-                            {msg.product_id && msg.products?.[0] && (
-                              <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
-                                <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
-                                <span className="text-xs text-muted-foreground line-clamp-1">
-                                  Tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
-                                </span>
-                              </div>
-                            )}
-                            <p className={`text-xs mt-1 ${msg.sender_id === adminUser?.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                              {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
-                            </p>
-                          </div>
-                          {msg.sender_id === adminUser?.id && (
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
-                              <AvatarFallback>
-                                {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
-                              </AvatarFallback>
-                            </Avatar>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
-          )}
-        </CardContent>
-        <div className="border-t p-4">
-          <form onSubmit={handleSendMessage} className="flex gap-2">
-            <Input
-              placeholder="Ketik balasan Anda..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              disabled={isSending}
-              className="flex-1"
-            />
-            <Button type="submit" disabled={isSending}>
-              {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              <span className="sr-only">Kirim</span>
-            </Button>
-          </form>
-        </div>
-      </Card>
+                        {msg.sender_id === adminUser?.id && (
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
+                            <AvatarFallback>
+                              {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+        )}
+      </CardContent>
+      <div className="border-t p-4">
+        <form onSubmit={handleSendMessage} className="flex gap-2">
+          <Input
+            placeholder="Ketik balasan Anda..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            disabled={isSending}
+            className="flex-1"
+          />
+          <Button type="submit" disabled={isSending}>
+            {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            <span className="sr-only">Kirim</span>
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }
