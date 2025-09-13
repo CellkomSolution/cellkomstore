@@ -18,7 +18,7 @@ export function useGoogleMapsLoader(options?: UseGoogleMapsLoaderOptions) {
 
   React.useEffect(() => {
     // Cara yang benar untuk mengakses variabel lingkungan
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const apiKey = process.env.AIzaSyBjkMJjjyUCe9kFwfjNNCZyah1XAwUGpkA;
 
     if (!apiKey) {
       const err = new Error("Google Maps API Key tidak ditemukan. Harap atur variabel lingkungan NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.");
