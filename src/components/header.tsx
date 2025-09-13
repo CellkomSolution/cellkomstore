@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChatNotificationIcon } from "./chat-notification-icon"; // Import ChatNotificationIcon
 import { AdminChatNotificationIcon } from "./admin-chat-notification-icon"; // Import AdminChatNotificationIcon
 import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
+import { CategorySheet } from "./category-sheet"; // Import CategorySheet
 
 export function Header() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -75,10 +76,7 @@ export function Header() {
                 appSettings?.site_name || "Cellkom Store"
               )}
             </Link>
-            <Button variant="ghost" className="hidden md:flex items-center gap-2 text-sm text-gray-500 hover:text-primary">
-              <LayoutGrid className="h-5 w-5" />
-              <span>Kategori</span>
-            </Button>
+            <CategorySheet /> {/* Integrated CategorySheet here */}
           </div>
 
           <div className="flex-1 max-w-xl hidden sm:flex">
