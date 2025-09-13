@@ -44,7 +44,6 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
         if (userProfileError) {
           console.error("Error fetching user profile:", userProfileError.message);
           toast.error("Gagal memuat profil pengguna.");
-          // No redirect here, just show empty state or error in the panel
           return;
         }
         setOtherUserProfile(userProfileData);
@@ -60,19 +59,18 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
       const fetchedMessages = await getChatMessages(userId, adminId);
       
       const finalMessages: ChatMessage[] = [];
-      const productsIntroduced = new Set<string>(); // To track products for system messages
+      const productsIntroduced = new Set<string>();
 
       for (const msg of fetchedMessages) {
-        // Add system message for product context if it's the first time this product is mentioned
         if (msg.product_id && !productsIntroduced.has(msg.product_id)) {
           const product = await getProductById(msg.product_id);
           if (product) {
             finalMessages.push({
-              id: `system-product-intro-${msg.product_id}-${msg.id}`, // Unique ID for system message
-              sender_id: 'system-id', // Dummy ID for system messages
-              receiver_id: adminId, // Dummy ID
+              id: `system-product-intro-${msg.product_id}-${msg.id}`,
+              sender_id: 'system-id',
+              receiver_id: adminId,
               message: `Percakapan ini dimulai terkait produk: ${product.name}`,
-              created_at: msg.created_at, // Use message's timestamp for ordering
+              created_at: msg.created_at,
               product_id: product.id,
               is_read: true,
               updated_at: msg.created_at,
@@ -89,7 +87,6 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
 
       setMessages(finalMessages);
       
-      // Mark messages as read
       await markMessagesAsRead(userId, adminId);
     } catch (error) {
       console.error("Error in fetchMessages for AdminChatDetailPage:", error);
@@ -112,7 +109,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
             event: "INSERT",
             schema: "public",
             table: "chats",
-            filter: `or(sender_id.eq.${userId},receiver_id.eq.${userId})`, // Listen for messages involving this user
+            filter: `or(sender_id.eq.${userId},receiver_id.eq.${userId})`,
           },
           (payload) => {
             const newMsg = payload.new as ChatMessage;
@@ -120,7 +117,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
               (newMsg.sender_id === userId && newMsg.receiver_id === adminId) ||
               (newMsg.sender_id === adminId && newMsg.receiver_id === userId)
             ) {
-              fetchMessages(); // Refetch all messages to get full profile data and re-evaluate system messages
+              fetchMessages();
             }
           }
         )
@@ -145,7 +142,6 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
       sender_id: adminUser.id,
       receiver_id: userId,
       message: newMessage.trim(),
-      // product_id is not set here, as it's a general chat from admin side
     }).select(`
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
@@ -164,17 +160,26 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
 
   if (isSessionLoading || !adminId || !otherUserProfile) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        <p className="ml-2">Memuat percakapan...</p>
-      </div>
+      <Card className="h-full flex flex-col">
+        <CardHeader>
+          <CardTitle>Detail Chat Admin</CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <p className="ml-2">Memuat percakapan...</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <Card className="h-full flex flex-col">
       <CardHeader className="border-b p-4 flex flex-row items-center justify-between">
         <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => router.push("/admin/chats")}>
+            <ArrowLeft className="h-5 w-5" />
+            <span className="sr-only">Kembali</span>
+          </Button>
           <Avatar className="h-10 w-10">
             <AvatarImage src={otherUserProfile.avatar_url || undefined} />
             <AvatarFallback>
@@ -219,7 +224,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
                             </span>
                           </div>
                         )}
-                        {!msg.products?.[0] && msg.message} {/* Fallback if product info is missing for some reason */}
+                        {!msg.products?.[0] && msg.message}
                       </div>
                     ) : (
                       <>
@@ -284,6 +289,6 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
           </Button>
         </form>
       </div>
-    </div>
+    </Card>
   );
 }
