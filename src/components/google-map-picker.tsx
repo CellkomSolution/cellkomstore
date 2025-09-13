@@ -3,7 +3,9 @@
 import * as React from "react";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
-import { useGoogleMapsLoader } from "@/hooks/use-google-maps-loader"; // Import hook baru
+import { useGoogleMapsLoader } from "@/hooks/use-google-maps-loader";
+
+import "google.maps"; // Menambahkan ini untuk membantu TypeScript mengenali tipe global 'google'
 
 interface GoogleMapPickerProps {
   center: { lat: number; lng: number };
@@ -23,7 +25,7 @@ export function GoogleMapPicker({
   const mapRef = React.useRef<HTMLDivElement>(null);
   const mapInstanceRef = React.useRef<google.maps.Map | null>(null);
   const markerInstanceRef = React.useRef<google.maps.Marker | null>(null);
-  const { isLoaded: isApiLoaded, isLoading: isLoaderLoading } = useGoogleMapsLoader(); // Gunakan hook baru
+  const { isLoaded: isApiLoaded, isLoading: isLoaderLoading } = useGoogleMapsLoader();
 
   React.useEffect(() => {
     if (isApiLoaded && mapRef.current) {
@@ -62,7 +64,7 @@ export function GoogleMapPicker({
           markerInstanceRef.current.setPosition(markerPosition);
         }
       } else if (markerInstanceRef.current) {
-        markerInstanceRef.current.setMap(null); // Remove marker if no position
+        markerInstanceRef.current.setMap(null);
         markerInstanceRef.current = null;
       }
     }
@@ -70,7 +72,7 @@ export function GoogleMapPicker({
 
   return (
     <div className={`relative w-full h-64 rounded-lg overflow-hidden ${className}`}>
-      {isLoaderLoading && ( // Gunakan isLoaderLoading dari hook
+      {isLoaderLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
           <Loader className="h-8 w-8 animate-spin text-primary" />
         </div>

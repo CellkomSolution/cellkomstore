@@ -4,7 +4,9 @@ import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
-import { useGoogleMapsLoader } from "@/hooks/use-google-maps-loader"; // Import hook baru
+import { useGoogleMapsLoader } from "@/hooks/use-google-maps-loader";
+
+import "google.maps"; // Menambahkan ini untuk membantu TypeScript mengenali tipe global 'google'
 
 interface AddressAutocompleteInputProps {
   onPlaceSelect: (place: {
@@ -25,7 +27,7 @@ export function AddressAutocompleteInput({
 }: AddressAutocompleteInputProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const autocompleteRef = React.useRef<google.maps.places.Autocomplete | null>(null);
-  const { isLoaded: isApiLoaded, isLoading: isLoaderLoading } = useGoogleMapsLoader({ libraries: ["places"] }); // Gunakan hook baru
+  const { isLoaded: isApiLoaded, isLoading: isLoaderLoading } = useGoogleMapsLoader({ libraries: ["places"] });
 
   React.useEffect(() => {
     if (isApiLoaded && inputRef.current) {
@@ -72,10 +74,10 @@ export function AddressAutocompleteInput({
         ref={inputRef}
         placeholder="Cari alamat Anda..."
         defaultValue={defaultValue}
-        disabled={disabled || isLoaderLoading} // Gunakan isLoaderLoading dari hook
+        disabled={disabled || isLoaderLoading}
         className="pr-10"
       />
-      {isLoaderLoading && ( // Gunakan isLoaderLoading dari hook
+      {isLoaderLoading && (
         <div className="absolute inset-y-0 right-0 flex items-center pr-3">
           <Loader className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
