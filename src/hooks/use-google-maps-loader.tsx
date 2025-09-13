@@ -4,7 +4,7 @@ import * as React from "react";
 import { Loader as GoogleMapsLoader } from "@googlemaps/js-api-loader";
 import { toast } from "sonner";
 
-import "google.maps"; // Menambahkan ini untuk membantu TypeScript mengenali tipe global 'google'
+// import "google.maps"; // Dihapus: Ini menyebabkan kesalahan 'Module not found'
 
 interface UseGoogleMapsLoaderOptions {
   // Opsi ini masih bisa ada jika komponen ingin mendeklarasikan apa yang ingin mereka gunakan,

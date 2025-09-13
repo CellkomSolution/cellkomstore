@@ -6,7 +6,7 @@ import { Loader } from "lucide-react";
 import { toast } from "sonner";
 import { useGoogleMapsLoader } from "@/hooks/use-google-maps-loader";
 
-import "google.maps"; // Menambahkan ini untuk membantu TypeScript mengenali tipe global 'google'
+// import "google.maps"; // Dihapus: Ini menyebabkan kesalahan 'Module not found'
 
 interface AddressAutocompleteInputProps {
   onPlaceSelect: (place: {
