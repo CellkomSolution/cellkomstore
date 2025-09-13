@@ -19,7 +19,11 @@ import { getProductById, Product, mapProductData } from "@/lib/supabase/products
 import Link from "next/link";
 import Image from "next/image";
 
-export default function AdminChatDetailPage({ params }: { params: { userId: string } }) {
+interface AdminChatDetailPageProps {
+  params: { userId: string };
+}
+
+export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps) {
   const { userId } = params;
   const router = useRouter();
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();
@@ -198,8 +202,7 @@ export default function AdminChatDetailPage({ params }: { params: { userId: stri
             </CardTitle>
             <p className="text-sm text-muted-foreground">{otherUserProfile.email}</p>
           </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
       <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
         {isLoadingMessages ? (
           <div className="flex-1 flex items-center justify-center">
