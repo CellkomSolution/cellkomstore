@@ -4,18 +4,12 @@ import * as React from "react";
 import { Loader as GoogleMapsLoader } from "@googlemaps/js-api-loader";
 import { toast } from "sonner";
 
-// import "google.maps"; // Dihapus: Ini menyebabkan kesalahan 'Module not found'
-
 interface UseGoogleMapsLoaderOptions {
-  // Opsi ini masih bisa ada jika komponen ingin mendeklarasikan apa yang ingin mereka gunakan,
-  // tetapi loader yang sebenarnya akan memuat set yang tetap untuk konsistensi.
   libraries?: ("places" | "geometry" | "drawing" | "visualization")[];
 }
 
-// Gunakan variabel global untuk menyimpan instance Loader tunggal dan promis-nya
-// Ini memastikan bahwa ia hanya dibuat sekali dengan set opsi yang konsisten.
 let googleMapsLoaderInstance: GoogleMapsLoader | null = null;
-let googleMapsLoadPromise: Promise<typeof google> | null = null; // Tipe diubah di sini
+let googleMapsLoadPromise: Promise<typeof google> | null = null;
 
 export function useGoogleMapsLoader(options?: UseGoogleMapsLoaderOptions) {
   const [isLoaded, setIsLoaded] = React.useState(false);
@@ -24,10 +18,6 @@ export function useGoogleMapsLoader(options?: UseGoogleMapsLoaderOptions) {
 
   React.useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-    // --- DEBUGGING LOG ---
-    console.log("AIzaSyBjkMJjjyUCe9kFwfjNNCZyah1XAwUGpkA:", apiKey ? "Loaded (starts with: " + apiKey.substring(0, 5) + "...)" : "Not Loaded");
-    // --- END DEBUGGING LOG ---
 
     if (!apiKey) {
       const err = new Error("Google Maps API Key tidak ditemukan. Harap atur variabel lingkungan NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.");
@@ -38,18 +28,16 @@ export function useGoogleMapsLoader(options?: UseGoogleMapsLoaderOptions) {
       return;
     }
 
-    // Inisialisasi loader hanya sekali
     if (!googleMapsLoaderInstance) {
       googleMapsLoaderInstance = new GoogleMapsLoader({
         apiKey: apiKey,
         version: "weekly",
-        libraries: ["places"], // Selalu muat 'places' untuk konsistensi
-        id: "__googleMapsScriptId", // Pastikan ID konsisten
+        libraries: ["places"],
+        id: "__googleMapsScriptId",
       });
       googleMapsLoadPromise = googleMapsLoaderInstance.load();
     }
 
-    // Tunggu promise pemuatan tunggal
     if (googleMapsLoadPromise) {
       googleMapsLoadPromise
         .then(() => {
@@ -63,7 +51,7 @@ export function useGoogleMapsLoader(options?: UseGoogleMapsLoaderOptions) {
           setIsLoading(false);
         });
     }
-  }, []); // Array dependensi kosong memastikan ini hanya berjalan sekali saat mount
+  }, []);
 
   return { isLoaded, isLoading, error };
 }
