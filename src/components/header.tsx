@@ -19,10 +19,11 @@ import { useSession } from "@/context/session-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CategoryDropdown } from "./category-dropdown"; // Import the new component
+import { useRouter } from "next/navigation"; // Ensure useRouter is imported correctly
 
 export function Header() {
   const { user, isLoading: isSessionLoading } = useSession();
-  const router = React.useRouter();
+  const router = useRouter(); // Corrected: Call useRouter directly
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
