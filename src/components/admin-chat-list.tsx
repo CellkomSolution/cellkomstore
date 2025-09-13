@@ -57,7 +57,7 @@ export function AdminChatList() {
             fetchConversations();
             const newMsg = payload.new as ChatMessage;
             if (payload.eventType === 'INSERT' && newMsg.sender_id !== adminId) {
-              toast.info(`Pesan baru dari ${newMsg.sender_profile[0]?.first_name || 'Pengguna'}!`);
+              toast.info(`Pesan baru dari ${newMsg.sender_profile[0]?.first_name || newMsg.sender_profile[0]?.email || 'Pengguna'}!`);
             }
           }
         )
@@ -116,7 +116,7 @@ export function AdminChatList() {
                     <Avatar className="h-9 w-9">
                       <AvatarImage src={conv.avatar_url || undefined} />
                       <AvatarFallback>
-                        {conv.first_name ? conv.first_name[0].toUpperCase() : <UserIcon className="h-5 w-5" />}
+                        {conv.first_name ? conv.first_name[0].toUpperCase() : (conv.email ? conv.email[0].toUpperCase() : <UserIcon className="h-5 w-5" />)}
                       </AvatarFallback>
                     </Avatar>
                   </Link>
@@ -124,7 +124,7 @@ export function AdminChatList() {
                 <TableCell>
                   <Link href={`/chats/${conv.id}`} className="flex flex-col">
                     <div className="font-medium">
-                      {conv.first_name || "Pengguna"} {conv.last_name || ""}
+                      {conv.first_name || conv.email || "Pengguna"} {conv.last_name || ""}
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-1">
                       {conv.latestMessage}
