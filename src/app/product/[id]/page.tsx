@@ -17,8 +17,15 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ChatWidget } from "@/components/chat-widget"; // Import ChatWidget
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+interface ProductDetailPageProps {
+  params: Promise<{ id: string }>; // Menyesuaikan tipe params menjadi Promise
+}
+
+export default function ProductDetailPage({ params }: ProductDetailPageProps) {
+  // Menggunakan React.use() untuk meng-unwrap params
+  const unwrappedParams = React.use(params);
+  const { id } = unwrappedParams;
+
   const { addItem } = useCart();
   const isMobile = useIsMobile(); // Use the hook
   const { user } = useSession(); // Get user from session
