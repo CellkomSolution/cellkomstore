@@ -18,7 +18,7 @@ export function useGoogleMapsLoader(options?: UseGoogleMapsLoaderOptions) {
 
   React.useEffect(() => {
     // Cara yang benar untuk mengakses variabel lingkungan di Next.js
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=;
 
     if (!apiKey) {
       const err = new Error("Google Maps API Key tidak ditemukan. Harap atur variabel lingkungan NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.");
@@ -31,7 +31,7 @@ export function useGoogleMapsLoader(options?: UseGoogleMapsLoaderOptions) {
 
     if (!googleMapsLoaderInstance) {
       googleMapsLoaderInstance = new GoogleMapsLoader({
-        apiKey: AIzaSyBjkMJjjyUCe9kFwfjNNCZyah1XAwUGpkA,
+        apiKey: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
         version: "weekly",
         libraries: ["places"],
         id: "__googleMapsScriptId",
