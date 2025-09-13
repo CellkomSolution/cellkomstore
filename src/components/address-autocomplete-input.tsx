@@ -4,7 +4,7 @@ import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
-import { Loader as GoogleMapsLoader } from "@googlemaps/js-api-loader";
+import { useGoogleMapsLoader } from "@/hooks/use-google-maps-loader"; // Import hook baru
 
 interface AddressAutocompleteInputProps {
   onPlaceSelect: (place: {
@@ -25,25 +25,7 @@ export function AddressAutocompleteInput({
 }: AddressAutocompleteInputProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const autocompleteRef = React.useRef<google.maps.places.Autocomplete | null>(null);
-  const [isApiLoaded, setIsApiLoaded] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const loader = new GoogleMapsLoader({
-      apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-      version: "weekly",
-      libraries: ["places"],
-    });
-
-    loader.load().then(() => {
-      setIsApiLoaded(true);
-      setIsLoading(false);
-    }).catch((e) => {
-      console.error("Error loading Google Maps Places API:", e);
-      toast.error("Gagal memuat layanan peta. Periksa kunci API Anda.");
-      setIsLoading(false);
-    });
-  }, []);
+  const { isLoaded: isApiLoaded, isLoading: isLoaderLoading } = useGoogleMapsLoader({ libraries: ["places"] }); // Gunakan hook baru
 
   React.useEffect(() => {
     if (isApiLoaded && inputRef.current) {
@@ -90,10 +72,10 @@ export function AddressAutocompleteInput({
         ref={inputRef}
         placeholder="Cari alamat Anda..."
         defaultValue={defaultValue}
-        disabled={disabled || isLoading}
+        disabled={disabled || isLoaderLoading} // Gunakan isLoaderLoading dari hook
         className="pr-10"
       />
-      {isLoading && (
+      {isLoaderLoading && ( // Gunakan isLoaderLoading dari hook
         <div className="absolute inset-y-0 right-0 flex items-center pr-3">
           <Loader className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
-import { Loader as GoogleMapsLoader } from "@googlemaps/js-api-loader";
+import { useGoogleMapsLoader } from "@/hooks/use-google-maps-loader"; // Import hook baru
 
 interface GoogleMapPickerProps {
   center: { lat: number; lng: number };
@@ -23,24 +23,7 @@ export function GoogleMapPicker({
   const mapRef = React.useRef<HTMLDivElement>(null);
   const mapInstanceRef = React.useRef<google.maps.Map | null>(null);
   const markerInstanceRef = React.useRef<google.maps.Marker | null>(null);
-  const [isApiLoaded, setIsApiLoaded] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const loader = new GoogleMapsLoader({
-      apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-      version: "weekly",
-    });
-
-    loader.load().then(() => {
-      setIsApiLoaded(true);
-      setIsLoading(false);
-    }).catch((e) => {
-      console.error("Error loading Google Maps API:", e);
-      toast.error("Gagal memuat peta. Periksa kunci API Anda.");
-      setIsLoading(false);
-    });
-  }, []);
+  const { isLoaded: isApiLoaded, isLoading: isLoaderLoading } = useGoogleMapsLoader(); // Gunakan hook baru
 
   React.useEffect(() => {
     if (isApiLoaded && mapRef.current) {
@@ -87,7 +70,7 @@ export function GoogleMapPicker({
 
   return (
     <div className={`relative w-full h-64 rounded-lg overflow-hidden ${className}`}>
-      {isLoading && (
+      {isLoaderLoading && ( // Gunakan isLoaderLoading dari hook
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
           <Loader className="h-8 w-8 animate-spin text-primary" />
         </div>
