@@ -3,6 +3,36 @@ import { CartItem } from "@/context/cart-context";
 import { Profile } from "./profiles";
 import { Product, mapProductData } from "./products";
 
+// Define a type for the raw product data as it comes from Supabase
+interface RawProductData {
+  id: string;
+  name: string;
+  price: number;
+  original_price: number | null;
+  image_url: string;
+  location: string;
+  rating: number;
+  sold_count: string;
+  category: string;
+  is_flash_sale: boolean;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Define a type for the raw order item data as it comes from Supabase
+interface RawOrderItemData {
+  id: string;
+  order_id: string;
+  product_id: string | null;
+  quantity: number;
+  price_at_purchase: number;
+  product_name_at_purchase: string;
+  product_image_url_at_purchase: string;
+  created_at: string;
+  products: RawProductData | null; // Raw product data before mapping
+}
+
 export interface OrderItem {
   id: string;
   order_id: string;
@@ -109,7 +139,7 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
   if (!data) return null;
 
   // Map product data within order_items
-  const mappedOrderItems = data.order_items?.map(item => ({
+  const mappedOrderItems = data.order_items?.map((item: RawOrderItemData) => ({ // Explicitly type item here
     ...item,
     product: item.products ? mapProductData(item.products) : undefined,
   }));

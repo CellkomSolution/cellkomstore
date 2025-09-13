@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -36,21 +37,23 @@ const formSchema = z.object({
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).optional(),
 });
 
+type PaymentMethodFormValues = z.infer<typeof formSchema>; // Explicitly define form values type
+
 interface PaymentMethodFormProps {
   initialData?: PaymentMethod | null;
-  onSubmit: (values: z.infer<typeof formSchema>) => Promise<void>;
+  onSubmit: (values: PaymentMethodFormValues) => Promise<void>; // Use explicit type
   loading?: boolean;
 }
 
 export function PaymentMethodForm({ initialData, onSubmit, loading = false }: PaymentMethodFormProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<PaymentMethodFormValues>({ // Use explicit type here
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name ?? "",
       type: initialData?.type ?? 'bank_transfer',
       details: initialData?.details ? JSON.stringify(initialData.details, null, 2) : null,
-      is_active: initialData?.is_active ?? true,
-      order: initialData?.order ?? 0,
+      is_active: initialData?.is_active ?? true, // Ensure this is always boolean
+      order: initialData?.order ?? 0, // Ensure this is always number
     },
   });
 
