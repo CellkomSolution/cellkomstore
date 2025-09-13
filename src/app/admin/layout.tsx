@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAdmin } from "@/hooks/use-admin";
 import { useSession } from "@/context/session-context";
 import Link from "next/link";
-import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon, LayoutGrid, MessageSquare } from "lucide-react"; // MessageSquare ditambahkan kembali
+import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon, LayoutGrid } from "lucide-react"; // MessageSquare dihapus
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -95,17 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Pengguna
             </Link>
           </Button>
-          {/* Tautan Chat ditambahkan kembali ke sidebar admin */}
-          <Button
-            variant="ghost"
-            className={cn("w-full justify-start", pathname.startsWith("/chats") && "bg-muted hover:bg-muted")}
-            asChild
-          >
-            <Link href="/chats">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Kelola Chat
-            </Link>
-          </Button>
+          {/* Tautan Chat dihapus dari sini */}
           <Separator className="my-4" />
           <Button
             variant="ghost"

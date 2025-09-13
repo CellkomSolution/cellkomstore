@@ -65,7 +65,7 @@ export function AdminChatNotificationIcon() {
       variant="ghost"
       size="icon"
       className="relative"
-      onClick={() => router.push("/admin/chats")}
+      onClick={() => router.push("/chats")} {/* Diperbarui untuk mengarah ke /chats */}
       disabled={isLoadingCount}
     >
       {isLoadingCount ? (
