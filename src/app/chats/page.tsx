@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageSquare } from "lucide-react";
-import { AdminChatList } from "@/components/admin-chat-list"; // Import the new component
+import { AdminChatList } from "@/components/admin-chat-list";
 
 export default function AdminChatsPage() {
   return (
@@ -14,7 +14,7 @@ export default function AdminChatsPage() {
           Percakapan Chat Admin
         </CardTitle>
       </CardHeader>
-      <AdminChatList /> {/* Render the new AdminChatList component */}
+      <AdminChatList />
     </Card>
   );
 }
