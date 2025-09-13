@@ -11,9 +11,15 @@ import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSettings } from "@/lib/supabase/app-settings";
+import { useCart } from "@/context/cart-context"; // Import useCart
+import { ChatNotificationIcon } from "./chat-notification-icon"; // Import ChatNotificationIcon
+import { AdminChatNotificationIcon } from "./admin-chat-notification-icon"; // Import AdminChatNotificationIcon
+import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
 
 export function Header() {
-  const { session, isLoading: isAuthLoading } = useAuth();
+  const { session, isLoading: isAuthLoading, user } = useAuth();
+  const { totalItems } = useCart(); // Dapatkan totalItems dari useCart
+  const { isAdmin } = useAdmin(); // Dapatkan status admin
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
@@ -89,16 +95,24 @@ export function Header() {
           </Button>
           <Button variant="ghost" size="icon" className="relative">
             <ShoppingCart className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary p-1 text-xs text-primary-foreground">
-              3
-            </span>
+            {totalItems > 0 && ( // Tampilkan badge hanya jika ada item
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary p-1 text-xs text-primary-foreground">
+                {totalItems}
+              </span>
+            )}
           </Button>
           <Button variant="ghost" size="icon">
             <Heart className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon">
-            <MessageSquare className="h-5 w-5" />
-          </Button>
+          {user && isAdmin ? (
+            <AdminChatNotificationIcon />
+          ) : user && !isAdmin ? (
+            <ChatNotificationIcon />
+          ) : (
+            <Button variant="ghost" size="icon">
+              <MessageSquare className="h-5 w-5" />
+            </Button>
+          )}
           <Button variant="ghost" size="icon">
             <Bell className="h-5 w-5" />
           </Button>
@@ -107,7 +121,7 @@ export function Header() {
           ) : session ? (
             <UserNav />
           ) : (
-            <Link href="/login">
+            <Link href="/auth"> {/* Perbaiki tautan ke /auth */}
               <Button variant="ghost" size="icon">
                 <User className="h-5 w-5" />
               </Button>
