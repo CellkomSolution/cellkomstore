@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { User, LogOut, LayoutDashboard, ShoppingBag } from "lucide-react"; // MessageSquare dihapus
+import { User, LogOut, LayoutDashboard, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,12 +13,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "@/context/session-context";
 import { useAdmin } from "@/hooks/use-admin";
-// import { ChatWidget } from "./chat-widget"; // ChatWidget is now handled by ChatNotificationIcon or ProductDetailPage
 
-export function UserAuthNav() {
+export function UserNav() {
   const { session, user, profile, signOut, isLoading: isSessionLoading } = useSession();
   const { isAdmin, isAdminLoading } = useAdmin();
-  // const [isGeneralChatOpen, setIsGeneralChatOpen] = React.useState(false); // No longer needed here
 
   if (isSessionLoading || isAdminLoading) {
     return <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />;
@@ -86,8 +84,6 @@ export function UserAuthNav() {
           <span className="sr-only">Akun</span>
         </Link>
       </Button>
-
-      {/* ChatWidget for general chat is now handled by ChatNotificationIcon */}
     </>
   );
 }
