@@ -94,7 +94,7 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
     .from("orders")
     .select(`
       *,
-      user_profile:profiles(id, first_name, last_name, avatar_url, email),
+      user_profile:profiles!user_id(id, first_name, last_name, avatar_url, email),
       order_items(*, products(id, name, price, original_price, image_url, location, rating, sold_count, category, is_flash_sale, description)),
       payment_method:payment_methods(id, name, type, details)
     `)
@@ -157,7 +157,7 @@ export async function getOrders(status?: Order['status']): Promise<Order[]> {
     .from("orders")
     .select(`
       *,
-      user_profile:profiles(id, first_name, last_name, avatar_url, email),
+      user_profile:profiles!user_id(id, first_name, last_name, avatar_url, email),
       payment_method:payment_methods(id, name, type)
     `)
     .order("created_at", { ascending: false });
@@ -185,7 +185,7 @@ export async function getUserOrders(userId: string): Promise<Order[]> {
     .from("orders")
     .select(`
       *,
-      user_profile:profiles(id, first_name, last_name, avatar_url, email),
+      user_profile:profiles!user_id(id, first_name, last_name, avatar_url, email),
       payment_method:payment_methods(id, name, type),
       order_items(id, product_name_at_purchase, product_image_url_at_purchase, quantity, price_at_purchase)
     `)
