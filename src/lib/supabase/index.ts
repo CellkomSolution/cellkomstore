@@ -6,3 +6,4 @@ export * from './app-settings';
 export * from './chats';
 export * from './orders';
 export * from './payment-methods';
+export * from './featured-brands';

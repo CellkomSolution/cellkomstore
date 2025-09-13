@@ -2,16 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client"; // Masih perlu untuk app_settings
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-
-interface FeaturedBrand {
-  id: string;
-  image_url: string;
-  link_url: string;
-  order: number;
-}
+import { getFeaturedBrands, FeaturedBrand } from "@/lib/supabase/featured-brands"; // Import dari utilitas baru
 
 export const FeaturedBrands = () => {
   const [brands, setBrands] = useState<FeaturedBrand[]>([]);
@@ -19,23 +13,15 @@ export const FeaturedBrands = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchFeaturedBrands = async () => {
+    const fetchFeaturedBrandsAndTitle = async () => {
       setLoading(true);
-      const { data: brandsData, error: brandsError } = await supabase
-        .from("featured_brands")
-        .select("*")
-        .order("order", { ascending: true });
+      const brandsData = await getFeaturedBrands(); // Menggunakan fungsi utilitas baru
+      setBrands(brandsData);
 
       const { data: settingsData, error: settingsError } = await supabase
         .from("app_settings")
         .select("featured_brands_title")
         .single();
-
-      if (brandsError) {
-        console.error("Error fetching featured brands:", brandsError.message);
-      } else {
-        setBrands(brandsData || []);
-      }
 
       if (settingsError) {
         console.error("Error fetching featured brands title:", settingsError.message);
@@ -45,7 +31,7 @@ export const FeaturedBrands = () => {
       setLoading(false);
     };
 
-    fetchFeaturedBrands();
+    fetchFeaturedBrandsAndTitle();
   }, []);
 
   return (

@@ -7,17 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ImageUploader } from "@/components/image-uploader";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client"; // Masih perlu untuk app_settings
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Trash2, Edit } from "lucide-react";
-
-interface FeaturedBrand {
-  id: string;
-  image_url: string;
-  link_url: string;
-  order: number;
-}
+import { getFeaturedBrands, createFeaturedBrand, updateFeaturedBrand, deleteFeaturedBrand, FeaturedBrand } from "@/lib/supabase/featured-brands"; // Import dari utilitas baru
 
 export default function FeaturedBrandsAdminPage() {
   const [brands, setBrands] = useState<FeaturedBrand[]>([]);
@@ -33,26 +27,18 @@ export default function FeaturedBrandsAdminPage() {
 
   const fetchBrandsAndTitle = async () => {
     setLoading(true);
-    const { data: brandsData, error: brandsError } = await supabase
-      .from("featured_brands")
-      .select("*")
-      .order("order", { ascending: true });
+    const brandsData = await getFeaturedBrands(); // Menggunakan fungsi utilitas baru
+    setBrands(brandsData);
 
     const { data: settingsData, error: settingsError } = await supabase
       .from("app_settings")
       .select("featured_brands_title")
       .single();
 
-    if (brandsError) {
-      toast.error("Gagal mengambil merek unggulan: " + brandsError.message);
-    } else {
-      setBrands(brandsData || []);
-    }
-
     if (settingsError) {
       toast.error("Gagal mengambil judul merek unggulan: " + settingsError.message);
     } else {
-      setTitle(settingsData?.featured_brands_title || "Brand Pilihan");
+      setFeaturedBrandsTitle(settingsData?.featured_brands_title || "Brand Pilihan");
     }
     setLoading(false);
   };
@@ -63,19 +49,16 @@ export default function FeaturedBrandsAdminPage() {
       return;
     }
 
-    const { data, error } = await supabase
-      .from("featured_brands")
-      .insert([{ image_url: newImageUrl, link_url: newLinkUrl, order: brands.length }])
-      .select()
-      .single();
-
-    if (error) {
+    try {
+      const data = await createFeaturedBrand({ image_url: newImageUrl, link_url: newLinkUrl, order: brands.length }); // Menggunakan fungsi utilitas baru
+      if (data) {
+        setBrands([...brands, data]);
+        setNewImageUrl("");
+        setNewLinkUrl("");
+        toast.success("Merek berhasil ditambahkan.");
+      }
+    } catch (error: any) {
       toast.error("Gagal menambahkan merek: " + error.message);
-    } else {
-      setBrands([...brands, data]);
-      setNewImageUrl("");
-      setNewLinkUrl("");
-      toast.success("Merek berhasil ditambahkan.");
     }
   };
 
@@ -85,45 +68,38 @@ export default function FeaturedBrandsAdminPage() {
       return;
     }
 
-    const { data, error } = await supabase
-      .from("featured_brands")
-      .update({ image_url: editingBrand.image_url, link_url: editingBrand.link_url })
-      .eq("id", editingBrand.id)
-      .select()
-      .single();
-
-    if (error) {
+    try {
+      const data = await updateFeaturedBrand(editingBrand.id, { image_url: editingBrand.image_url, link_url: editingBrand.link_url }); // Menggunakan fungsi utilitas baru
+      if (data) {
+        setBrands(brands.map((b) => (b.id === data.id ? data : b)));
+        setEditingBrand(null);
+        toast.success("Merek berhasil diperbarui.");
+      }
+    } catch (error: any) {
       toast.error("Gagal memperbarui merek: " + error.message);
-    } else {
-      setBrands(brands.map((b) => (b.id === data.id ? data : b)));
-      setEditingBrand(null);
-      toast.success("Merek berhasil diperbarui.");
     }
   };
 
   const handleDeleteBrand = async (id: string) => {
-    // First, delete the image from storage
     const brandToDelete = brands.find(b => b.id === id);
     if (brandToDelete && brandToDelete.image_url) {
       const imageUrlParts = brandToDelete.image_url.split('/');
       const fileName = imageUrlParts[imageUrlParts.length - 1];
       const { error: storageError } = await supabase.storage
-        .from('featured-brand-images') // Use the correct bucket name
+        .from('featured-brand-images')
         .remove([fileName]);
 
       if (storageError) {
         console.warn("Failed to delete brand image from storage:", storageError.message);
-        // Don't throw error here, proceed with brand deletion even if image deletion fails
       }
     }
 
-    const { error } = await supabase.from("featured_brands").delete().eq("id", id);
-
-    if (error) {
-      toast.error("Gagal menghapus merek: " + error.message);
-    } else {
+    try {
+      await deleteFeaturedBrand(id); // Menggunakan fungsi utilitas baru
       setBrands(brands.filter((b) => b.id !== id));
       toast.success("Merek berhasil dihapus.");
+    } catch (error: any) {
+      toast.error("Gagal menghapus merek: " + error.message);
     }
   };
 
@@ -131,7 +107,7 @@ export default function FeaturedBrandsAdminPage() {
     const { error } = await supabase
       .from("app_settings")
       .update({ featured_brands_title: featuredBrandsTitle })
-      .eq("id", "00000000-0000-0000-0000-000000000001"); // Assuming a fixed ID for app_settings
+      .eq("id", "00000000-0000-0000-0000-000000000001");
 
     if (error) {
       toast.error("Gagal memperbarui judul: " + error.message);
@@ -177,7 +153,7 @@ export default function FeaturedBrandsAdminPage() {
             <div>
               <Label htmlFor="image-uploader">Gambar Merek</Label>
               <ImageUploader
-                bucketName="featured-brand-images" // Corrected prop and bucket name
+                bucketName="featured-brand-images"
                 currentImageUrl={editingBrand ? editingBrand.image_url : newImageUrl}
                 onUploadSuccess={(url) => {
                   if (editingBrand) {
@@ -186,7 +162,7 @@ export default function FeaturedBrandsAdminPage() {
                     setNewImageUrl(url);
                   }
                 }}
-                onRemove={() => { // Added onRemove handler
+                onRemove={() => {
                   if (editingBrand) {
                     setEditingBrand({ ...editingBrand, image_url: "" });
                   } else {
@@ -199,7 +175,7 @@ export default function FeaturedBrandsAdminPage() {
               <Label htmlFor="link-url">URL Tautan</Label>
               <Input
                 id="link-url"
-                value={editingBrand ? editingBrand.link_url : newLinkUrl}
+                value={editingBrand ? editingBrand.link_url || "" : newLinkUrl}
                 onChange={(e) => {
                   if (editingBrand) {
                     setEditingBrand({ ...editingBrand, link_url: e.target.value });
@@ -245,8 +221,8 @@ export default function FeaturedBrandsAdminPage() {
                       <img src={brand.image_url} alt="Brand" className="w-16 h-16 object-contain rounded" />
                     </TableCell>
                     <TableCell>
-                      <a href={brand.link_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                        {brand.link_url}
+                      <a href={brand.link_url || "#"} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        {brand.link_url || "N/A"}
                       </a>
                     </TableCell>
                     <TableCell className="flex space-x-2">
