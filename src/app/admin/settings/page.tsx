@@ -40,6 +40,21 @@ const formSchema = z.object({
   right_header_text_enabled: z.boolean().optional().default(false),
   right_header_text_content: z.string().nullable().optional().or(z.literal("")),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
+}).superRefine((data, ctx) => {
+  if (data.scrolling_text_enabled && (!data.scrolling_text_content || data.scrolling_text_content.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Konten teks berjalan tidak boleh kosong jika diaktifkan.",
+      path: ['scrolling_text_content'],
+    });
+  }
+  if (data.right_header_text_enabled && (!data.right_header_text_content || data.right_header_text_content.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Konten teks kanan header tidak boleh kosong jika diaktifkan.",
+      path: ['right_header_text_content'],
+    });
+  }
 });
 
 export default function AdminSettingsPage() {
