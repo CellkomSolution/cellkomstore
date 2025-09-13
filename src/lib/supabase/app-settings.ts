@@ -13,11 +13,12 @@ export interface AppSettings {
   youtube_url: string | null;
   linkedin_url: string | null;
   updated_at: string | null;
-  scrolling_text_enabled: boolean | null; // New field
-  scrolling_text_content: string | null;  // New field
-  right_header_text_enabled: boolean | null; // New field
-  right_header_text_content: string | null;  // New field
-  right_header_text_link: string | null;     // New field
+  scrolling_text_enabled: boolean | null;
+  scrolling_text_content: string | null;
+  right_header_text_enabled: boolean | null;
+  right_header_text_content: string | null;
+  right_header_text_link: string | null;
+  download_app_url: string | null; // New field
 }
 
 export async function getAppSettings(): Promise<AppSettings | null> {

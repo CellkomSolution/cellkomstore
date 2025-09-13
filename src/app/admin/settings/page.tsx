@@ -34,12 +34,12 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().optional().or(z.literal("")),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().optional().or(z.literal("")),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().optional().or(z.literal("")),
-  // New fields for header bottom section
   scrolling_text_enabled: z.boolean().optional().default(false),
   scrolling_text_content: z.string().nullable().optional().or(z.literal("")),
   right_header_text_enabled: z.boolean().optional().default(false),
   right_header_text_content: z.string().nullable().optional().or(z.literal("")),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
+  download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().optional().or(z.literal("")), // New field
 }).superRefine((data, ctx) => {
   if (data.scrolling_text_enabled && (!data.scrolling_text_content || data.scrolling_text_content.trim() === '')) {
     ctx.addIssue({
@@ -80,6 +80,7 @@ export default function AdminSettingsPage() {
       right_header_text_enabled: false,
       right_header_text_content: null,
       right_header_text_link: null,
+      download_app_url: null, // Default value for new field
     },
   });
 
@@ -105,6 +106,7 @@ export default function AdminSettingsPage() {
           right_header_text_enabled: settings.right_header_text_enabled || false,
           right_header_text_content: settings.right_header_text_content || null,
           right_header_text_link: settings.right_header_text_link || null,
+          download_app_url: settings.download_app_url || null, // Set value for new field
         });
       }
       setIsLoading(false);
@@ -198,7 +200,7 @@ export default function AdminSettingsPage() {
                 <FormControl>
                   <ImageUploader
                     bucketName="app-assets"
-                    currentImageUrl={form.watch("site_logo_url") ?? null} // Coalesce undefined to null
+                    currentImageUrl={form.watch("site_logo_url") ?? null}
                     onUploadSuccess={handleLogoUploadSuccess}
                     onRemove={handleRemoveLogo}
                     disabled={isSubmitting}
@@ -420,6 +422,24 @@ export default function AdminSettingsPage() {
                   />
                 </>
               )}
+
+              <h3 className="text-lg font-semibold mt-8">Pengaturan Aplikasi</h3>
+              <FormField
+                control={form.control}
+                name="download_app_url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>URL Unduhan Aplikasi</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://play.google.com/store/apps/details?id=com.example.app" {...field} value={field.value ?? ""} />
+                    </FormControl>
+                    <FormDescription>
+                      Tautan untuk mengunduh aplikasi seluler Anda (misalnya, dari Play Store atau App Store).
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
