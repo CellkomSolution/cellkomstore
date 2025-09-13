@@ -10,19 +10,19 @@ import { ThemeToggle } from "./theme-toggle";
 import Link from "next/link";
 import Image from "next/image";
 import { UserAuthNav } from "./user-auth-nav";
-import { getAppSettings, AppSettings } from "@/lib/supabase/app-settings"; // Import dari modul app-settings
+import { getAppSettings, AppSettings } from "@/lib/supabase/app-settings";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChatNotificationIcon } from "./chat-notification-icon"; // Import ChatNotificationIcon
-import { AdminChatNotificationIcon } from "./admin-chat-notification-icon"; // Import AdminChatNotificationIcon
-import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
-import { CategorySheet } from "./category-sheet"; // Import CategorySheet
+import { ChatNotificationIcon } from "./chat-notification-icon";
+import { AdminChatNotificationIcon } from "./admin-chat-notification-icon";
+import { useAdmin } from "@/hooks/use-admin";
+import { CategorySheet } from "./category-sheet";
 
 export function Header() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const router = useRouter();
   const [appSettings, setAppSettings] = React.useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = React.useState(true);
-  const { isAdmin, isAdminLoading } = useAdmin(); // Use useAdmin hook
+  const { isAdmin, isAdminLoading } = useAdmin();
 
   React.useEffect(() => {
     async function fetchSettings() {
@@ -76,7 +76,7 @@ export function Header() {
                 appSettings?.site_name || "Cellkom Store"
               )}
             </Link>
-            <CategorySheet /> {/* Integrated CategorySheet here */}
+            <CategorySheet />
           </div>
 
           <div className="flex-1 max-w-xl hidden sm:flex">
@@ -124,18 +124,43 @@ export function Header() {
       </div>
 
       <div className="bg-background border-t text-xs text-muted-foreground">
-        <div className="container mx-auto px-4 py-2 flex justify-between items-center">
-          <div className="flex gap-4 overflow-x-auto whitespace-nowrap pb-1">
-            <Link href="#" className="hover:underline">Serbu Sale Disc 63%</Link>
-            <Link href="#" className="hover:underline">DEKORUMA DISC 60%+20%</Link>
-            <Link href="#" className="hover:underline">DREAMBOX DISC SD 1JT</Link>
-            <Link href="#" className="hover:underline">Hydro Flask x Syma</Link>
-          </div>
-          <Button variant="ghost" size="sm" className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
-            <MapPin className="h-4 w-4" />
-            <span>Tambah alamat biar belanja lebih asyik</span>
-            <Menu className="h-4 w-4 rotate-90" />
-          </Button>
+        <div className="container mx-auto px-4 py-2 flex justify-between items-center overflow-hidden">
+          {isLoadingSettings ? (
+            <div className="flex-1 flex justify-between items-center">
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-4 w-1/4" />
+            </div>
+          ) : (
+            <>
+              {appSettings?.scrolling_text_enabled && appSettings.scrolling_text_content ? (
+                <div className="flex-1 overflow-hidden relative h-4">
+                  <div className="absolute whitespace-nowrap animate-marquee">
+                    {appSettings.scrolling_text_content}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1"></div> // Placeholder to maintain layout
+              )}
+
+              {appSettings?.right_header_text_enabled && appSettings.right_header_text_content ? (
+                <div className="ml-4 flex-shrink-0">
+                  {appSettings.right_header_text_link ? (
+                    <Link href={appSettings.right_header_text_link} className="hover:underline">
+                      {appSettings.right_header_text_content}
+                    </Link>
+                  ) : (
+                    <span>{appSettings.right_header_text_content}</span>
+                  )}
+                </div>
+              ) : (
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 text-muted-foreground hover:text-foreground flex-shrink-0">
+                  <MapPin className="h-4 w-4" />
+                  <span>Tambah alamat biar belanja lebih asyik</span>
+                  <Menu className="h-4 w-4 rotate-90" />
+                </Button>
+              )}
+            </>
+          )}
         </div>
       </div>
     </header>
