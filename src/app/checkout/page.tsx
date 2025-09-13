@@ -83,9 +83,9 @@ export default function CheckoutPage() {
       });
 
       if (newOrder) {
-        clearCart();
-        toast.success("Pesanan berhasil dibuat!");
-        router.push(`/checkout/${newOrder.id}`);
+        // clearCart(); // Removed: Cart will be cleared after payment confirmation
+        toast.success("Pesanan berhasil dibuat! Silakan pilih metode pembayaran.");
+        router.push(`/my-orders/${newOrder.id}`); // Redirect to the new order detail page
       } else {
         toast.error("Gagal membuat pesanan. Silakan coba lagi.");
       }

@@ -18,6 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatWidget } from "@/components/chat-widget";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useCart } from "@/context/cart-context"; // Import useCart to clear cart
 
 interface UserOrderDetailPageProps {
   params: Promise<{ orderId: string }>;
@@ -28,6 +29,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
   const { orderId } = unwrappedParams;
   const router = useRouter();
   const { user, isLoading: isSessionLoading } = useSession();
+  const { clearCart } = useCart(); // Get clearCart from context
 
   const [order, setOrder] = React.useState<Order | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -55,6 +57,12 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     if (fetchedOrder.status === 'pending') {
       const activeMethods = await getPaymentMethods(true);
       setPaymentMethods(activeMethods);
+      // Pre-select if there's only one active method or if one was already chosen
+      if (activeMethods.length === 1) {
+        setSelectedPaymentMethodId(activeMethods[0].id);
+      } else if (fetchedOrder.payment_method_id) {
+        setSelectedPaymentMethodId(fetchedOrder.payment_method_id);
+      }
     }
     setIsLoading(false);
   }, [orderId, user, isSessionLoading, router]);
@@ -71,6 +79,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     setIsConfirmingPayment(true);
     try {
       await updateOrderPaymentMethod(order.id, selectedPaymentMethodId);
+      clearCart(); // Clear cart after payment confirmation
       toast.success("Metode pembayaran berhasil dikonfirmasi!");
       await fetchData(); // Refetch order data to update UI
     } catch (error: any) {
@@ -202,7 +211,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
                   <CardTitle>Pilih Metode Pembayaran</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RadioGroup onValueChange={setSelectedPaymentMethodId}>
+                  <RadioGroup onValueChange={setSelectedPaymentMethodId} value={selectedPaymentMethodId || undefined}>
                     <div className="space-y-4">
                       {paymentMethods.map((method) => (
                         <Label key={method.id} htmlFor={method.id} className="flex items-center gap-3 p-3 border rounded-md cursor-pointer hover:bg-muted/50 has-[:checked]:bg-muted has-[:checked]:border-primary">
