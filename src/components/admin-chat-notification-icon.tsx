@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { MessageSquare, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button"; // Import Button ditambahkan
+import { Button } from "@/components/ui/button"; // Pastikan import ini ada
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/context/session-context";
 import { getUnreadMessageCount } from "@/lib/supabase/chats";
@@ -65,7 +65,7 @@ export function AdminChatNotificationIcon() {
       variant="ghost"
       size="icon"
       className="relative"
-      onClick={() => router.push("/chats")} {/* Diperbarui untuk mengarah ke /chats */}
+      onClick={() => router.push("/chats")}
       disabled={isLoadingCount}
     >
       {isLoadingCount ? (
