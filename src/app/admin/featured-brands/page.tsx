@@ -102,6 +102,21 @@ export default function FeaturedBrandsAdminPage() {
   };
 
   const handleDeleteBrand = async (id: string) => {
+    // First, delete the image from storage
+    const brandToDelete = brands.find(b => b.id === id);
+    if (brandToDelete && brandToDelete.image_url) {
+      const imageUrlParts = brandToDelete.image_url.split('/');
+      const fileName = imageUrlParts[imageUrlParts.length - 1];
+      const { error: storageError } = await supabase.storage
+        .from('featured-brand-images') // Use the correct bucket name
+        .remove([fileName]);
+
+      if (storageError) {
+        console.warn("Failed to delete brand image from storage:", storageError.message);
+        // Don't throw error here, proceed with brand deletion even if image deletion fails
+      }
+    }
+
     const { error } = await supabase.from("featured_brands").delete().eq("id", id);
 
     if (error) {
@@ -162,13 +177,20 @@ export default function FeaturedBrandsAdminPage() {
             <div>
               <Label htmlFor="image-uploader">Gambar Merek</Label>
               <ImageUploader
-                uid="featured-brand-image"
-                url={editingBrand ? editingBrand.image_url : newImageUrl}
-                onUploadComplete={(url) => {
+                bucketName="featured-brand-images" // Corrected prop and bucket name
+                currentImageUrl={editingBrand ? editingBrand.image_url : newImageUrl}
+                onUploadSuccess={(url) => {
                   if (editingBrand) {
                     setEditingBrand({ ...editingBrand, image_url: url });
                   } else {
                     setNewImageUrl(url);
+                  }
+                }}
+                onRemove={() => { // Added onRemove handler
+                  if (editingBrand) {
+                    setEditingBrand({ ...editingBrand, image_url: "" });
+                  } else {
+                    setNewImageUrl("");
                   }
                 }}
               />
