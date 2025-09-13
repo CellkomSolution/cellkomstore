@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AdminChatList } from "@/components/admin-chat-list";
+import { AdminChatList } from "@/components/admin-chat-list"; // Corrected import path
 import { useSession } from "@/context/session-context";
 import { Loader2, MessageSquare, ArrowLeft } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
