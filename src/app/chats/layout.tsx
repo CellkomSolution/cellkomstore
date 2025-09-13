@@ -7,30 +7,30 @@ import { Loader2, MessageSquare, ArrowLeft } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
 
 export default function AdminChatLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading: isSessionLoading } = useSession();
+  const { isAdmin, isAdminLoading } = useAdmin(); // Gunakan useAdmin hook
   const router = useRouter();
   const pathname = usePathname();
 
   const isChatDetailRoute = pathname.startsWith("/chats/") && pathname !== "/chats";
 
   React.useEffect(() => {
-    if (!isSessionLoading && user) {
-      // Check if the user is an admin
-      const isAdmin = user?.user_metadata?.role === 'admin' || user?.app_metadata?.user_role === 'admin';
-      if (!isAdmin) {
+    if (!isSessionLoading && !isAdminLoading) { // Tunggu hingga status admin juga dimuat
+      if (!user) {
+        toast.error("Anda harus login untuk mengakses chat admin.");
+        router.push("/auth"); // Redirect to login if not authenticated
+      } else if (!isAdmin) { // Gunakan isAdmin dari useAdmin
         toast.error("Anda tidak memiliki izin untuk mengakses chat admin.");
         router.push("/"); // Redirect non-admin users
       }
-    } else if (!isSessionLoading && !user) {
-      toast.error("Anda harus login untuk mengakses chat admin.");
-      router.push("/auth"); // Redirect to login if not authenticated
     }
-  }, [isSessionLoading, user, router]);
+  }, [isSessionLoading, isAdminLoading, user, isAdmin, router]);
 
-  if (isSessionLoading) {
+  if (isSessionLoading || isAdminLoading) { // Tambahkan isAdminLoading ke kondisi loading
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -39,14 +39,14 @@ export default function AdminChatLayout({ children }: { children: React.ReactNod
     );
   }
 
-  // If user is not an admin or not logged in, the useEffect will handle redirection.
-  // We can return null or a loading state here to prevent rendering the chat layout prematurely.
-  if (!user || !(user?.user_metadata?.role === 'admin' || user?.app_metadata?.user_role === 'admin')) {
+  // Jika user tidak ada atau bukan admin, useEffect akan menangani pengalihan.
+  // Kita bisa mengembalikan null atau loading state di sini untuk mencegah rendering layout chat sebelum waktunya.
+  if (!user || !isAdmin) { // Gunakan isAdmin dari useAdmin
     return null;
   }
 
   return (
-    <div className="flex h-[calc(100vh-64px)] bg-background overflow-hidden"> {/* Adjusted height */}
+    <div className="flex h-[calc(100vh-64px)] bg-background overflow-hidden">
       {/* Left Column: Chat List */}
       <Card className={`
         w-full md:w-1/3 lg:w-1/4 flex flex-col border-r rounded-none shadow-none
