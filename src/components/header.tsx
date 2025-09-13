@@ -62,7 +62,7 @@ export function Header() {
       <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300">
         <div className="container mx-auto px-4 py-1 flex justify-between items-center">
           <div className="flex space-x-4">
-            {appSettings?.download_app_url && ( // Hanya tampilkan jika download_app_url ada
+            {appSettings?.download_app_url && (
               <a href={appSettings.download_app_url} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
                 <Download className="h-3 w-3" /> {appSettings.download_app_text || "Download Aplikasi"}
               </a>
@@ -118,44 +118,40 @@ export function Header() {
             <Search className="h-5 w-5" />
             <span className="sr-only">Cari</span>
           </Button>
+
+          {/* Always show Cart and Heart */}
           <CartSheet />
           <Button variant="ghost" size="icon">
             <Heart className="h-5 w-5" />
             <span className="sr-only">Favorit</span>
           </Button>
-          {user && isAdmin ? (
-            <AdminChatNotificationIcon />
-          ) : user && !isAdmin ? (
-            <ChatNotificationIcon />
-          ) : (
-            <>
-              <Button variant="ghost" size="icon" onClick={() => setIsGeneralChatOpen(true)}>
-                <MessageSquare className="h-5 w-5" />
-                <span className="sr-only">Chat</span>
-              </Button>
-              <ChatWidget
-                productId={null}
-                productName={null}
-                open={isGeneralChatOpen}
-                onOpenChange={setIsGeneralChatOpen}
-              />
-            </>
-          )}
-          <Button variant="ghost" size="icon">
-            <Bell className="h-5 w-5" />
-            <span className="sr-only">Notifikasi</span>
-          </Button>
+
           {isAuthLoading ? (
             <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
           ) : session ? (
-            <UserNav />
-          ) : (
-            <Link href="/auth">
+            // Logged in: Show Chat, Bell, and UserNav dropdown
+            <>
+              {isAdmin ? (
+                <AdminChatNotificationIcon />
+              ) : (
+                <ChatNotificationIcon />
+              )}
               <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-                <span className="sr-only">Akun</span>
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">Notifikasi</span>
               </Button>
-            </Link>
+              <UserNav />
+            </>
+          ) : (
+            // Not logged in: Show Masuk/Daftar buttons
+            <div className="flex items-center space-x-2">
+              <Link href="/auth">
+                <Button className="bg-black text-white hover:bg-gray-800">Masuk</Button>
+              </Link>
+              <Link href="/auth">
+                <Button className="bg-black text-white hover:bg-gray-800">Daftar</Button>
+              </Link>
+            </div>
           )}
         </div>
       </div>
