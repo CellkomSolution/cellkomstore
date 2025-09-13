@@ -65,7 +65,7 @@ export function AdminChatNotificationIcon() {
       variant="ghost"
       size="icon"
       className="relative"
-      onClick={() => router.push("/admin/chats")} // Navigate to the new full chat page
+      onClick={() => router.push("/admin/chats")}
       disabled={isLoadingCount}
     >
       {isLoadingCount ? (
