@@ -1,12 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { MessageSquare, Loader2 } from "lucide-react";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { Card, CardContent } from "@/components/ui/card";
+import { MessageSquare } from "lucide-react";
 import { useSession } from "@/context/session-context";
 import { useAdmin } from "@/hooks/use-admin";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Card, CardContent } from "@/components/ui/card"; // Keep Card for the welcome message if no children
+import { Loader2 } from "lucide-react";
+import AdminChatsPage from "./page"; // Import the list component as default
 
 export default function AdminChatLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading: isSessionLoading } = useSession();
@@ -35,8 +38,29 @@ export default function AdminChatLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-120px)] p-4"> {/* Adjust height and add padding */}
-      {children}
+    <div className="flex-1 flex flex-col h-[calc(100vh-120px)]"> {/* Adjust height to fit header/footer */}
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="min-h-[calc(100vh-120px)] rounded-lg border"
+      >
+        <ResizablePanel defaultSize={30} minSize={25} maxSize={40}>
+          <AdminChatsPage /> {/* Use the default imported component */}
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={70}>
+          {children ? (
+            children
+          ) : (
+            <div className="flex h-full items-center justify-center p-6 text-center text-muted-foreground">
+              <Card className="w-full max-w-md p-8 flex flex-col items-center justify-center">
+                <MessageSquare className="h-16 w-16 mb-4 text-primary" />
+                <h3 className="text-xl font-semibold mb-2">Selamat Datang di Chat Admin</h3>
+                <p className="text-sm">Pilih percakapan dari daftar di sebelah kiri untuk memulai.</p>
+              </Card>
+            </div>
+          )}
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }
