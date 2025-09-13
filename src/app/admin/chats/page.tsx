@@ -54,9 +54,9 @@ export default function AdminChatsPage() {
             table: "chats",
             filter: `receiver_id=eq.${adminId}`,
           },
-          async (payload) => {
+          (payload) => {
             // Refetch all conversations to update unread counts and last messages
-            await fetchConversations();
+            fetchConversations();
             const newMsg = payload.new as ChatMessage;
             // Only show toast if it's a new message from a user
             if (payload.eventType === 'INSERT' && newMsg.sender_id !== adminId) {
@@ -135,7 +135,7 @@ export default function AdminChatsPage() {
                   </TableRow>
                 ) : (
                   conversations.map((conv) => (
-                    <TableRow key={conv.user_id}> {/* Key is now just user_id */}
+                    <TableRow key={conv.user_id}>
                       <TableCell>
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={conv.user_avatar_url || undefined} />
@@ -148,7 +148,7 @@ export default function AdminChatsPage() {
                         <div className="font-medium">
                           {conv.user_first_name || "Pengguna"} {conv.user_last_name || ""}
                         </div>
-                        {conv.product_id && ( // Display product info if the last message was about a product
+                        {conv.product_id && (
                           <div className="flex items-center text-sm text-muted-foreground mt-1">
                             {conv.product_image_url && (
                               <Image
@@ -162,7 +162,7 @@ export default function AdminChatsPage() {
                             <span className="line-clamp-1">Tentang: {conv.product_name || "Produk Tidak Dikenal"}</span>
                           </div>
                         )}
-                        {!conv.product_id && ( // Display general chat if no product in last message
+                        {!conv.product_id && (
                           <div className="flex items-center text-sm text-muted-foreground mt-1">
                             <MessageSquare className="h-4 w-4 mr-2" />
                             <span>Chat Umum</span>
@@ -182,7 +182,7 @@ export default function AdminChatsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <Button asChild size="sm">
-                          <Link href={`/admin/chats/${conv.user_id}`}> {/* Link to unified chat page */}
+                          <Link href={`/admin/chats/${conv.user_id}`}>
                             Lihat Chat
                           </Link>
                         </Button>
