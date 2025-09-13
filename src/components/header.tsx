@@ -1,143 +1,143 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import { Menu, Search, LayoutGrid, MapPin, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { CartSheet } from "./cart-sheet";
-import { ThemeToggle } from "./theme-toggle";
 import Link from "next/link";
-import Image from "next/image";
-import { UserAuthNav } from "./user-auth-nav";
-import { getAppSettings, AppSettings } from "@/lib/supabase/app-settings"; // Import dari modul app-settings
-import { Skeleton } from "@/components/ui/skeleton";
-import { ChatNotificationIcon } from "./chat-notification-icon"; // Import ChatNotificationIcon
-import { AdminChatNotificationIcon } from "./admin-chat-notification-icon"; // Import AdminChatNotificationIcon
-import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
+import { Menu, Search, ShoppingCart, User, LayoutGrid } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useSession } from "@/context/session-context";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { CategoryDropdown } from "./category-dropdown"; // Import the new component
 
 export function Header() {
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const router = useRouter();
-  const [appSettings, setAppSettings] = React.useState<AppSettings | null>(null);
-  const [isLoadingSettings, setIsLoadingSettings] = React.useState(true);
-  const { isAdmin, isAdminLoading } = useAdmin(); // Use useAdmin hook
+  const { user, isLoading: isSessionLoading } = useSession();
+  const router = React.useRouter();
 
-  React.useEffect(() => {
-    async function fetchSettings() {
-      setIsLoadingSettings(true);
-      const settings = await getAppSettings();
-      setAppSettings(settings);
-      setIsLoadingSettings(false);
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("Gagal logout. Silakan coba lagi.");
+      console.error("Logout error:", error);
+    } else {
+      toast.success("Anda telah berhasil logout.");
+      router.push("/login");
     }
-    fetchSettings();
-  }, []);
-
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
   };
 
   return (
-    <header className="border-b sticky top-0 bg-background/95 backdrop-blur-sm z-50">
-      <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300">
-        <div className="container mx-auto px-4 py-1 flex justify-between items-center">
-          <div className="flex space-x-4">
-            <a href="#" className="hover:underline flex items-center gap-1">
-              <Download className="h-3 w-3" /> Download Aplikasi Cellkom
-            </a>
-            <a href="#" className="hover:underline">CellkomCare</a>
-          </div>
-          <div className="flex space-x-4">
-            <a href="#" className="hover:underline">Jual di Cellkom Store</a>
-            <a href="#" className="hover:underline">Cellkom Ticket Rewards</a>
-            <a href="#" className="hover:underline">Cek daftar pesanan</a>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between">
+        {/* Left section: Logo and Category Dropdown */}
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2 text-lg font-semibold md:text-xl">
+            <img src="/logo.svg" alt="Cellkom Store Logo" className="h-8 w-auto" />
+            <span className="sr-only">Cellkom Store</span>
+          </Link>
+          <CategoryDropdown /> {/* Use the new CategoryDropdown component here */}
+        </div>
+
+        {/* Middle section: Search Bar (hidden on small screens) */}
+        <div className="flex-1 mx-4 hidden md:block max-w-md">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              type="search"
+              placeholder="Cari produk..."
+              className="w-full pl-9 pr-3 py-2 rounded-md border focus:border-primary focus:ring-primary"
+            />
           </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center gap-4">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-2xl font-bold text-primary">
-              {isLoadingSettings ? (
-                <Skeleton className="h-8 w-32" />
-              ) : appSettings?.site_logo_url ? (
-                <Image
-                  src={appSettings.site_logo_url}
-                  alt={appSettings.site_name || "Cellkom Store Logo"}
-                  width={120}
-                  height={30}
-                  className="h-auto"
-                />
-              ) : (
-                appSettings?.site_name || "Cellkom Store"
-              )}
-            </Link>
-            <Button variant="ghost" className="hidden md:flex items-center gap-2 text-sm text-gray-500 hover:text-primary">
-              <LayoutGrid className="h-5 w-5" />
-              <span>Kategori</span>
-            </Button>
-          </div>
-
-          <div className="flex-1 max-w-xl hidden sm:flex">
-            <form onSubmit={handleSearchSubmit} className="relative flex w-full">
-              <Input
-                type="search"
-                placeholder="Cari produk impianmu..."
-                className="flex-1 rounded-r-none pr-3"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Button type="submit" className="rounded-l-none px-4">
-                <Search className="h-5 w-5" />
-                <span className="sr-only">Cari</span>
-              </Button>
-            </form>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {!isAdminLoading && isAdmin ? (
-              <AdminChatNotificationIcon />
-            ) : (
-              <ChatNotificationIcon />
-            )}
-            <CartSheet />
-            <UserAuthNav />
-            <ThemeToggle />
-          </div>
-        </div>
-        <div className="mt-2 sm:hidden">
-            <form onSubmit={handleSearchSubmit} className="relative flex w-full">
-              <Input
-                type="search"
-                placeholder="Cari produk di sini..."
-                className="flex-1 rounded-r-none pr-3"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Button type="submit" className="rounded-l-none px-4">
-                <Search className="h-5 w-5" />
-                <span className="sr-only">Cari</span>
-              </Button>
-            </form>
-        </div>
-      </div>
-
-      <div className="bg-background border-t text-xs text-muted-foreground">
-        <div className="container mx-auto px-4 py-2 flex justify-between items-center">
-          <div className="flex gap-4 overflow-x-auto whitespace-nowrap pb-1">
-            <Link href="#" className="hover:underline">Serbu Sale Disc 63%</Link>
-            <Link href="#" className="hover:underline">DEKORUMA DISC 60%+20%</Link>
-            <Link href="#" className="hover:underline">DREAMBOX DISC SD 1JT</Link>
-            <Link href="#" className="hover:underline">Hydro Flask x Syma</Link>
-          </div>
-          <Button variant="ghost" size="sm" className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
-            <MapPin className="h-4 w-4" />
-            <span>Tambah alamat biar belanja lebih asyik</span>
-            <Menu className="h-4 w-4 rotate-90" />
+        {/* Right section: Icons and User Menu */}
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" className="relative">
+            <ShoppingCart className="h-5 w-5" />
+            <span className="sr-only">Keranjang</span>
+            {/* <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+              3
+            </span> */}
           </Button>
+
+          {isSessionLoading ? (
+            <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/lorelei/svg?seed=${user.id}`} alt={user.user_metadata?.first_name || "User"} />
+                    <AvatarFallback>{user.user_metadata?.first_name?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {user.user_metadata?.first_name || "Pengguna"}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">Profil</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/my-orders">Pesanan Saya</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/login">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Login</span>
+              </Link>
+            </Button>
+          )}
+
+          {/* Mobile Menu (Hamburger Icon) */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-64 p-4">
+              <nav className="flex flex-col gap-4">
+                <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
+                  <img src="/logo.svg" alt="Cellkom Store Logo" className="h-8 w-auto" />
+                  <span className="sr-only">Cellkom Store</span>
+                </Link>
+                <Link href="/categories" className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary">
+                  <LayoutGrid className="h-5 w-5" />
+                  <span>Kategori</span>
+                </Link>
+                <Link href="/products" className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary">
+                  <span>Produk</span>
+                </Link>
+                {/* Add more mobile navigation links here */}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
