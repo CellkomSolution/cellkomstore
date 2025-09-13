@@ -176,7 +176,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
     <Card className="h-full flex flex-col">
       <CardHeader className="border-b p-4 flex flex-row items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => router.push("/admin/chats")}>
+          <Button variant="ghost" size="icon" onClick={() => router.push("/chats")}>
             <ArrowLeft className="h-5 w-5" />
             <span className="sr-only">Kembali</span>
           </Button>
@@ -228,6 +228,7 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
                       </div>
                     ) : (
                       <>
+                        {/* Display avatar for messages from the other user */}
                         {msg.sender_id !== adminUser?.id && (
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
@@ -256,11 +257,12 @@ export default function AdminChatDetailPage({ params }: { params: Promise<{ user
                             {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
                           </p>
                         </div>
+                        {/* Display avatar for messages from the admin */}
                         {msg.sender_id === adminUser?.id && (
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
+                            <AvatarImage src={adminProfile?.avatar_url || undefined} />
                             <AvatarFallback>
-                              {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                              {adminProfile?.first_name ? adminProfile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
                             </AvatarFallback>
                           </Avatar>
                         )}
