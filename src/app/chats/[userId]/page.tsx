@@ -20,11 +20,14 @@ import Link from "next/link";
 import Image from "next/image";
 
 interface AdminChatDetailPageProps {
-  params: any; // Menggunakan 'any' untuk mengatasi masalah tipe internal Next.js
+  params: Promise<{ userId: string }>; // Menyesuaikan tipe params menjadi Promise
 }
 
 export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps) {
-  const { userId } = params as { userId: string }; // Type assertion untuk penggunaan yang aman di dalam komponen
+  // Menggunakan React.use() untuk meng-unwrap params
+  const unwrappedParams = React.use(params);
+  const { userId } = unwrappedParams;
+
   const router = useRouter();
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();
 
