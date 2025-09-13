@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, DollarSign, ShoppingBag } from "lucide-react";
+import { Package, Users, DollarSign, ShoppingBag, LayoutGrid, Image as ImageIcon, CreditCard } from "lucide-react"; // Import additional icons
 import { getTotalProductsCount } from "@/lib/supabase/products";
 import { getTotalUsersCount } from "@/lib/supabase/profiles";
 import { getTotalOrdersCount } from "@/lib/supabase/orders"; // Import getTotalOrdersCount
+import Link from "next/link"; // Import Link
 
 export default function AdminDashboardPage() {
   const [totalProducts, setTotalProducts] = React.useState<number | null>(null);
@@ -35,42 +36,48 @@ export default function AdminDashboardPage() {
       </p>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Pesanan</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalOrders}
-            </div>
-            <p className="text-xs text-muted-foreground">+10% dari bulan lalu</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Produk</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalProducts}
-            </div>
-            <p className="text-xs text-muted-foreground">+20% dari bulan lalu</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Pengguna</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalUsers}
-            </div>
-            <p className="text-xs text-muted-foreground">+15% dari bulan lalu</p>
-          </CardContent>
-        </Card>
+        <Link href="/admin/orders" className="block">
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Pesanan</CardTitle>
+              <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalOrders}
+              </div>
+              <p className="text-xs text-muted-foreground">+10% dari bulan lalu</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/admin/products" className="block">
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Produk</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalProducts}
+              </div>
+              <p className="text-xs text-muted-foreground">+20% dari bulan lalu</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/admin/users" className="block">
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Pengguna</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalUsers}
+              </div>
+              <p className="text-xs text-muted-foreground">+15% dari bulan lalu</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <Card>
@@ -79,15 +86,39 @@ export default function AdminDashboardPage() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            Fitur manajemen konten akan dibangun di sini. Anda dapat mengelola banner, kategori, produk, dan elemen lainnya.
+            Gunakan tautan di bawah ini untuk mengelola berbagai aspek aplikasi Anda.
           </p>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-            <li>- Manajemen Pesanan</li>
-            <li>- Manajemen Produk</li>
-            <li>- Manajemen Banner</li>
-            <li>- Manajemen Kategori</li>
-            <li>- Manajemen Metode Pembayaran</li>
-            <li>- Pengaturan Header & Footer</li>
+            <li>
+              <Link href="/admin/orders" className="flex items-center gap-2 hover:text-primary">
+                <ShoppingBag className="h-4 w-4" /> Manajemen Pesanan
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/products" className="flex items-center gap-2 hover:text-primary">
+                <Package className="h-4 w-4" /> Manajemen Produk
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/hero-carousel" className="flex items-center gap-2 hover:text-primary">
+                <ImageIcon className="h-4 w-4" /> Manajemen Hero Carousel
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/categories" className="flex items-center gap-2 hover:text-primary">
+                <LayoutGrid className="h-4 w-4" /> Manajemen Kategori
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/payment-methods" className="flex items-center gap-2 hover:text-primary">
+                <CreditCard className="h-4 w-4" /> Manajemen Metode Pembayaran
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/settings" className="flex items-center gap-2 hover:text-primary">
+                <Settings className="h-4 w-4" /> Pengaturan Aplikasi
+              </Link>
+            </li>
           </ul>
         </CardContent>
       </Card>

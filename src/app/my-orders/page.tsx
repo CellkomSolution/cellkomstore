@@ -97,7 +97,7 @@ export default function MyOrdersPage() {
                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                   </Badge>
                   <Button variant="outline" size="icon" asChild>
-                    <Link href={`/checkout/${order.id}`}>
+                    <Link href={`/my-orders/${order.id}`}> {/* Updated link */}
                       <Eye className="h-4 w-4" />
                       <span className="sr-only">Lihat Detail</span>
                     </Link>
