@@ -52,8 +52,9 @@ export function PaymentMethodForm({ initialData, onSubmit, loading = false }: Pa
       name: initialData?.name ?? "",
       type: initialData?.type ?? 'bank_transfer',
       details: initialData?.details ? JSON.stringify(initialData.details, null, 2) : null,
-      is_active: initialData?.is_active ?? true, // Use nullish coalescing
-      order: initialData?.order ?? 0, // Use nullish coalescing
+      // Explicitly ensure is_active and order are boolean/number
+      is_active: initialData ? initialData.is_active : true,
+      order: initialData ? initialData.order : 0,
     },
   });
 
