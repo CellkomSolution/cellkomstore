@@ -15,9 +15,9 @@ import { useCart } from "@/context/cart-context";
 import { ChatNotificationIcon } from "./chat-notification-icon";
 import { AdminChatNotificationIcon } from "./admin-chat-notification-icon";
 import { useAdmin } from "@/hooks/use-admin";
-import { useRouter } from "next/navigation"; // Import useRouter
-import { CartSheet } from "./cart-sheet"; // Import CartSheet
-import { ChatWidget } from "./chat-widget"; // Import ChatWidget
+import { useRouter } from "next/navigation";
+import { CartSheet } from "./cart-sheet";
+import { ChatWidget } from "./chat-widget";
 
 export function Header() {
   const { session, isLoading: isAuthLoading, user } = useAuth();
@@ -25,9 +25,9 @@ export function Header() {
   const { isAdmin } = useAdmin();
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(""); // State untuk input pencarian
-  const [isGeneralChatOpen, setIsGeneralChatOpen] = useState(false); // State untuk ChatWidget umum
-  const router = useRouter(); // Inisialisasi useRouter
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isGeneralChatOpen, setIsGeneralChatOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchAppSettings = async () => {
@@ -53,7 +53,7 @@ export function Header() {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery(""); // Bersihkan input setelah pencarian
+      setSearchQuery("");
     }
   };
 
@@ -70,6 +70,15 @@ export function Header() {
             <a href="#" className="hover:underline">
               Bantuan
             </a>
+            {appSettings?.right_header_text_enabled && appSettings?.right_header_text_content && (
+              appSettings.right_header_text_link ? (
+                <Link href={appSettings.right_header_text_link} className="hover:underline">
+                  {appSettings.right_header_text_content}
+                </Link>
+              ) : (
+                <span className="hover:underline">{appSettings.right_header_text_content}</span>
+              )
+            )}
           </div>
         </div>
       </div>
@@ -107,7 +116,7 @@ export function Header() {
             <Search className="h-5 w-5" />
             <span className="sr-only">Cari</span>
           </Button>
-          <CartSheet /> {/* Mengganti tombol keranjang dengan CartSheet */}
+          <CartSheet />
           <Button variant="ghost" size="icon">
             <Heart className="h-5 w-5" />
             <span className="sr-only">Favorit</span>
@@ -153,17 +162,6 @@ export function Header() {
           <div className="animate-marquee">
             {appSettings.scrolling_text_content}
           </div>
-        </div>
-      )}
-      {appSettings?.right_header_text_enabled && appSettings?.right_header_text_content && (
-        <div className="bg-secondary text-secondary-foreground text-sm py-1 text-center">
-          {appSettings.right_header_text_link ? (
-            <Link href={appSettings.right_header_text_link} className="hover:underline">
-              {appSettings.right_header_text_content}
-            </Link>
-          ) : (
-            appSettings.right_header_text_content
-          )}
         </div>
       )}
     </header>
