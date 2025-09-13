@@ -52,7 +52,7 @@ export default function FeaturedBrandsAdminPage() {
     if (settingsError) {
       toast.error("Gagal mengambil judul merek unggulan: " + settingsError.message);
     } else {
-      setFeaturedBrandsTitle(settingsData?.featured_brands_title || "Brand Pilihan");
+      setTitle(settingsData?.featured_brands_title || "Brand Pilihan");
     }
     setLoading(false);
   };
