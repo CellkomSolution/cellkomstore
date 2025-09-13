@@ -25,6 +25,10 @@ export function useGoogleMapsLoader(options?: UseGoogleMapsLoaderOptions) {
   React.useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
+    // --- DEBUGGING LOG ---
+    console.log("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:", apiKey ? "Loaded (starts with: " + apiKey.substring(0, 5) + "...)" : "Not Loaded");
+    // --- END DEBUGGING LOG ---
+
     if (!apiKey) {
       const err = new Error("Google Maps API Key tidak ditemukan. Harap atur variabel lingkungan NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.");
       console.error(err);
