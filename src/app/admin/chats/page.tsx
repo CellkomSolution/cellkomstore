@@ -17,8 +17,9 @@ import { useSession } from "@/context/session-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation"; // Import usePathname
+import { ScrollArea } from "@/components/ui/scroll-area"; // Import ScrollArea
 
-export function AdminChatList() { // Changed to named export
+export default function AdminChatsPage() { // Changed to default export
   const { user, isLoading: isSessionLoading } = useSession();
   const [conversations, setConversations] = React.useState<ChatConversation[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
