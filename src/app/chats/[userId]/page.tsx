@@ -20,11 +20,11 @@ import Link from "next/link";
 import Image from "next/image";
 
 interface AdminChatDetailPageProps {
-  params: { userId: string };
+  params: { userId: string } | Promise<{ userId: string }>; // Menyesuaikan tipe params
 }
 
 export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps) {
-  const { userId } = params;
+  const { userId } = params as { userId: string }; // Type assertion for params
   const router = useRouter();
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();
 
@@ -184,7 +184,8 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader className="border-b p-4 flex flex-row items-center justify-between">
+      {/* Mengganti CardHeader dengan div untuk tata letak kustom */}
+      <div className="border-b p-4 flex flex-row items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.push("/chats")}>
             <ArrowLeft className="h-5 w-5" />
@@ -202,7 +203,8 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
             </CardTitle>
             <p className="text-sm text-muted-foreground">{otherUserProfile.email}</p>
           </div>
-        </CardHeader>
+        </div>
+      </div>
       <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
         {isLoadingMessages ? (
           <div className="flex-1 flex items-center justify-center">
