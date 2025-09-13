@@ -19,183 +19,77 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import Image from "next/image";
-import { Loader2, UploadCloud, XCircle } from "lucide-react";
-import { HeroCarouselSlide } from "@/lib/supabase/hero-carousel"; // Import HeroCarouselSlide dari modul hero-carousel
+import { Loader2 } from "lucide-react";
+import { HeroCarouselSlide } from "@/lib/supabase/hero-carousel";
+import { ImageUploader } from "@/components/image-uploader"; // Import ImageUploader yang sudah ada
 
 const formSchema = z.object({
-  display_style: z.enum(['full', 'split']), // Matches interface: not optional
-  product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).nullable(), // Matches interface: string | null
-  alt: z.string().min(3, { message: "Teks alternatif minimal 3 karakter." }), // Matches interface: string
-  link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable(), // Matches interface: string | null
-  order: z.coerce.number().min(0), // Matches interface: number
-  // Optional fields for split view
-  logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable(), // Matches interface: string | null
-  product_name: z.string().nullable(), // Matches interface: string | null
-  original_price: z.coerce.number().min(0).nullable(), // Matches interface: number | null
-  discounted_price: z.coerce.number().min(0).nullable(), // Matches interface: number | null
-  is_new: z.boolean(), // Matches interface: boolean
-  hashtag: z.string().nullable(), // Matches interface: string | null
-  left_panel_bg_color: z.string().nullable(), // Matches interface: string | null
+  display_style: z.enum(['full', 'split']),
+  product_image_url: z.string().url({ message: "URL gambar produk tidak valid." }).nullable(),
+  alt: z.string().min(3, { message: "Teks alternatif minimal 3 karakter." }),
+  link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable(),
+  order: z.coerce.number().min(0),
+  logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable(),
+  product_name: z.string().nullable(),
+  original_price: z.coerce.number().min(0).nullable(),
+  discounted_price: z.coerce.number().min(0).nullable(),
+  is_new: z.boolean(),
+  hashtag: z.string().nullable(),
+  left_panel_bg_color: z.string().nullable(),
 });
 
-type HeroCarouselFormValues = z.infer<typeof formSchema>; // Define explicit type
+type HeroCarouselFormValues = z.infer<typeof formSchema>;
 
 interface HeroCarouselFormProps {
   initialData?: HeroCarouselSlide | null;
-  onSubmit: (values: HeroCarouselFormValues) => Promise<void>; // Use explicit type here
+  onSubmit: (values: HeroCarouselFormValues) => Promise<void>;
   loading?: boolean;
 }
 
-type ImageFieldName = 'product_image_url' | 'logo_url';
-
 export function HeroCarouselForm({ initialData, onSubmit, loading = false }: HeroCarouselFormProps) {
   const router = useRouter();
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [activeUploader, setActiveUploader] = React.useState<ImageFieldName | null>(null);
-  const [imagePreviews, setImagePreviews] = React.useState<{ [key in ImageFieldName]: string | null }>({
-    product_image_url: initialData?.product_image_url || null,
-    logo_url: initialData?.logo_url || null,
-  });
-  const [isUploadingImage, setIsUploadingImage] = React.useState(false);
-
+  
   const defaultValues: HeroCarouselFormValues = {
-    display_style: initialData?.display_style ?? 'split', // Provide a default if initialData is null/undefined
-    product_image_url: initialData?.product_image_url ?? null, // Must be string or null
-    alt: initialData?.alt ?? "", // Must be string
-    link_url: initialData?.link_url ?? null, // Must be string or null
-    order: initialData?.order ?? 0, // Must be number
-    logo_url: initialData?.logo_url ?? null, // Must be string or null
-    product_name: initialData?.product_name ?? null, // Must be string or null
-    original_price: initialData?.original_price ?? null, // Must be number or null
-    discounted_price: initialData?.discounted_price ?? null, // Must be number or null
-    is_new: initialData?.is_new ?? false, // Must be boolean
-    hashtag: initialData?.hashtag ?? null, // Must be string or null
-    left_panel_bg_color: initialData?.left_panel_bg_color ?? null, // Must be string or null
+    display_style: initialData?.display_style ?? 'split',
+    product_image_url: initialData?.product_image_url ?? null,
+    alt: initialData?.alt ?? "",
+    link_url: initialData?.link_url ?? null,
+    order: initialData?.order ?? 0,
+    logo_url: initialData?.logo_url ?? null,
+    product_name: initialData?.product_name ?? null,
+    original_price: initialData?.original_price ?? null,
+    discounted_price: initialData?.discounted_price ?? null,
+    is_new: initialData?.is_new ?? false,
+    hashtag: initialData?.hashtag ?? null,
+    left_panel_bg_color: initialData?.left_panel_bg_color ?? null,
   };
 
-  const form = useForm<HeroCarouselFormValues>({ // Use the explicit type here
+  const form = useForm<HeroCarouselFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
 
   const displayStyle = form.watch('display_style');
 
-  const triggerFileInput = (fieldName: ImageFieldName) => {
-    if (loading || isUploadingImage) return;
-    setActiveUploader(fieldName);
-    fileInputRef.current?.click();
+  const handleProductImageUploadSuccess = (newUrl: string) => {
+    form.setValue("product_image_url", newUrl, { shouldValidate: true });
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, fieldName: ImageFieldName) => {
-    if (!event.target.files || event.target.files.length === 0) return;
-
-    const file = event.target.files[0];
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
-
-    setIsUploadingImage(true);
-    try {
-      const { error: uploadError } = await supabase.storage
-        .from("carousel-images")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: publicUrlData } = supabase.storage
-        .from("carousel-images")
-        .getPublicUrl(filePath);
-
-      if (!publicUrlData.publicUrl) throw new Error("Tidak bisa mendapatkan URL publik untuk gambar.");
-
-      setImagePreviews((prev) => ({ ...prev, [fieldName]: publicUrlData.publicUrl }));
-      form.setValue(fieldName, publicUrlData.publicUrl, { shouldValidate: true });
-      toast.success("Gambar berhasil diunggah!");
-    } catch (error: any) {
-      toast.error("Gagal mengunggah gambar: " + error.message);
-      setImagePreviews((prev) => ({ ...prev, [fieldName]: null }));
-      form.setValue(fieldName, null); // Now that schema allows null, no need for 'as any'
-    } finally {
-      setIsUploadingImage(false);
-      setActiveUploader(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
+  const handleRemoveProductImage = () => {
+    form.setValue("product_image_url", null, { shouldValidate: true });
   };
 
-  const removeImage = (fieldName: ImageFieldName) => {
-    setImagePreviews((prev) => ({ ...prev, [fieldName]: null }));
-    form.setValue(fieldName, null); // Now that schema allows null, no need for 'as any'
+  const handleLogoUploadSuccess = (newUrl: string) => {
+    form.setValue("logo_url", newUrl, { shouldValidate: true });
   };
 
-  const ImageUploader = ({ fieldName, label, description }: { fieldName: ImageFieldName, label: string, description?: string }) => (
-    <FormItem>
-      <FormLabel>{label}</FormLabel>
-      <FormControl>
-        <div>
-          {imagePreviews[fieldName] ? (
-            <div className="relative h-48 w-full max-w-md">
-              <Image
-                src={imagePreviews[fieldName]!}
-                alt={`${label} Preview`}
-                fill
-                style={{ objectFit: "contain" }}
-                className="p-2 border rounded-lg"
-              />
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2 rounded-full h-6 w-6"
-                onClick={() => removeImage(fieldName)}
-                disabled={loading || isUploadingImage}
-              >
-                <XCircle className="h-4 w-4" />
-                <span className="sr-only">Hapus Gambar</span>
-              </Button>
-            </div>
-          ) : (
-            <div
-              className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 hover:bg-muted/30"
-              onClick={() => triggerFileInput(fieldName)}
-            >
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={(e) => activeUploader && handleImageUpload(e, activeUploader)}
-                disabled={loading || isUploadingImage}
-              />
-              {isUploadingImage && activeUploader === fieldName ? (
-                <>
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  <p className="mt-2 text-sm text-muted-foreground">Mengunggah...</p>
-                </>
-              ) : (
-                <div className="text-center">
-                  <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    <span className="font-semibold text-primary">Klik untuk mengunggah</span> atau seret & lepas
-                  </p>
-                  <p className="text-xs text-muted-foreground">PNG, JPG, WEBP</p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </FormControl>
-      {description && <FormDescription>{description}</FormDescription>}
-      <FormMessage />
-    </FormItem>
-  );
+  const handleRemoveLogo = () => {
+    form.setValue("logo_url", null, { shouldValidate: true });
+  };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {/* The hidden input for file upload is now inside ImageUploader */}
-        
         <FormField
           control={form.control}
           name="display_style"
@@ -231,11 +125,23 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
           )}
         />
 
-        <ImageUploader
-          fieldName="product_image_url"
-          label="Gambar Banner"
-          description="Gambar utama yang akan ditampilkan di slide."
-        />
+        <FormItem>
+          <FormLabel>Gambar Banner</FormLabel>
+          <FormControl>
+            <ImageUploader
+              bucketName="carousel-images"
+              currentImageUrl={form.watch("product_image_url")}
+              onUploadSuccess={handleProductImageUploadSuccess}
+              onRemove={handleRemoveProductImage}
+              disabled={loading}
+              aspectRatio="aspect-video"
+            />
+          </FormControl>
+          <FormDescription>
+            Gambar utama yang akan ditampilkan di slide.
+          </FormDescription>
+          <FormMessage />
+        </FormItem>
 
         <FormField
           control={form.control}
@@ -291,11 +197,24 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
         {displayStyle === 'split' && (
           <div className="space-y-8 border-t pt-8">
             <h3 className="text-lg font-semibold">Detail Panel Teks (Tampilan Split)</h3>
-            <ImageUploader
-              fieldName="logo_url"
-              label="Logo Brand (Opsional)"
-              description="Logo brand yang akan muncul di atas nama produk."
-            />
+            <FormItem>
+              <FormLabel>Logo Brand (Opsional)</FormLabel>
+              <FormControl>
+                <ImageUploader
+                  bucketName="carousel-images"
+                  currentImageUrl={form.watch("logo_url")}
+                  onUploadSuccess={handleLogoUploadSuccess}
+                  onRemove={handleRemoveLogo}
+                  disabled={loading}
+                  aspectRatio="aspect-square"
+                  className="max-w-[150px]"
+                />
+              </FormControl>
+              <FormDescription>
+                Logo brand yang akan muncul di atas nama produk.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
             <FormField
               control={form.control}
               name="product_name"
@@ -354,7 +273,7 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
                       <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        disabled={loading || isUploadingImage}
+                        disabled={loading}
                       />
                     </FormControl>
                     <FormDescription>
@@ -400,8 +319,8 @@ export function HeroCarouselForm({ initialData, onSubmit, loading = false }: Her
           </div>
         )}
 
-        <Button type="submit" disabled={loading || isUploadingImage}>
-          {loading || isUploadingImage ? (
+        <Button type="submit" disabled={loading}>
+          {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Menyimpan...
