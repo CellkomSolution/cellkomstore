@@ -5,7 +5,7 @@ import { MessageSquare, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/context/session-context";
-import { getUserUnifiedConversation, ChatConversation, ChatMessage } from "@/lib/supabase/chats"; // Import getUserUnifiedConversation
+import { getUnreadMessageCount } from "@/lib/supabase/chats"; // Hanya import getUnreadMessageCount
 import { supabase } from "@/integrations/supabase/client";
 import { ChatWidget } from "./chat-widget";
 import { useAdmin } from "@/hooks/use-admin";
@@ -13,30 +13,27 @@ import { useAdmin } from "@/hooks/use-admin";
 export function ChatNotificationIcon() {
   const { user, isLoading: isSessionLoading } = useSession();
   const { isAdmin } = useAdmin();
-  const [unifiedConversation, setUnifiedConversation] = React.useState<ChatConversation | null>(null);
   const [totalUnreadCount, setTotalUnreadCount] = React.useState(0);
-  const [isLoadingConversations, setIsLoadingConversations] = React.useState(true);
+  const [isLoadingCount, setIsLoadingCount] = React.useState(true);
   const [isChatOpen, setIsChatOpen] = React.useState(false);
-  const [activeChatProductId, setActiveChatProductId] = React.useState<string | null>(null);
-  const [activeChatProductName, setActiveChatProductName] = React.useState<string | null>(null);
+  // activeChatProductId dan activeChatProductName tidak lagi diperlukan di sini
+  // karena ChatWidget yang dibuka dari ikon ini adalah chat umum, bukan chat produk spesifik.
 
-  const fetchUnifiedConversation = React.useCallback(async () => {
+  const fetchUnreadCount = React.useCallback(async () => {
     if (!user || isAdmin) {
-      setUnifiedConversation(null);
       setTotalUnreadCount(0);
-      setIsLoadingConversations(false);
+      setIsLoadingCount(false);
       return;
     }
-    setIsLoadingConversations(true);
-    const conversation = await getUserUnifiedConversation(user.id);
-    setUnifiedConversation(conversation);
-    setTotalUnreadCount(conversation?.unread_count || 0);
-    setIsLoadingConversations(false);
+    setIsLoadingCount(true);
+    const count = await getUnreadMessageCount(user.id);
+    setTotalUnreadCount(count);
+    setIsLoadingCount(false);
   }, [user, isAdmin]);
 
   React.useEffect(() => {
     if (!isSessionLoading && user && !isAdmin) {
-      fetchUnifiedConversation();
+      fetchUnreadCount();
 
       // Subscribe to all messages where this user is the receiver
       const channel = supabase
@@ -51,7 +48,7 @@ export function ChatNotificationIcon() {
           },
           (payload) => {
             // If a new message is received or an existing one is marked read, refetch
-            fetchUnifiedConversation();
+            fetchUnreadCount();
           }
         )
         .subscribe();
@@ -60,16 +57,14 @@ export function ChatNotificationIcon() {
         supabase.removeChannel(channel);
       };
     }
-  }, [isSessionLoading, user, isAdmin, fetchUnifiedConversation]);
+  }, [isSessionLoading, user, isAdmin, fetchUnreadCount]);
 
   const handleChatIconClick = () => {
     // When the icon is clicked, always open the unified chat with no specific product context initially
-    setActiveChatProductId(null);
-    setActiveChatProductName(null);
     setIsChatOpen(true);
   };
 
-  if (isSessionLoading || isLoadingConversations || !user || isAdmin) {
+  if (isSessionLoading || isLoadingCount || !user || isAdmin) {
     return null; // Don't render if loading, not logged in, or is admin
   }
 
@@ -90,8 +85,8 @@ export function ChatNotificationIcon() {
         <span className="sr-only">Chat</span>
       </Button>
       <ChatWidget
-        productId={activeChatProductId} // This will be null, but the prop is kept for product page initiation
-        productName={activeChatProductName} // This will be null, but the prop is kept for product page initiation
+        productId={null} // Chat umum, tidak terkait produk spesifik
+        productName={null} // Chat umum, tidak terkait produk spesifik
         open={isChatOpen}
         onOpenChange={setIsChatOpen}
       />

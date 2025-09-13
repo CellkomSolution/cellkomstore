@@ -17,6 +17,13 @@ export type ChatMessage = {
   type?: 'system' | 'message';
 };
 
+// Define ChatConversation type based on getChatParticipants return
+export interface ChatConversation extends Profile {
+  latestMessage: string;
+  latestTimestamp: string;
+  unreadCount: number;
+}
+
 export async function getChatMessages(user1Id: string, user2Id: string): Promise<ChatMessage[]> {
   const { data, error } = await supabase
     .from("chats")

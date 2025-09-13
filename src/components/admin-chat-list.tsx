@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getChatConversations, ChatConversation, ChatMessage } from "@/lib/supabase/chats";
+import { getChatParticipants, ChatConversation, ChatMessage } from "@/lib/supabase/chats"; // Fixed: getChatConversations to getChatParticipants, added ChatConversation
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Loader2, User as UserIcon } from "lucide-react";
@@ -19,7 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function AdminChatList() {
   const { user, isLoading: isSessionLoading } = useSession();
-  const [conversations, setConversations] = React.useState<ChatConversation[]>([]);
+  const [conversations, setConversations] = React.useState<ChatConversation[]>([]); // Fixed: type to ChatConversation[]
   const [isLoading, setIsLoading] = React.useState(true);
   const pathname = usePathname();
   
@@ -29,7 +29,7 @@ export function AdminChatList() {
     if (!adminId) return;
     setIsLoading(true);
     try {
-      const fetchedConversations = await getChatConversations(adminId);
+      const fetchedConversations = await getChatParticipants(adminId); // Fixed: getChatConversations to getChatParticipants
       setConversations(fetchedConversations);
     } catch (error) {
       console.error("Error in fetchConversations for AdminChatList:", error);
@@ -110,37 +110,37 @@ export function AdminChatList() {
             ) : (
               conversations.map((conv) => (
                 <TableRow 
-                  key={conv.user_id} 
-                  className={`cursor-pointer ${pathname.includes(conv.user_id) ? 'bg-muted' : ''}`}
+                  key={conv.id} // Fixed: conv.user_id to conv.id (from ChatConversation interface)
+                  className={`cursor-pointer ${pathname.includes(conv.id) ? 'bg-muted' : ''}`} // Fixed: conv.user_id to conv.id
                 >
                   <TableCell>
-                    <Link href={`/chats/${conv.user_id}`} className="flex items-center gap-3">
+                    <Link href={`/chats/${conv.id}`} className="flex items-center gap-3"> {/* Fixed: conv.user_id to conv.id */}
                       <Avatar className="h-9 w-9">
-                        <AvatarImage src={conv.user_avatar_url || undefined} />
+                        <AvatarImage src={conv.avatar_url || undefined} />
                         <AvatarFallback>
-                          {conv.user_first_name ? conv.user_first_name[0].toUpperCase() : <UserIcon className="h-5 w-5" />}
+                          {conv.first_name ? conv.first_name[0].toUpperCase() : <UserIcon className="h-5 w-5" />}
                         </AvatarFallback>
                       </Avatar>
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Link href={`/chats/${conv.user_id}`} className="flex flex-col">
+                    <Link href={`/chats/${conv.id}`} className="flex flex-col"> {/* Fixed: conv.user_id to conv.id */}
                       <div className="font-medium">
-                        {conv.user_first_name || "Pengguna"} {conv.user_last_name || ""}
+                        {conv.first_name || "Pengguna"} {conv.last_name || ""}
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-1">
-                        {conv.last_message}
+                        {conv.latestMessage}
                       </p>
-                      {conv.unread_count > 0 && (
+                      {conv.unreadCount > 0 && (
                         <Badge variant="destructive" className="mt-1 w-fit">
-                          {conv.unread_count} Pesan Baru
+                          {conv.unreadCount} Pesan Baru
                         </Badge>
                       )}
                     </Link>
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground text-sm">
-                    <Link href={`/chats/${conv.user_id}`}>
-                      {formatDistanceToNow(new Date(conv.last_message_time), { addSuffix: true, locale: id })}
+                    <Link href={`/chats/${conv.id}`}> {/* Fixed: conv.user_id to conv.id */}
+                      {formatDistanceToNow(new Date(conv.latestTimestamp), { addSuffix: true, locale: id })}
                     </Link>
                   </TableCell>
                 </TableRow>

@@ -90,7 +90,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
             updated_at: msg.created_at,
             sender_profile: [],
             receiver_profile: [],
-            products: [{ name: product.name, image_url: product.imageUrl }],
+            products: [{ name: product.name, imageUrl: product.imageUrl }], // Fixed: image_url to imageUrl
             type: 'system',
           });
           productsIntroduced.add(msg.product_id);
@@ -174,7 +174,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
-      products (name, image_url)
+      products (name, imageUrl)
     `).single();
 
     if (error) {
@@ -318,7 +318,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                       <div className="w-full text-center text-muted-foreground text-sm my-2">
                         {msg.products?.[0] && (
                           <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
-                            <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                            <Image src={msg.products[0].imageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
                             <span>
                               Percakapan tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
                             </span>
@@ -346,7 +346,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                           <p className="text-sm">{msg.message}</p>
                           {msg.product_id && msg.products?.[0] && (
                             <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
-                              <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                              <Image src={msg.products[0].imageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
                               <span className="text-xs text-muted-foreground line-clamp-1">
                                 Tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
                               </span>
