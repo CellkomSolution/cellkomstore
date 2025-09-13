@@ -180,3 +180,5 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
   }
   return mapProductData(data);
 }
+
+export { mapProductData };

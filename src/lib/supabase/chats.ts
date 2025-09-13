@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "./profiles";
-import { Product } from "./products";
+import { Product, mapProductData } from "./products"; // Import mapProductData
 
 export type ChatMessage = {
   id: string;
@@ -31,7 +31,7 @@ export async function getChatMessages(user1Id: string, user2Id: string): Promise
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
-      products (name, image_url)
+      products (id, name, price, original_price, image_url, location, rating, sold_count, category, is_flash_sale, description)
     `)
     .or(`and(sender_id.eq.${user1Id},receiver_id.eq.${user2Id}),and(sender_id.eq.${user2Id},receiver_id.eq.${user1Id})`)
     .order("created_at", { ascending: true });
@@ -40,7 +40,11 @@ export async function getChatMessages(user1Id: string, user2Id: string): Promise
     console.error("Error fetching chat messages:", error.message);
     throw new Error("Gagal memuat pesan chat.");
   }
-  return data as ChatMessage[];
+
+  return data.map(chat => ({
+    ...chat,
+    products: chat.products ? chat.products.map(mapProductData) : [],
+  })) as ChatMessage[];
 }
 
 export async function markMessagesAsRead(senderId: string, receiverId: string) {

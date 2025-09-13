@@ -174,14 +174,19 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
-      products (name, imageUrl)
+      products (id, name, price, original_price, image_url, location, rating, sold_count, category, is_flash_sale, description)
     `).single();
 
     if (error) {
       console.error("Error sending message:", error.message);
       toast.error("Gagal mengirim pesan.");
     } else if (data) {
-      setMessages((prev) => [...prev, data]);
+      // Map product data from snake_case to camelCase for the new message
+      const mappedData = {
+        ...data,
+        products: data.products ? data.products.map(mapProductData) : [],
+      };
+      setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
     }
     setIsSending(false);
