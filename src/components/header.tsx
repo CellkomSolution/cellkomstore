@@ -19,11 +19,10 @@ import { useSession } from "@/context/session-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CategoryDropdown } from "./category-dropdown"; // Import the new component
-import { useRouter } from "next/navigation"; // Correct import for App Router
 
 export function Header() {
   const { user, isLoading: isSessionLoading } = useSession();
-  const router = useRouter(); // Corrected: Call useRouter directly
+  const router = React.useRouter();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -77,8 +76,8 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={profile?.avatar_url || `https://api.dicebear.com/7.x/lorelei/svg?seed=${user.id}`} alt={profile?.first_name || "User"} />
-                    <AvatarFallback>{profile?.first_name?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/lorelei/svg?seed=${user.id}`} alt={user.user_metadata?.first_name || "User"} />
+                    <AvatarFallback>{user.user_metadata?.first_name?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -86,7 +85,7 @@ export function Header() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {profile?.first_name || "Pengguna"}
+                      {user.user_metadata?.first_name || "Pengguna"}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
@@ -107,7 +106,7 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <Button variant="ghost" size="icon" asChild>
-              <Link href="/auth">
+              <Link href="/login">
                 <User className="h-5 w-5" />
                 <span className="sr-only">Login</span>
               </Link>
