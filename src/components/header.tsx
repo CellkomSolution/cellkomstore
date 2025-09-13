@@ -42,7 +42,7 @@ export function Header() {
 
   return (
     <header className="border-b sticky top-0 bg-background/95 backdrop-blur-sm z-50">
-      <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300">
+      <div className="bg-black-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300">
         <div className="container mx-auto px-4 py-1 flex justify-between items-center">
           <div className="flex space-x-4">
             <a href="#" className="hover:underline flex items-center gap-1">
