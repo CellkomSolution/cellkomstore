@@ -19,8 +19,9 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { getAppSettings, updateAppSettings, AppSettings } from "@/lib/supabase/app-settings"; // Import dari modul app-settings
+import { getAppSettings, updateAppSettings, AppSettings } from "@/lib/supabase/app-settings";
 import { ImageUploader } from "@/components/image-uploader";
+import { Switch } from "@/components/ui/switch"; // Import Switch component
 
 const formSchema = z.object({
   site_name: z.string().nullable().optional().or(z.literal("")),
@@ -33,6 +34,12 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().optional().or(z.literal("")),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().optional().or(z.literal("")),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().optional().or(z.literal("")),
+  // New fields for header bottom section
+  scrolling_text_enabled: z.boolean().optional().default(false),
+  scrolling_text_content: z.string().nullable().optional().or(z.literal("")),
+  right_header_text_enabled: z.boolean().optional().default(false),
+  right_header_text_content: z.string().nullable().optional().or(z.literal("")),
+  right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
 });
 
 export default function AdminSettingsPage() {
@@ -53,6 +60,11 @@ export default function AdminSettingsPage() {
       twitter_url: null,
       youtube_url: null,
       linkedin_url: null,
+      scrolling_text_enabled: false,
+      scrolling_text_content: null,
+      right_header_text_enabled: false,
+      right_header_text_content: null,
+      right_header_text_link: null,
     },
   });
 
@@ -73,6 +85,11 @@ export default function AdminSettingsPage() {
           twitter_url: settings.twitter_url,
           youtube_url: settings.youtube_url,
           linkedin_url: settings.linkedin_url,
+          scrolling_text_enabled: settings.scrolling_text_enabled || false,
+          scrolling_text_content: settings.scrolling_text_content || null,
+          right_header_text_enabled: settings.right_header_text_enabled || false,
+          right_header_text_content: settings.right_header_text_content || null,
+          right_header_text_link: settings.right_header_text_link || null,
         });
       }
       setIsLoading(false);
@@ -287,6 +304,107 @@ export default function AdminSettingsPage() {
                   </FormItem>
                 )}
               />
+
+              <h3 className="text-lg font-semibold mt-8">Pengaturan Header Bawah</h3>
+              <FormField
+                control={form.control}
+                name="scrolling_text_enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Aktifkan Teks Berjalan</FormLabel>
+                      <FormDescription>
+                        Tampilkan teks yang bergerak di bagian kiri bawah header.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {form.watch("scrolling_text_enabled") && (
+                <FormField
+                  control={form.control}
+                  name="scrolling_text_content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Konten Teks Berjalan</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Contoh: Promo Spesial Akhir Tahun! Diskon hingga 50%!" {...field} value={field.value ?? ""} />
+                      </FormControl>
+                      <FormDescription>
+                        Teks yang akan ditampilkan dan bergerak.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              <FormField
+                control={form.control}
+                name="right_header_text_enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Aktifkan Teks Kanan Header</FormLabel>
+                      <FormDescription>
+                        Tampilkan teks atau tautan di bagian kanan bawah header.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {form.watch("right_header_text_enabled") && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="right_header_text_content"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Konten Teks Kanan Header</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Contoh: Cek Promo Terbaru!" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormDescription>
+                          Teks yang akan ditampilkan di sisi kanan.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="right_header_text_link"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL Tautan Teks Kanan (Opsional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://cellkom.com/promo" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormDescription>
+                          Jika diisi, teks akan menjadi tautan yang dapat diklik.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
 
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
