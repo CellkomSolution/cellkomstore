@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { MessageSquare, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"; // Import Button ditambahkan
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/context/session-context";
 import { getUnreadMessageCount } from "@/lib/supabase/chats";
