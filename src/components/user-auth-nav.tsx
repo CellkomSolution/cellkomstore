@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { User, LogOut, LayoutDashboard, MessageSquare } from "lucide-react"; // Import MessageSquare
+import { User, LogOut, LayoutDashboard } from "lucide-react"; // MessageSquare dihapus
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -50,15 +50,7 @@ export function UserAuthNav() {
                 <span>Profil</span>
               </Link>
             </DropdownMenuItem>
-            {isAdmin && (
-              <DropdownMenuItem asChild>
-                <Link href="/admin/chats" className="cursor-pointer">
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  <span>Kelola Chat</span>
-                </Link>
-              </DropdownMenuItem>
-            )}
-            {/* Removed "Chat Admin" for non-admin users, now handled by ChatNotificationIcon */}
+            {/* Tautan 'Kelola Chat' dihapus dari sini */}
             {isAdmin && (
               <DropdownMenuItem asChild>
                 <Link href="/admin/dashboard" className="cursor-pointer">

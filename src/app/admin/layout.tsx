@@ -1,19 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, usePathname } from "next/navigation"; // Import usePathname
+import { useRouter, usePathname } from "next/navigation";
 import { useAdmin } from "@/hooks/use-admin";
 import { useSession } from "@/context/session-context";
 import Link from "next/link";
-import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon, LayoutGrid, MessageSquare } from "lucide-react"; // Import MessageSquare
+import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon, LayoutGrid, MessageSquare } from "lucide-react"; // MessageSquare ditambahkan kembali
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils"; // Import cn for conditional classNames
+import { cn } from "@/lib/utils";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname(); // Get current pathname
+  const pathname = usePathname();
   const { isLoading: isSessionLoading, user } = useSession();
   const { isAdmin, isAdminLoading } = useAdmin();
 
@@ -45,9 +45,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <h2 className="text-xl font-bold text-primary">Admin Panel</h2>
         </div>
         <nav className="flex-1 space-y-2 py-4">
-          <Button 
-            variant="ghost" 
-            className={cn("w-full justify-start", pathname === "/admin/dashboard" && "bg-muted hover:bg-muted")} 
+          <Button
+            variant="ghost"
+            className={cn("w-full justify-start", pathname === "/admin/dashboard" && "bg-muted hover:bg-muted")}
             asChild
           >
             <Link href="/admin/dashboard">
@@ -55,9 +55,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Dashboard
             </Link>
           </Button>
-          <Button 
-            variant="ghost" 
-            className={cn("w-full justify-start", pathname.startsWith("/admin/products") && "bg-muted hover:bg-muted")} 
+          <Button
+            variant="ghost"
+            className={cn("w-full justify-start", pathname.startsWith("/admin/products") && "bg-muted hover:bg-muted")}
             asChild
           >
             <Link href="/admin/products">
@@ -65,9 +65,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Produk
             </Link>
           </Button>
-          <Button 
-            variant="ghost" 
-            className={cn("w-full justify-start", pathname.startsWith("/admin/hero-carousel") && "bg-muted hover:bg-muted")} 
+          <Button
+            variant="ghost"
+            className={cn("w-full justify-start", pathname.startsWith("/admin/hero-carousel") && "bg-muted hover:bg-muted")}
             asChild
           >
             <Link href="/admin/hero-carousel">
@@ -75,9 +75,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Hero Carousel
             </Link>
           </Button>
-          <Button 
-            variant="ghost" 
-            className={cn("w-full justify-start", pathname.startsWith("/admin/categories") && "bg-muted hover:bg-muted")} 
+          <Button
+            variant="ghost"
+            className={cn("w-full justify-start", pathname.startsWith("/admin/categories") && "bg-muted hover:bg-muted")}
             asChild
           >
             <Link href="/admin/categories">
@@ -85,9 +85,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Kategori
             </Link>
           </Button>
-          <Button 
-            variant="ghost" 
-            className={cn("w-full justify-start", pathname === "/admin/users" && "bg-muted hover:bg-muted")} 
+          <Button
+            variant="ghost"
+            className={cn("w-full justify-start", pathname === "/admin/users" && "bg-muted hover:bg-muted")}
             asChild
           >
             <Link href="/admin/users">
@@ -95,11 +95,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Pengguna
             </Link>
           </Button>
-          {/* Removed Chat link from main admin sidebar */}
+          {/* Tautan Chat ditambahkan kembali ke sidebar admin */}
+          <Button
+            variant="ghost"
+            className={cn("w-full justify-start", pathname.startsWith("/chats") && "bg-muted hover:bg-muted")}
+            asChild
+          >
+            <Link href="/chats">
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Kelola Chat
+            </Link>
+          </Button>
           <Separator className="my-4" />
-          <Button 
-            variant="ghost" 
-            className={cn("w-full justify-start", pathname === "/admin/settings" && "bg-muted hover:bg-muted")} 
+          <Button
+            variant="ghost"
+            className={cn("w-full justify-start", pathname === "/admin/settings" && "bg-muted hover:bg-muted")}
             asChild
           >
             <Link href="/admin/settings">
