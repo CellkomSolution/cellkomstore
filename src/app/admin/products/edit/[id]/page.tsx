@@ -9,8 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { getProductById, updateProduct, Product } from "@/lib/supabase/products"; // Import updateProduct
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton";
 
-export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = React.use(params);
+export default function EditProductPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
 
   const [initialData, setInitialData] = React.useState<Product | null>(null);

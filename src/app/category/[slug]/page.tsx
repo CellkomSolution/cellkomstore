@@ -7,8 +7,8 @@ import { getProductsByCategory, Product, SortOption } from "@/lib/supabase/produ
 import { getCategoryBySlug, Category } from "@/lib/supabase/categories"; // Import getCategoryBySlug, Category dari modul categories
 import { SortDropdown } from "@/components/sort-dropdown";
 
-export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = React.use(params);
+export default function CategoryPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   
   const [categoryName, setCategoryName] = React.useState<string | null>(null);
   const [products, setProducts] = React.useState<Product[]>([]);

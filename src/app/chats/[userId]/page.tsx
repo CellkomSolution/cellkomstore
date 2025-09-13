@@ -19,8 +19,8 @@ import { getProductById, Product, mapProductData } from "@/lib/supabase/products
 import Link from "next/link";
 import Image from "next/image";
 
-export default function AdminChatDetailPage({ params }: { params: Promise<{ userId: string }> }) {
-  const { userId } = React.use(params);
+export default function AdminChatDetailPage({ params }: { params: { userId: string } }) {
+  const { userId } = params;
   const router = useRouter();
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();
 

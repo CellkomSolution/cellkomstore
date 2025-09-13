@@ -17,8 +17,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ChatWidget } from "@/components/chat-widget"; // Import ChatWidget
 
-export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = React.use(params);
+export default function ProductDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const { addItem } = useCart();
   const isMobile = useIsMobile(); // Use the hook
   const { user } = useSession(); // Get user from session
