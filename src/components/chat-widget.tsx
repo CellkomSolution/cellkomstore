@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/sheet";
 import Image from "next/image";
 import { getProductById } from "@/lib/supabase/products";
+import Link from "next/link"; // Import Link for product links
 
 interface ChatWidgetProps {
   productId?: string | null;
@@ -319,7 +320,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                           <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
                             <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
                             <span>
-                              Percakapan tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
+                              Percakapan tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
                             </span>
                           </div>
                         )}
@@ -347,7 +348,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                             <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
                               <Image src={msg.products[0].image_url} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
                               <span className="text-xs text-muted-foreground line-clamp-1">
-                                Tentang: <a href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</a>
+                                Tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
                               </span>
                             </div>
                           )}
