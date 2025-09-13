@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@googlemaps/js-api-loader':
-        specifier: ^1.16.10
-        version: 1.16.10
       '@hookform/resolvers':
         specifier: ^5.0.1
         version: 5.0.1(react-hook-form@7.56.4(react@19.1.0))
@@ -101,9 +98,6 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.57.2
         version: 2.57.2
-      '@types/google.maps':
-        specifier: ^3.58.1
-        version: 3.58.1
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -239,9 +233,6 @@ packages:
 
   '@floating-ui/utils@0.2.9':
     resolution: {integrity: sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==}
-
-  '@googlemaps/js-api-loader@1.16.10':
-    resolution: {integrity: sha512-c2erv2k7P2ilYzMmtYcMgAR21AULosQuUHJbStnrvRk2dG93k5cqptDrh9A8p+ZNlyhiqEOgHW7N9PAizdUM7Q==}
 
   '@hookform/resolvers@5.0.1':
     resolution: {integrity: sha512-u/+Jp83luQNx9AdyW2fIPGY6Y7NG68eN2ZW8FOJYL+M0i4s49+refdJdOp/A9n9HFQtQs3HIDHQvX3ZET2o7YA==}
@@ -1147,9 +1138,6 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
-
-  '@types/google.maps@3.58.1':
-    resolution: {integrity: sha512-X9QTSvGJ0nCfMzYOnaVs/k6/4L+7F5uCS+4iUmkLEls6J9S/Phv+m/i3mDeyc49ZBgwab3EFO1HEoBY7k98EGQ==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -2248,8 +2236,6 @@ snapshots:
 
   '@floating-ui/utils@0.2.9': {}
 
-  '@googlemaps/js-api-loader@1.16.10': {}
-
   '@hookform/resolvers@5.0.1(react-hook-form@7.56.4(react@19.1.0))':
     dependencies:
       '@standard-schema/utils': 0.3.0
@@ -3161,8 +3147,6 @@ snapshots:
       '@types/json-schema': 7.0.15
 
   '@types/estree@1.0.8': {}
-
-  '@types/google.maps@3.58.1': {}
 
   '@types/json-schema@7.0.15': {}
 
