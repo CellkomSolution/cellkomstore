@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAdmin } from "@/hooks/use-admin";
 import { useSession } from "@/context/session-context";
 import Link from "next/link";
-import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon, LayoutGrid } from "lucide-react"; // MessageSquare dihapus
+import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon, LayoutGrid, ShoppingBag, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -57,6 +57,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Button>
           <Button
             variant="ghost"
+            className={cn("w-full justify-start", pathname.startsWith("/admin/orders") && "bg-muted hover:bg-muted")}
+            asChild
+          >
+            <Link href="/admin/orders">
+              <ShoppingBag className="mr-2 h-4 w-4" />
+              Pesanan
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
             className={cn("w-full justify-start", pathname.startsWith("/admin/products") && "bg-muted hover:bg-muted")}
             asChild
           >
@@ -95,7 +105,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Pengguna
             </Link>
           </Button>
-          {/* Tautan Chat dihapus dari sini */}
+          <Button
+            variant="ghost"
+            className={cn("w-full justify-start", pathname.startsWith("/admin/payment-methods") && "bg-muted hover:bg-muted")}
+            asChild
+          >
+            <Link href="/admin/payment-methods">
+              <CreditCard className="mr-2 h-4 w-4" />
+              Metode Pembayaran
+            </Link>
+          </Button>
           <Separator className="my-4" />
           <Button
             variant="ghost"

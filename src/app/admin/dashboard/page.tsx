@@ -2,13 +2,15 @@
 
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, DollarSign } from "lucide-react";
-import { getTotalProductsCount } from "@/lib/supabase/products"; // Import dari modul products
-import { getTotalUsersCount } from "@/lib/supabase/profiles"; // Import dari modul profiles
+import { Package, Users, DollarSign, ShoppingBag } from "lucide-react";
+import { getTotalProductsCount } from "@/lib/supabase/products";
+import { getTotalUsersCount } from "@/lib/supabase/profiles";
+import { getTotalOrdersCount } from "@/lib/supabase/orders"; // Import getTotalOrdersCount
 
 export default function AdminDashboardPage() {
   const [totalProducts, setTotalProducts] = React.useState<number | null>(null);
   const [totalUsers, setTotalUsers] = React.useState<number | null>(null);
+  const [totalOrders, setTotalOrders] = React.useState<number | null>(null); // New state for total orders
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -16,8 +18,10 @@ export default function AdminDashboardPage() {
       setIsLoading(true);
       const productsCount = await getTotalProductsCount();
       const usersCount = await getTotalUsersCount();
+      const ordersCount = await getTotalOrdersCount(); // Fetch total orders
       setTotalProducts(productsCount);
       setTotalUsers(usersCount);
+      setTotalOrders(ordersCount); // Set total orders
       setIsLoading(false);
     }
     fetchData();
@@ -31,6 +35,18 @@ export default function AdminDashboardPage() {
       </p>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Pesanan</CardTitle>
+            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalOrders}
+            </div>
+            <p className="text-xs text-muted-foreground">+10% dari bulan lalu</p>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Produk</CardTitle>
@@ -55,16 +71,6 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">+15% dari bulan lalu</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Penjualan Hari Ini</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">Rp 12.500.000</div>
-            <p className="text-xs text-muted-foreground">+5% dari kemarin</p>
-          </CardContent>
-        </Card>
       </div>
 
       <Card>
@@ -76,9 +82,11 @@ export default function AdminDashboardPage() {
             Fitur manajemen konten akan dibangun di sini. Anda dapat mengelola banner, kategori, produk, dan elemen lainnya.
           </p>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+            <li>- Manajemen Pesanan</li>
+            <li>- Manajemen Produk</li>
             <li>- Manajemen Banner</li>
             <li>- Manajemen Kategori</li>
-            <li>- Manajemen Produk</li>
+            <li>- Manajemen Metode Pembayaran</li>
             <li>- Pengaturan Header & Footer</li>
           </ul>
         </CardContent>

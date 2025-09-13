@@ -18,13 +18,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription, // Ditambahkan: Import FormDescription
+  FormDescription,
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
 import { useSession } from "@/context/session-context";
 import { AddressAutocompleteInput } from "@/components/address-autocomplete-input";
 import { GoogleMapPicker } from "@/components/google-map-picker";
+import { createOrder } from "@/lib/supabase/orders"; // Import createOrder
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nama harus diisi (min. 2 karakter)." }),
@@ -66,7 +67,8 @@ export default function CheckoutPage() {
       router.replace("/auth");
       return;
     }
-    if (totalItems === 0) {
+    if (!isSessionLoading && user && totalItems === 0) {
+      toast.info("Keranjang Anda kosong. Silakan tambahkan produk untuk checkout.");
       router.replace("/");
     }
   }, [totalItems, router, user, isSessionLoading]);
@@ -91,16 +93,43 @@ export default function CheckoutPage() {
     setMarkerPosition({ lat, lng });
     form.setValue("latitude", lat, { shouldValidate: true });
     form.setValue("longitude", lng, { shouldValidate: true });
-    // Optionally, reverse geocode to get address details
-    // For simplicity, we'll just update lat/lng here.
     toast.info("Lokasi peta diperbarui. Anda mungkin perlu menyesuaikan alamat lengkap secara manual.");
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Order submitted:", values);
-    toast.success("Pesanan berhasil dibuat!");
-    clearCart();
-    router.push("/");
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) {
+      toast.error("Anda harus login untuk membuat pesanan.");
+      router.push("/auth");
+      return;
+    }
+    if (items.length === 0) {
+      toast.error("Keranjang Anda kosong. Tidak dapat membuat pesanan.");
+      router.push("/");
+      return;
+    }
+
+    try {
+      const newOrder = await createOrder(user.id, items, {
+        name: values.name,
+        fullAddress: values.fullAddress,
+        city: values.city,
+        postalCode: values.postalCode,
+        latitude: values.latitude,
+        longitude: values.longitude,
+        phone: values.phone,
+      });
+
+      if (newOrder) {
+        clearCart();
+        toast.success("Pesanan berhasil dibuat!");
+        router.push(`/checkout/${newOrder.id}`);
+      } else {
+        toast.error("Gagal membuat pesanan. Silakan coba lagi.");
+      }
+    } catch (error: any) {
+      console.error("Error submitting order:", error);
+      toast.error(error.message || "Terjadi kesalahan saat membuat pesanan.");
+    }
   }
 
   const handleCancelOrder = () => {
@@ -146,7 +175,7 @@ export default function CheckoutPage() {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nama Lengkap</FormLabel>
+                        <FormLabel>Nama Lengkap Penerima</FormLabel>
                         <FormControl>
                           <Input placeholder="John Doe" {...field} />
                         </FormControl>
