@@ -26,7 +26,7 @@ export function useGoogleMapsLoader(options?: UseGoogleMapsLoaderOptions) {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     // --- DEBUGGING LOG ---
-    console.log("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:", apiKey ? "Loaded (starts with: " + apiKey.substring(0, 5) + "...)" : "Not Loaded");
+    console.log("AIzaSyBjkMJjjyUCe9kFwfjNNCZyah1XAwUGpkA:", apiKey ? "Loaded (starts with: " + apiKey.substring(0, 5) + "...)" : "Not Loaded");
     // --- END DEBUGGING LOG ---
 
     if (!apiKey) {
