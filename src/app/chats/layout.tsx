@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { AdminChatList } from "@/components/admin-chat-list"; // Corrected import path
+import { AdminChatList } from "@/components/admin-chat-list";
 import { useSession } from "@/context/session-context";
 import { Loader2, MessageSquare, ArrowLeft } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
 
 export default function AdminChatLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading: isSessionLoading } = useSession();
@@ -45,19 +46,19 @@ export default function AdminChatLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-[calc(100vh-64px)] bg-background overflow-hidden"> {/* Adjusted height */}
       {/* Left Column: Chat List */}
-      <div className={`
-        w-full md:w-1/3 lg:w-1/4 border-r flex flex-col bg-card shadow-sm
+      <Card className={`
+        w-full md:w-1/3 lg:w-1/4 flex flex-col border-r rounded-none shadow-none
         ${isChatDetailRoute ? 'hidden md:flex' : 'flex'} 
       `}>
-        <div className="p-4 border-b">
-          <h1 className="text-xl font-bold flex items-center gap-2">
+        <CardHeader className="p-4 border-b">
+          <CardTitle className="text-xl font-bold flex items-center gap-2">
             <MessageSquare className="h-5 w-5" /> Chat Admin
-          </h1>
-        </div>
+          </CardTitle>
+        </CardHeader>
         <AdminChatList />
-      </div>
+      </Card>
 
       {/* Right Column: Chat Detail */}
       <div className={`
@@ -65,12 +66,13 @@ export default function AdminChatLayout({ children }: { children: React.ReactNod
         ${isChatDetailRoute ? 'flex' : 'hidden md:flex'} 
       `}>
         {isChatDetailRoute && (
-          <div className="md:hidden p-2 border-b bg-card">
+          <CardHeader className="md:hidden p-2 border-b bg-card flex flex-row items-center">
             <Button variant="ghost" size="icon" onClick={() => router.push("/chats")}>
               <ArrowLeft className="h-5 w-5" />
               <span className="sr-only">Kembali ke daftar chat</span>
             </Button>
-          </div>
+            <CardTitle className="text-lg ml-2">Detail Chat</CardTitle> {/* Placeholder title */}
+          </CardHeader>
         )}
         {children}
       </div>
