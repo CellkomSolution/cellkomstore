@@ -126,7 +126,7 @@ export async function getChatParticipants(adminId: string) {
 
   const { data: profilesData, error: profilesError } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, avatar_url, email')
+    .select('id, first_name, last_name, avatar_url, email, role') // Ditambahkan 'role'
     .in('id', participantIds);
 
   if (profilesError) {

@@ -90,7 +90,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
             updated_at: msg.created_at,
             sender_profile: [],
             receiver_profile: [],
-            products: [{ name: product.name, imageUrl: product.imageUrl }], // Fixed: image_url to imageUrl
+            products: [product], // Fixed: Pass the full product object
             type: 'system',
           });
           productsIntroduced.add(msg.product_id);
