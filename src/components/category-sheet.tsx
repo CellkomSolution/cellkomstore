@@ -14,6 +14,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
+  DrawerTrigger, // <-- Menambahkan DrawerTrigger di sini
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, Loader2, Tag, X } from "lucide-react";
