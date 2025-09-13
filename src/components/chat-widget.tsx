@@ -27,7 +27,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import Image from "next/image";
-import { getProductById } from "@/lib/supabase/products";
+import { getProductById, mapProductData } from "@/lib/supabase/products"; // Import mapProductData
 import Link from "next/link"; // Import Link for product links
 
 interface ChatWidgetProps {
