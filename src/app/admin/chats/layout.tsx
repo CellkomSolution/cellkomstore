@@ -9,7 +9,7 @@ import { useAdmin } from "@/hooks/use-admin";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { AdminChatList } from "./page"; // Import the list component
+import AdminChatsPage from "./page"; // Import the list component as default
 
 export default function AdminChatLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading: isSessionLoading } = useSession();
@@ -44,7 +44,7 @@ export default function AdminChatLayout({ children }: { children: React.ReactNod
         className="min-h-[calc(100vh-120px)] rounded-lg border"
       >
         <ResizablePanel defaultSize={30} minSize={25} maxSize={40}>
-          <AdminChatList />
+          <AdminChatsPage /> {/* Use the default imported component */}
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={70}>
