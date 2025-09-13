@@ -46,7 +46,7 @@ export default function AdminDashboardPage() {
               <div className="text-2xl font-bold">
                 {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalOrders}
               </div>
-              <p className="text-xs text-muted-foreground">+10% dari bulan lalu</p>
+              {/* <p className="text-xs text-muted-foreground">+10% dari bulan lalu</p> */}
             </CardContent>
           </Card>
         </Link>
@@ -60,7 +60,7 @@ export default function AdminDashboardPage() {
               <div className="text-2xl font-bold">
                 {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalProducts}
               </div>
-              <p className="text-xs text-muted-foreground">+20% dari bulan lalu</p>
+              {/* <p className="text-xs text-muted-foreground">+20% dari bulan lalu</p> */}
             </CardContent>
           </Card>
         </Link>
@@ -74,7 +74,7 @@ export default function AdminDashboardPage() {
               <div className="text-2xl font-bold">
                 {isLoading ? <div className="h-7 w-16 bg-muted rounded animate-pulse" /> : totalUsers}
               </div>
-              <p className="text-xs text-muted-foreground">+15% dari bulan lalu</p>
+              {/* <p className="text-xs text-muted-foreground">+15% dari bulan lalu</p> */}
             </CardContent>
           </Card>
         </Link>
@@ -110,13 +110,27 @@ export default function AdminDashboardPage() {
               </Link>
             </li>
             <li>
+              <Link href="/admin/featured-brands" className="flex items-center gap-2 hover:text-primary">
+                <ImageIcon className="mr-2 h-4 w-4" />
+                Merek Unggulan
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/users" className="flex items-center gap-2 hover:text-primary">
+                <Users className="h-4 w-4" />
+                Pengguna
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/payment-methods" className="flex items-center gap-2 hover:text-primary">
-                <CreditCard className="h-4 w-4" /> Manajemen Metode Pembayaran
+                <CreditCard className="h-4 w-4" />
+                Metode Pembayaran
               </Link>
             </li>
             <li>
               <Link href="/admin/settings" className="flex items-center gap-2 hover:text-primary">
-                <Settings className="h-4 w-4" /> Pengaturan Aplikasi
+                <Settings className="h-4 w-4" />
+                Pengaturan Aplikasi
               </Link>
             </li>
           </ul>
