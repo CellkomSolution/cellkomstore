@@ -13,12 +13,15 @@ import { UserAuthNav } from "./user-auth-nav";
 import { getAppSettings, AppSettings } from "@/lib/supabase/app-settings"; // Import dari modul app-settings
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChatNotificationIcon } from "./chat-notification-icon"; // Import ChatNotificationIcon
+import { AdminChatNotificationIcon } from "./admin-chat-notification-icon"; // Import AdminChatNotificationIcon
+import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
 
 export function Header() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const router = useRouter();
   const [appSettings, setAppSettings] = React.useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = React.useState(true);
+  const { isAdmin, isAdminLoading } = useAdmin(); // Use useAdmin hook
 
   React.useEffect(() => {
     async function fetchSettings() {
@@ -95,7 +98,11 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-2">
-            <ChatNotificationIcon /> {/* Added ChatNotificationIcon here */}
+            {!isAdminLoading && isAdmin ? (
+              <AdminChatNotificationIcon />
+            ) : (
+              <ChatNotificationIcon />
+            )}
             <CartSheet />
             <UserAuthNav />
             <ThemeToggle />
