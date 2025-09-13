@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { User, LogOut, LayoutDashboard } from "lucide-react"; // MessageSquare dihapus
+import { User, LogOut, LayoutDashboard, ShoppingBag } from "lucide-react"; // MessageSquare dihapus
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -50,7 +50,12 @@ export function UserAuthNav() {
                 <span>Profil</span>
               </Link>
             </DropdownMenuItem>
-            {/* Tautan 'Kelola Chat' dihapus dari sini */}
+            <DropdownMenuItem asChild>
+              <Link href="/my-orders" className="cursor-pointer">
+                <ShoppingBag className="mr-2 h-4 w-4" />
+                <span>Pesanan Saya</span>
+              </Link>
+            </DropdownMenuItem>
             {isAdmin && (
               <DropdownMenuItem asChild>
                 <Link href="/admin/dashboard" className="cursor-pointer">

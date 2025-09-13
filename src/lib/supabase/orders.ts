@@ -180,6 +180,31 @@ export async function getOrders(status?: Order['status']): Promise<Order[]> {
   })) as Order[];
 }
 
+export async function getUserOrders(userId: string): Promise<Order[]> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select(`
+      *,
+      user_profile:profiles(id, first_name, last_name, avatar_url, email),
+      payment_method:payment_methods(id, name, type),
+      order_items(id, product_name_at_purchase, product_image_url_at_purchase, quantity, price_at_purchase)
+    `)
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(`Error fetching orders for user ${userId}:`, error.message);
+    return [];
+  }
+
+  return data.map(order => ({
+    ...order,
+    user_profile: order.user_profile as Profile,
+    payment_method: order.payment_method as { id: string; name: string; type: string } | undefined,
+    order_items: order.order_items as OrderItem[],
+  })) as Order[];
+}
+
 export async function getTotalOrdersCount(): Promise<number> {
   const { count, error } = await supabase
     .from("orders")
