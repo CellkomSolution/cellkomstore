@@ -74,7 +74,9 @@ export function HeroCarousel() {
                       <p className="text-sm text-muted-foreground mb-1">{slide.hashtag}</p>
                     )}
                     {slide.logo_url && (
-                      <img src={slide.logo_url} alt="Logo" className="h-8 mb-2" />
+                      <div className="relative h-8 w-20 mb-2"> {/* Wrapper for Image component */}
+                        <Image src={slide.logo_url} alt="Logo" fill style={{ objectFit: "contain" }} sizes="80px" />
+                      </div>
                     )}
                     {slide.product_name && (
                       <h3 className="text-2xl md:text-3xl font-bold mb-2">
