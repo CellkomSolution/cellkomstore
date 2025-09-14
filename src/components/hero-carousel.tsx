@@ -10,10 +10,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { supabase } from "@/integrations/supabase/client";
-import { HeroCarouselSlide } from "@/lib/supabase/hero-carousel-slides";
+import { getHeroCarouselSlides, HeroCarouselSlide } from "@/lib/supabase/hero-carousel"; // Menggunakan fungsi utilitas dan antarmuka yang benar
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
 export function HeroCarousel() {
   const [slides, setSlides] = React.useState<HeroCarouselSlide[]>([]);
@@ -22,21 +22,20 @@ export function HeroCarousel() {
   React.useEffect(() => {
     const fetchSlides = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from("hero_carousel_slides")
-        .select("*")
-        .order("order", { ascending: true });
-
-      if (error) {
-        console.error("Error fetching hero carousel slides:", error.message);
-      } else {
+      try {
+        const data = await getHeroCarouselSlides(); // Menggunakan fungsi utilitas
+        console.log("Fetched hero carousel slides:", data); // Log data yang diambil untuk debugging
         setSlides(data || []);
+      } catch (error) {
+        console.error("Error fetching hero carousel slides:", error);
+        setSlides([]); // Pastikan slide dikosongkan jika ada kesalahan
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     fetchSlides();
-  }, []);
+  }, []); // Array dependensi kosong berarti ini berjalan sekali saat komponen dipasang.
 
   if (isLoading) {
     return (
@@ -85,12 +84,12 @@ export function HeroCarousel() {
                     <div className="flex items-baseline gap-2 mb-4">
                       {slide.discounted_price && (
                         <span className="text-3xl font-bold text-primary">
-                          Rp{slide.discounted_price.toLocaleString("id-ID")}
+                          {formatRupiah(slide.discounted_price)}
                         </span>
                       )}
                       {slide.original_price && (
                         <span className={`text-lg text-muted-foreground ${slide.discounted_price ? "line-through" : ""}`}>
-                          Rp{slide.original_price.toLocaleString("id-ID")}
+                          {formatRupiah(slide.original_price)}
                         </span>
                       )}
                     </div>
