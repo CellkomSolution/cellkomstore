@@ -102,7 +102,7 @@ export function HeroCarousel() {
                       src={slide.product_image_url || "/placeholder-image.jpg"}
                       alt={slide.alt}
                       fill
-                      className="object-cover"
+                      className="object-contain"
                       priority
                       sizes="(max-width: 768px) 50vw, 50vw"
                     />
@@ -116,7 +116,7 @@ export function HeroCarousel() {
                     src={slide.product_image_url || "/placeholder-image.jpg"}
                     alt={slide.alt}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     priority
                     sizes="(max-width: 768px) 100vw, 100vw"
                   />
