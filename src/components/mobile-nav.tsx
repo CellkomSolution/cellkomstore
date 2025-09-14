@@ -107,6 +107,9 @@ export function MobileNav() {
             <Link href="/blog">Blog</Link>
           </Button>
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+            <Link href="/services">Layanan Servis</Link>
+          </Button>
+          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
             <Link href="/contact">Kontak</Link>
           </Button>
 

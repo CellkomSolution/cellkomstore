@@ -93,6 +93,11 @@ export function MainNav() {
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
+          <Link href="/services" className={navigationMenuTriggerStyle()}>
+            Layanan Servis
+          </Link>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
           <Link href="/contact" className={navigationMenuTriggerStyle()}> {/* Menghapus legacyBehavior dan passHref */}
             Kontak
           </Link>
