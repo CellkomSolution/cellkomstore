@@ -40,10 +40,9 @@ export function UserNav() {
   }
 
   if (!user) {
+    // Jika pengguna tidak login, komponen ini tidak akan menampilkan apa pun.
     return null;
   }
-
-  const isAdmin = user.role === 'admin';
 
   return (
     <DropdownMenu>
@@ -68,13 +67,9 @@ export function UserNav() {
             <Link href="/profile">Profil</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            {isAdmin ? (
-              <Link href="/admin/orders">Pesanan Masuk</Link>
-            ) : (
-              <Link href="/my-orders">Pesanan Saya</Link>
-            )}
+            <Link href="/my-orders">Pesanan Saya</Link>
           </DropdownMenuItem>
-          {isAdmin && (
+          {user.role === 'admin' && ( // Only show Admin Dashboard if user is admin
             <DropdownMenuItem asChild>
               <Link href="/admin/dashboard">Dasbor Admin</Link>
             </DropdownMenuItem>
