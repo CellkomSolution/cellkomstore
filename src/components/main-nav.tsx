@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import Link from "next/link"; // Pastikan Link diimpor
 
 import { cn } from "@/lib/utils";
 import {
@@ -18,12 +18,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof Link> // Mengubah tipe props agar sesuai dengan Link
+>(({ className, title, children, href, ...props }, ref) => { // Destrukturisasi href
   return (
     <li>
       <NavigationMenuLink asChild>
-        <a
+        <Link // Mengganti <a> dengan Link
+          href={href || "#"} // Menggunakan href yang didestrukturisasi
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
@@ -35,7 +36,7 @@ const ListItem = React.forwardRef<
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
-        </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   );
@@ -66,10 +67,8 @@ export function MainNav() {
     <NavigationMenu className="hidden lg:flex">
       <NavigationMenuList>
         <NavigationMenuItem>
-          <Link href="/" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Beranda
-            </NavigationMenuLink>
+          <Link href="/" className={navigationMenuTriggerStyle()}> {/* Menghapus legacyBehavior dan passHref */}
+            Beranda
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
@@ -89,17 +88,13 @@ export function MainNav() {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href="/blog" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Blog
-            </NavigationMenuLink>
+          <Link href="/blog" className={navigationMenuTriggerStyle()}> {/* Menghapus legacyBehavior dan passHref */}
+            Blog
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href="/contact" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Kontak
-            </NavigationMenuLink>
+          <Link href="/contact" className={navigationMenuTriggerStyle()}> {/* Menghapus legacyBehavior dan passHref */}
+            Kontak
           </Link>
         </NavigationMenuItem>
       </NavigationMenuList>
