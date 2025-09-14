@@ -154,7 +154,11 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       <div className="mt-12">
         <h2 className="text-xl font-bold mb-4 border-b pb-2">Deskripsi Produk</h2>
         <div className="prose prose-sm dark:prose-invert max-w-none">
-            <p>Detail produk untuk "{product.name}" akan ditampilkan di sini. Saat ini, kami menggunakan deskripsi placeholder. Dalam aplikasi nyata, bagian ini akan berisi informasi rinci tentang spesifikasi, fitur, dan manfaat produk untuk membantu pelanggan membuat keputusan pembelian yang tepat.</p>
+            {product.description ? (
+                <div dangerouslySetInnerHTML={{ __html: product.description }} />
+            ) : (
+                <p>Tidak ada deskripsi yang tersedia untuk produk ini.</p>
+            )}
         </div>
       </div>
 
