@@ -69,10 +69,15 @@ export function UserNav() {
           <DropdownMenuItem asChild>
             <Link href="/my-orders">Pesanan Saya</Link>
           </DropdownMenuItem>
-          {user.role === 'admin' && ( // Only show Admin Dashboard if user is admin
-            <DropdownMenuItem asChild>
-              <Link href="/admin/dashboard">Dasbor Admin</Link>
-            </DropdownMenuItem>
+          {user.role === 'admin' && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/admin/orders">Pesanan Masuk</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/admin/dashboard">Dasbor Admin</Link>
+              </DropdownMenuItem>
+            </>
           )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
