@@ -12,13 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut } from "lucide-react"; // Menghapus import User icon
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function UserNav() {
-  const { user, signOut, isLoading } = useSession();
+  const { user, profile, signOut, isLoading } = useSession();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -39,7 +39,7 @@ export function UserNav() {
     );
   }
 
-  if (!user) {
+  if (!user || !profile) {
     // Jika pengguna tidak login, komponen ini tidak akan menampilkan apa pun.
     return null;
   }
@@ -49,15 +49,15 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar_url || "/placeholder-avatar.jpg"} alt={user.first_name || "User"} />
-            <AvatarFallback>{user.first_name ? user.first_name[0] : "U"}</AvatarFallback>
+            <AvatarImage src={profile.avatar_url || "/placeholder-avatar.jpg"} alt={profile.first_name || "User"} />
+            <AvatarFallback>{profile.first_name ? profile.first_name[0].toUpperCase() : "U"}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.first_name} {user.last_name}</p>
+            <p className="text-sm font-medium leading-none">{profile.first_name} {profile.last_name}</p>
             <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
           </div>
         </DropdownMenuLabel>
@@ -67,8 +67,18 @@ export function UserNav() {
             <Link href="/profile">Profil</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/admin/dashboard">Dasbor Admin</Link>
+            <Link href="/my-orders">Pesanan Saya</Link>
           </DropdownMenuItem>
+          {profile.role === 'admin' && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/admin/orders">Pesanan Masuk</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/admin/dashboard">Dasbor Admin</Link>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
