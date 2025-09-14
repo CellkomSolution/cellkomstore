@@ -2,17 +2,21 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Menu, LayoutGrid, Loader2 } from "lucide-react"; // Menambahkan LayoutGrid dan Loader2
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSettings } from "@/lib/supabase/app-settings";
+import { getCategories, Category } from "@/lib/supabase/categories"; // Import getCategories dan Category
+import { CategorySheet } from "./category-sheet"; // Import CategorySheet
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]); // State untuk kategori
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true); // State loading kategori
 
   useEffect(() => {
     const fetchAppSettings = async () => {
@@ -31,7 +35,15 @@ export function MobileNav() {
       setIsLoadingSettings(false);
     };
 
+    const fetchCategoriesData = async () => {
+      setIsLoadingCategories(true);
+      const fetchedCategories = await getCategories();
+      setCategories(fetchedCategories);
+      setIsLoadingCategories(false);
+    };
+
     fetchAppSettings();
+    fetchCategoriesData();
   }, []);
 
   return (
@@ -62,17 +74,33 @@ export function MobileNav() {
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
             <Link href="/">Beranda</Link>
           </Button>
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/products">Produk</Link>
-          </Button>
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/categories">Kategori</Link>
-          </Button>
+          {/* Tautan Kategori Dinamis */}
+          <h3 className="text-sm font-semibold text-muted-foreground px-4 pt-2">Kategori</h3>
+          {isLoadingCategories ? (
+            <div className="px-4 space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-8 w-full bg-muted animate-pulse rounded" />
+              ))}
+            </div>
+          ) : (
+            <>
+              {categories.slice(0, 5).map((category) => ( // Tampilkan 5 kategori teratas
+                <Button key={category.id} variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+                  <Link href={`/category/${category.slug}`}>{category.name}</Link>
+                </Button>
+              ))}
+              {categories.length > 0 && (
+                <CategorySheet> {/* Menggunakan CategorySheet sebagai trigger */}
+                  <Button variant="ghost" className="justify-start w-full flex items-center gap-2" onClick={() => setOpen(false)}>
+                    <LayoutGrid className="h-5 w-5" />
+                    <span>Semua Kategori</span>
+                  </Button>
+                </CategorySheet>
+              )}
+            </>
+          )}
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
             <Link href="/blog">Blog</Link>
-          </Button>
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/about">Tentang Kami</Link>
           </Button>
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
             <Link href="/contact">Kontak</Link>
