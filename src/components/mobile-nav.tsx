@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, Home, Tag, TrendingUp, Sparkles } from "lucide-react";
+import { Menu, Home, Tag, Sparkles, User, ShoppingBag, BookOpen } from "lucide-react"; // Menambahkan BookOpen untuk Blog
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -41,34 +41,29 @@ export function MobileNav() {
             </Link>
           </Button>
           <CategorySheet /> {/* Menggunakan CategorySheet di sini */}
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/flash-sale">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Flash Sale
-            </Link>
-          </Button>
+          {/* Menghapus tautan Flash Sale */}
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
             <Link href="/new-arrivals">
-              <Tag className="mr-2 h-4 w-4" />
+              <Sparkles className="mr-2 h-4 w-4" /> {/* Menggunakan Sparkles untuk Produk Baru */}
               Produk Baru
             </Link>
           </Button>
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/best-sellers">
-              <TrendingUp className="mr-2 h-4 w-4" />
-              Terlaris
+            <Link href="/blog"> {/* Mengubah href ke /blog */}
+              <BookOpen className="mr-2 h-4 w-4" /> {/* Menggunakan ikon BookOpen untuk Blog */}
+              Blog
             </Link>
           </Button>
           <Separator />
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
             <Link href="/profile">
-              <Home className="mr-2 h-4 w-4" />
+              <User className="mr-2 h-4 w-4" /> {/* Mengubah ikon menjadi User */}
               Profil
             </Link>
           </Button>
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
             <Link href="/my-orders">
-              <Home className="mr-2 h-4 w-4" />
+              <ShoppingBag className="mr-2 h-4 w-4" /> {/* Mengubah ikon menjadi ShoppingBag */}
               Pesanan Saya
             </Link>
           </Button>
