@@ -1,138 +1,132 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
-import { FullCarouselSlide } from "./full-carousel-slide";
-import { FullWidthCarouselSlide } from "./full-width-carousel-slide";
-import { getHeroCarouselSlides, HeroCarouselSlide as SupabaseHeroCarouselSlide } from "@/lib/supabase/hero-carousel"; // Import dari modul hero-carousel
-import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { HeroCarouselSlide } from "@/lib/supabase/hero-carousel-slides";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export function HeroCarousel() {
-  const plugin = React.useRef(
-    Autoplay({ delay: 4000, stopOnInteraction: true })
-  );
-
-  const [api, setApi] = React.useState<CarouselApi>();
-  const [current, setCurrent] = React.useState(0);
-  const [count, setCount] = React.useState(0);
-  const [carouselSlides, setCarouselSlides] = React.useState<SupabaseHeroCarouselSlide[]>([]);
+  const [slides, setSlides] = React.useState<HeroCarouselSlide[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    async function fetchSlides() {
+    const fetchSlides = async () => {
       setIsLoading(true);
-      const slidesFromSupabase = await getHeroCarouselSlides();
-      setCarouselSlides(slidesFromSupabase);
+      const { data, error } = await supabase
+        .from("hero_carousel_slides")
+        .select("*")
+        .order("order", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching hero carousel slides:", error.message);
+      } else {
+        setSlides(data || []);
+      }
       setIsLoading(false);
-    }
+    };
+
     fetchSlides();
   }, []);
 
-  React.useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap() + 1);
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap() + 1);
-    });
-  }, [api]);
-
   if (isLoading) {
     return (
-      <div className="relative w-full aspect-[4/1] rounded-lg overflow-hidden bg-muted animate-pulse flex items-center justify-center">
-        <Loader2 className="h-12 w-12 text-muted-foreground animate-spin" />
+      <div className="relative w-full aspect-[16/9] md:aspect-[4/1] rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+        <div className="h-full w-full bg-gray-200 animate-pulse" />
       </div>
     );
   }
 
-  if (carouselSlides.length === 0) {
+  if (slides.length === 0) {
     return (
-      <div className="relative w-full aspect-[4/1] rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
+      <div className="relative w-full aspect-[16/9] md:aspect-[4/1] rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
         Tidak ada slide carousel untuk ditampilkan.
       </div>
     );
   }
 
   return (
-    <div className="relative">
-      <Carousel
-        plugins={[plugin.current]}
-        className="w-full"
-        onMouseEnter={plugin.current.stop}
-        onMouseLeave={plugin.current.reset}
-        setApi={setApi}
-      >
-        <CarouselContent>
-          {carouselSlides.map((slide, index) => {
-            const slideContent = (
-              <Card className="overflow-hidden rounded-lg">
-                <CardContent className="flex aspect-[4/1] p-0 relative">
-                  {slide.display_style === 'full' ? (
-                    <FullWidthCarouselSlide
-                      imageSrc={slide.product_image_url || ''}
+    <Carousel className="w-full aspect-[16/9] md:aspect-[4/1]">
+      <CarouselContent>
+        {slides.map((slide) => (
+          <CarouselItem key={slide.id}>
+            {slide.display_style === "split" ? (
+              <Link href={slide.link_url || "#"} className="block h-full">
+                <div
+                  className="relative flex h-full w-full rounded-lg overflow-hidden"
+                  style={{ backgroundColor: slide.left_panel_bg_color || "#f0f0f0" }}
+                >
+                  <div className="flex-1 p-6 flex flex-col justify-center items-start text-left">
+                    {slide.is_new && (
+                      <Badge variant="secondary" className="mb-2">
+                        Baru
+                      </Badge>
+                    )}
+                    {slide.hashtag && (
+                      <p className="text-sm text-muted-foreground mb-1">{slide.hashtag}</p>
+                    )}
+                    {slide.logo_url && (
+                      <img src={slide.logo_url} alt="Logo" className="h-8 mb-2" />
+                    )}
+                    {slide.product_name && (
+                      <h3 className="text-2xl md:text-3xl font-bold mb-2">
+                        {slide.product_name}
+                      </h3>
+                    )}
+                    <div className="flex items-baseline gap-2 mb-4">
+                      {slide.discounted_price && (
+                        <span className="text-3xl font-bold text-primary">
+                          Rp{slide.discounted_price.toLocaleString("id-ID")}
+                        </span>
+                      )}
+                      {slide.original_price && (
+                        <span className={`text-lg text-muted-foreground ${slide.discounted_price ? "line-through" : ""}`}>
+                          Rp{slide.original_price.toLocaleString("id-ID")}
+                        </span>
+                      )}
+                    </div>
+                    <Button>Belanja Sekarang</Button>
+                  </div>
+                  <div className="relative flex-1 h-full">
+                    <Image
+                      src={slide.product_image_url || "/placeholder-image.jpg"}
                       alt={slide.alt}
-                      priority={index === 0}
+                      fill
+                      className="object-cover"
+                      priority
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
-                  ) : (
-                    <FullCarouselSlide
-                      productImageSrc={slide.product_image_url || ''}
-                      alt={slide.alt}
-                      logoSrc={slide.logo_url || undefined}
-                      productName={slide.product_name || undefined}
-                      originalPrice={slide.original_price || undefined}
-                      discountedPrice={slide.discounted_price || undefined}
-                      isNew={slide.is_new}
-                      hashtag={slide.hashtag || undefined}
-                      leftPanelBgColor={slide.left_panel_bg_color || undefined}
-                      priority={index === 0}
-                    />
-                  )}
-                </CardContent>
-              </Card>
-            );
-
-            return (
-              <CarouselItem key={index}>
-                {slide.link_url ? (
-                  <Link href={slide.link_url} target="_blank" rel="noopener noreferrer" className="block">
-                    {slideContent}
-                  </Link>
-                ) : (
-                  slideContent
-                )}
-              </CarouselItem>
-            );
-          })}
-        </CarouselContent>
-        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 hidden sm:flex h-10 w-10 rounded-full bg-gray-800 text-white hover:bg-gray-700 z-20" />
-        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 hidden sm:flex h-10 w-10 rounded-full bg-gray-800 text-white hover:bg-gray-700 z-20" />
-      </Carousel>
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-        {Array.from({ length: count }).map((_, index) => (
-          <button
-            key={index}
-            className={`h-2 w-2 rounded-full ${
-              index + 1 === current ? "bg-primary" : "bg-gray-300 dark:bg-gray-700"
-            }`}
-            onClick={() => api?.scrollTo(index)}
-            aria-label={`Go to slide ${index + 1}`}
-          />
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <Link href={slide.link_url || "#"} className="block h-full">
+                <div className="relative w-full h-full rounded-lg overflow-hidden">
+                  <Image
+                    src={slide.product_image_url || "/placeholder-image.jpg"}
+                    alt={slide.alt}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
+              </Link>
+            )}
+          </CarouselItem>
         ))}
-      </div>
-    </div>
+      </CarouselContent>
+      <CarouselPrevious className="left-4" />
+      <CarouselNext className="right-4" />
+    </Carousel>
   );
 }
