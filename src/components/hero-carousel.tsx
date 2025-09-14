@@ -102,7 +102,7 @@ export function HeroCarousel() {
                       fill
                       className="object-cover"
                       priority
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      sizes="(max-width: 768px) 50vw, 50vw"
                     />
                   </div>
                 </div>
@@ -116,7 +116,7 @@ export function HeroCarousel() {
                     fill
                     className="object-cover"
                     priority
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    sizes="(max-width: 768px) 100vw, 100vw"
                   />
                 </div>
               </Link>
