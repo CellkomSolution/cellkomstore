@@ -85,8 +85,8 @@ export function Header() {
         </div>
       </div>
       <div className="container mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Mobile-only Logo Row */}
-        <div className="md:hidden w-full flex justify-start mb-2">
+        {/* Mobile-only Logo and Search Row */}
+        <div className="md:hidden w-full flex items-center gap-2 mb-2">
           <Link href="/" className="flex items-center space-x-2">
             {appSettings?.site_logo_url ? (
               <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
@@ -94,6 +94,19 @@ export function Header() {
               <span className="inline-block font-bold text-lg">{appSettings?.site_name || "Cellkom"}</span>
             )}
           </Link>
+          <form onSubmit={handleSearch} className="relative flex-1">
+            <Input
+              type="search"
+              placeholder="Cari produk..."
+              className="w-full pl-10 pr-4 rounded-full bg-gray-100 dark:bg-gray-700 border-none focus-visible:ring-0"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Button type="submit" variant="ghost" size="icon" className="absolute right-0 top-1/2 -translate-y-1/2 h-full w-10 rounded-full">
+              <Search className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+              <span className="sr-only">Cari</span>
+            </Button>
+          </form>
         </div>
 
         {/* Main Header Content Row (adapts for mobile/desktop) */}
@@ -129,12 +142,8 @@ export function Header() {
             </form>
           </div>
 
-          {/* Right side: Mobile Search (visible on mobile), Cart, Heart, UserNav/Auth */}
+          {/* Right side: Cart, Heart, UserNav/Auth */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => router.push(`/search`)}>
-              <Search className="h-5 w-5" />
-              <span className="sr-only">Cari</span>
-            </Button>
             <CartSheet />
             <Button variant="ghost" size="icon">
               <Heart className="h-5 w-5" />
