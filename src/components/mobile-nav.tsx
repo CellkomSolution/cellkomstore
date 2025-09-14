@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSettings } from "@/lib/supabase/app-settings";
+import { cn } from "@/lib/utils"; // Import cn for conditional classNames
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -59,22 +60,22 @@ export function MobileNav() {
           </SheetTitle>
         </SheetHeader>
         <div className="flex flex-col space-y-4 py-4">
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+          <Button variant="ghost" className="justify-start hover:bg-transparent hover:underline" asChild onClick={() => setOpen(false)}>
             <Link href="/">Beranda</Link>
           </Button>
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+          <Button variant="ghost" className="justify-start hover:bg-transparent hover:underline" asChild onClick={() => setOpen(false)}>
             <Link href="/products">Produk</Link>
           </Button>
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+          <Button variant="ghost" className="justify-start hover:bg-transparent hover:underline" asChild onClick={() => setOpen(false)}>
             <Link href="/categories">Kategori</Link>
           </Button>
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+          <Button variant="ghost" className="justify-start hover:bg-transparent hover:underline" asChild onClick={() => setOpen(false)}>
             <Link href="/blog">Blog</Link>
           </Button>
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+          <Button variant="ghost" className="justify-start hover:bg-transparent hover:underline" asChild onClick={() => setOpen(false)}>
             <Link href="/about">Tentang Kami</Link>
           </Button>
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+          <Button variant="ghost" className="justify-start hover:bg-transparent hover:underline" asChild onClick={() => setOpen(false)}>
             <Link href="/contact">Kontak</Link>
           </Button>
         </div>
