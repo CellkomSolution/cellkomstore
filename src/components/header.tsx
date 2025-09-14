@@ -84,7 +84,7 @@ export function Header() {
           </div>
         </div>
       </div>
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4 relative">
         <div className="flex items-center gap-4">
           <MobileNav />
           <Link href="/" className="hidden md:flex items-center space-x-2">
@@ -98,7 +98,7 @@ export function Header() {
         </div>
 
         {/* Mobile Logo */}
-        <div className="md:hidden">
+        <div className="md:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <Link href="/" className="flex items-center space-x-2">
             {appSettings?.site_logo_url ? (
               <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
