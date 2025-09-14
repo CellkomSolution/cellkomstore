@@ -10,10 +10,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { getHeroCarouselSlides, HeroCarouselSlide } from "@/lib/supabase/hero-carousel"; // Menggunakan fungsi utilitas dan antarmuka yang benar
+import { getHeroCarouselSlides, HeroCarouselSlide } from "@/lib/supabase/hero-carousel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
+import { formatRupiah } from "@/lib/utils";
 
 export function HeroCarousel() {
   const [slides, setSlides] = React.useState<HeroCarouselSlide[]>([]);
@@ -23,23 +23,23 @@ export function HeroCarousel() {
     const fetchSlides = async () => {
       setIsLoading(true);
       try {
-        const data = await getHeroCarouselSlides(); // Menggunakan fungsi utilitas
-        console.log("Fetched hero carousel slides:", data); // Log data yang diambil untuk debugging
+        const data = await getHeroCarouselSlides();
+        console.log("Fetched hero carousel slides:", data);
         setSlides(data || []);
       } catch (error) {
         console.error("Error fetching hero carousel slides:", error);
-        setSlides([]); // Pastikan slide dikosongkan jika ada kesalahan
+        setSlides([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchSlides();
-  }, []); // Array dependensi kosong berarti ini berjalan sekali saat komponen dipasang.
+  }, []);
 
   if (isLoading) {
     return (
-      <div className="relative w-full aspect-[16/9] md:aspect-[4/1] rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+      <div className="relative w-full aspect-[16/9] md:h-[400px] rounded-lg overflow-hidden bg-muted flex items-center justify-center">
         <div className="h-full w-full bg-gray-200 animate-pulse" />
       </div>
     );
@@ -47,14 +47,14 @@ export function HeroCarousel() {
 
   if (slides.length === 0) {
     return (
-      <div className="relative w-full aspect-[16/9] md:aspect-[4/1] rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
+      <div className="relative w-full aspect-[16/9] md:h-[400px] rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
         Tidak ada slide carousel untuk ditampilkan.
       </div>
     );
   }
 
   return (
-    <Carousel className="w-full aspect-[16/9] md:aspect-[4/1]">
+    <Carousel className="w-full aspect-[16/9] md:h-[400px]">
       <CarouselContent>
         {slides.map((slide) => (
           <CarouselItem key={slide.id}>
