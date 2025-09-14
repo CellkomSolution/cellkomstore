@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { AdminChatList } from "@/components/admin-chat-list"; // Pastikan import ini ada
+import { AdminChatList } from "@/components/admin-chat-list";
 import { useSession } from "@/context/session-context";
 import { Loader2, MessageSquare, ArrowLeft } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // Menambahkan CardContent
+import { CardHeader, CardTitle } from "@/components/ui/card"; // Hanya import CardHeader dan CardTitle
 import { useAdmin } from "@/hooks/use-admin";
 
 export default function AdminChatLayout({ children }: { children: React.ReactNode }) {
@@ -42,8 +42,8 @@ export default function AdminChatLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex h-[calc(100vh-64px)] bg-background overflow-hidden">
       {/* Left Column: Chat List */}
-      <Card className={`
-        w-full md:w-1/3 lg:w-1/4 flex flex-col border-r rounded-none shadow-none
+      <div className={`
+        w-full md:w-1/3 lg:w-1/4 flex flex-col border-r bg-background
         ${isChatDetailRoute ? 'hidden md:flex' : 'flex'} 
       `}>
         <CardHeader className="p-4 border-b">
@@ -51,10 +51,10 @@ export default function AdminChatLayout({ children }: { children: React.ReactNod
             <MessageSquare className="h-5 w-5" /> Daftar Chat
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 p-0"> {/* CardContent membungkus AdminChatList */}
+        <div className="flex-1"> {/* Mengganti CardContent dengan div */}
           <AdminChatList />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Right Column: Chat Detail / Placeholder */}
       <div className={`

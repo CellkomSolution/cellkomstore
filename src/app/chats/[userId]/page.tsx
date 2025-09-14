@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Hanya import CardContent, CardHeader, CardTitle
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageSquare, Send, Loader2, User as UserIcon, ArrowLeft } from "lucide-react";
@@ -171,7 +171,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
 
   if (isSessionLoading || !adminId || !otherUserProfile) {
     return (
-      <Card className="h-full flex flex-col">
+      <div className="h-full flex flex-col"> {/* Mengganti Card dengan div */}
         <CardHeader>
           <CardTitle>Detail Chat Admin</CardTitle>
         </CardHeader>
@@ -179,12 +179,12 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           <p className="ml-2">Memuat percakapan...</p>
         </CardContent>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="h-full flex flex-col">
+    <div className="h-full flex flex-col"> {/* Mengganti Card dengan div */}
       <div className="border-b p-4 flex flex-row items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.push("/chats")}>
@@ -300,6 +300,6 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
           </Button>
         </form>
       </div>
-    </Card>
+    </div>
   );
 }
