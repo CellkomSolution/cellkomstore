@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/header"; // Diperbaiki: Menggunakan default import
+import Header from "@/components/header";
 import { Footer } from "@/components/footer";
 import { CartProvider } from "@/context/cart-context";
 import { Toaster } from "@/components/ui/sonner";
@@ -9,7 +9,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "@/context/session-context";
 import { getAppSettings } from "@/lib/supabase/app-settings";
 import { OrderNotificationProvider } from "@/context/order-notification-context";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"; // Menambahkan import untuk React Query
+import { ReactQueryProvider } from "@/components/react-query-provider"; // Mengimpor ReactQueryProvider yang baru
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,9 +29,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Buat instance QueryClient di luar komponen untuk menghindari pembuatan ulang
-const queryClient = new QueryClient();
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -48,7 +45,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <QueryClientProvider client={queryClient}> {/* Membungkus aplikasi dengan QueryClientProvider */}
+          <ReactQueryProvider> {/* Menggunakan ReactQueryProvider yang baru */}
             <SessionProvider>
               <OrderNotificationProvider>
                 <CartProvider>
@@ -59,7 +56,7 @@ export default function RootLayout({
                 </CartProvider>
               </OrderNotificationProvider>
             </SessionProvider>
-          </QueryClientProvider>
+          </ReactQueryProvider>
         </ThemeProvider>
       </body>
     </html>
