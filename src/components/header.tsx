@@ -84,21 +84,9 @@ export function Header() {
           </div>
         </div>
       </div>
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4 relative">
-        <div className="flex items-center gap-4">
-          <MobileNav />
-          <Link href="/" className="hidden md:flex items-center space-x-2">
-            {appSettings?.site_logo_url ? (
-              <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
-            ) : (
-              <span className="inline-block font-bold text-lg">{appSettings?.site_name || "Cellkom"}</span>
-            )}
-          </Link>
-          <MainNav />
-        </div>
-
-        {/* Mobile Logo */}
-        <div className="md:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="container mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Mobile-only Logo Row */}
+        <div className="md:hidden w-full flex justify-center mb-2">
           <Link href="/" className="flex items-center space-x-2">
             {appSettings?.site_logo_url ? (
               <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
@@ -108,62 +96,79 @@ export function Header() {
           </Link>
         </div>
 
-        <div className="flex-1 max-w-xl hidden lg:block">
-          <form onSubmit={handleSearch} className="relative">
-            <Input
-              type="search"
-              placeholder="Cari produk..."
-              className="w-full pl-10 pr-4 rounded-full bg-gray-100 dark:bg-gray-700 border-none focus-visible:ring-0"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Button type="submit" variant="ghost" size="icon" className="absolute right-0 top-1/2 -translate-y-1/2 h-full w-10 rounded-full">
-              <Search className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+        {/* Main Header Content Row (adapts for mobile/desktop) */}
+        <div className="flex w-full md:w-auto items-center justify-between md:justify-start gap-4">
+          {/* Left side: MobileNav (always visible on mobile), DesktopNav (hidden on mobile) */}
+          <div className="flex items-center gap-4">
+            <MobileNav /> {/* Mobile menu button */}
+            <Link href="/" className="hidden md:flex items-center space-x-2">
+              {/* Desktop Logo */}
+              {appSettings?.site_logo_url ? (
+                <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
+              ) : (
+                <span className="inline-block font-bold text-lg">{appSettings?.site_name || "Cellkom"}</span>
+              )}
+            </Link>
+            <MainNav /> {/* Desktop navigation links */}
+          </div>
+
+          {/* Center: Desktop Search (hidden on mobile) */}
+          <div className="flex-1 max-w-xl hidden lg:block">
+            <form onSubmit={handleSearch} className="relative">
+              <Input
+                type="search"
+                placeholder="Cari produk..."
+                className="w-full pl-10 pr-4 rounded-full bg-gray-100 dark:bg-gray-700 border-none focus-visible:ring-0"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Button type="submit" variant="ghost" size="icon" className="absolute right-0 top-1/2 -translate-y-1/2 h-full w-10 rounded-full">
+                <Search className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <span className="sr-only">Cari</span>
+              </Button>
+            </form>
+          </div>
+
+          {/* Right side: Mobile Search (visible on mobile), Cart, Heart, UserNav/Auth */}
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => router.push(`/search`)}>
+              <Search className="h-5 w-5" />
               <span className="sr-only">Cari</span>
             </Button>
-          </form>
-        </div>
+            <CartSheet />
+            <Button variant="ghost" size="icon">
+              <Heart className="h-5 w-5" />
+              <span className="sr-only">Favorit</span>
+            </Button>
 
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => router.push(`/search`)}>
-            <Search className="h-5 w-5" />
-            <span className="sr-only">Cari</span>
-          </Button>
-
-          {/* Always show Cart and Heart */}
-          <CartSheet />
-          <Button variant="ghost" size="icon">
-            <Heart className="h-5 w-5" />
-            <span className="sr-only">Favorit</span>
-          </Button>
-
-          {isAuthLoading ? (
-            <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
-          ) : session ? (
-            // Logged in: Show Chat, Bell, and UserNav dropdown
-            <>
-              {isAdmin ? (
-                <AdminChatNotificationIcon />
-              ) : (
-                <ChatNotificationIcon />
-              )}
-              <Button variant="ghost" size="icon">
-                <Bell className="h-5 w-5" />
-                <span className="sr-only">Notifikasi</span>
-              </Button>
-              <UserNav />
-            </>
-          ) : (
-            // Not logged in: Show Masuk/Daftar buttons
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" asChild>
-                <Link href="/auth">Masuk</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/auth">Daftar</Link>
-              </Button>
-            </div>
-          )}
+            {isAuthLoading ? (
+              <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
+            ) : session ? (
+              // Logged in: Show Chat, Bell, and UserNav dropdown
+              <>
+                {isAdmin ? (
+                  <AdminChatNotificationIcon />
+                ) : (
+                  <ChatNotificationIcon />
+                )}
+                <Button variant="ghost" size="icon">
+                  <Bell className="h-5 w-5" />
+                  <span className="sr-only">Notifikasi</span>
+                </Button>
+                <UserNav />
+              </>
+            ) : (
+              // Not logged in: Show Masuk/Daftar buttons
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" asChild>
+                  <Link href="/auth">Masuk</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/auth">Daftar</Link>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       {appSettings?.scrolling_text_enabled && appSettings?.scrolling_text_content && (
