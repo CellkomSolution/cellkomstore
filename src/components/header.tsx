@@ -1,215 +1,167 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Search, User, Menu, X, Home, Package, MessageSquare, Settings, LogOut, ChevronRight, Heart, History, CreditCard, MapPin, Bell } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ShoppingCart, Search, User, Heart, Download, MessageSquare, Bell } from "lucide-react";
+import { MainNav } from "./main-nav";
+import { MobileNav } from "./mobile-nav";
+import { UserNav } from "./user-nav";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { AppSettings } from "@/lib/supabase/app-settings";
 import { useCart } from "@/context/cart-context";
-import { useSession } from "@/context/session-context";
+import { ChatNotificationIcon } from "./chat-notification-icon";
+import { AdminChatNotificationIcon } from "./admin-chat-notification-icon";
+import { useAdmin } from "@/hooks/use-admin";
 import { useRouter } from "next/navigation";
-import { getAppSettings, AppSettings } from "@/lib/supabase/app-settings";
-import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile
+import { CartSheet } from "./cart-sheet";
+import { ChatWidget } from "./chat-widget";
 
 export function Header() {
-  const { cartItems } = useCart();
-  const { user, profile, signOut } = useSession();
+  const { session, isLoading: isAuthLoading, user } = useAuth();
+  const { totalItems } = useCart();
+  const { isAdmin } = useAdmin();
+  const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isGeneralChatOpen, setIsGeneralChatOpen] = useState(false);
   const router = useRouter();
-  const [appSettings, setAppSettings] = React.useState<AppSettings | null>(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const isMobile = useIsMobile(); // Gunakan hook useIsMobile
 
-  React.useEffect(() => {
-    async function fetchAppSettings() {
-      const settings = await getAppSettings();
-      setAppSettings(settings);
-    }
+  useEffect(() => {
+    const fetchAppSettings = async () => {
+      setIsLoadingSettings(true);
+      const { data, error } = await supabase
+        .from("app_settings")
+        .select("*")
+        .eq("id", "00000000-0000-0000-0000-000000000001")
+        .single();
+
+      if (error) {
+        console.error("Error fetching app settings:", error.message);
+      } else {
+        setAppSettings(data);
+      }
+      setIsLoadingSettings(false);
+    };
+
     fetchAppSettings();
   }, []);
 
-  const totalCartItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/");
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
   };
 
-  const mobileNavItems = [
-    { name: "Beranda", href: "/", icon: Home },
-    { name: "Produk", href: "/products", icon: Package },
-    { name: "Chat", href: "/chats", icon: MessageSquare },
-    { name: "Favorit", href: "/favorites", icon: Heart },
-    { name: "Riwayat Pesanan", href: "/orders", icon: History },
-    { name: "Metode Pembayaran", href: "/payment-methods", icon: CreditCard },
-    { name: "Alamat Pengiriman", href: "/shipping-addresses", icon: MapPin },
-    { name: "Notifikasi", href: "/notifications", icon: Bell },
-    { name: "Pengaturan Akun", href: "/profile", icon: Settings },
-  ];
-
   return (
-    <header className="sticky top-0 z-50 bg-background border-b">
-      {/* Top Header Bar - Hanya ditampilkan pada tampilan non-mobile */}
-      {!isMobile && appSettings?.scrolling_text_enabled && appSettings?.scrolling_text_content && (
-        <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300">
-          <div className="container mx-auto px-4 py-1 flex justify-between items-center">
-            <div className="flex space-x-4">
-              {appSettings?.download_app_url && (
-                <a href={appSettings.download_app_url} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
-                  {appSettings.download_app_text || "Download Aplikasi"}
-                </a>
-              )}
-            </div>
+    <header className="sticky top-0 z-50 w-full border-b bg-background">
+      <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300">
+        <div className="container mx-auto px-4 py-1 flex justify-between items-center">
+          <div className="flex space-x-4">
+            {appSettings?.download_app_url && (
+              <a href={appSettings.download_app_url} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                <Download className="h-3 w-3" /> {appSettings.download_app_text || "Download Aplikasi"}
+              </a>
+            )}
+          </div>
+          <div className="flex space-x-4">
+            <a href="#" className="hover:underline">
+              Bantuan
+            </a>
             {appSettings?.right_header_text_enabled && appSettings?.right_header_text_content && (
-              <Link href={appSettings.right_header_text_link || "#"} className="hover:underline">
-                {appSettings.right_header_text_content}
-              </Link>
+              appSettings.right_header_text_link ? (
+                <Link href={appSettings.right_header_text_link} className="hover:underline">
+                  {appSettings.right_header_text_content}
+                </Link>
+              ) : (
+                <span className="hover:underline">{appSettings.right_header_text_content}</span>
+              )
             )}
           </div>
         </div>
-      )}
-
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Mobile Menu Toggle */}
-        <div className="md:hidden">
-          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between border-b pb-4 mb-4">
-                  <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
-                    {appSettings?.site_logo_url ? (
-                      <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
-                    ) : (
-                      <span className="text-lg font-bold">{appSettings?.site_name || "E-commerce"}</span>
-                    )}
-                  </Link>
-                  <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
-                    <X className="h-6 w-6" />
-                    <span className="sr-only">Close menu</span>
-                  </Button>
-                </div>
-                <nav className="flex-1 overflow-y-auto">
-                  <ul className="space-y-2">
-                    {mobileNavItems.map((item) => (
-                      <li key={item.name}>
-                        <Link
-                          href={item.href}
-                          className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <item.icon className="h-5 w-5 text-muted-foreground" />
-                            <span className="text-base font-medium">{item.name}</span>
-                          </div>
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-                <div className="mt-auto border-t pt-4">
-                  {user ? (
-                    <Button variant="ghost" className="w-full justify-start text-destructive" onClick={handleSignOut}>
-                      <LogOut className="h-5 w-5 mr-3" />
-                      Keluar
-                    </Button>
-                  ) : (
-                    <Button className="w-full" onClick={() => { router.push("/auth"); setIsMobileMenuOpen(false); }}>
-                      Masuk / Daftar
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+      </div>
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <MobileNav />
+          <Link href="/" className="flex items-center space-x-2">
+            {appSettings?.site_logo_url ? (
+              <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
+            ) : (
+              <span className="inline-block font-bold text-lg">{appSettings?.site_name || "Cellkom"}</span>
+            )}
+          </Link>
+          <MainNav />
         </div>
 
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          {appSettings?.site_logo_url ? (
-            <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
-          ) : (
-            <span className="text-lg font-bold">{appSettings?.site_name || "E-commerce"}</span>
-          )}
-        </Link>
-
-        {/* Search Bar (Desktop Only) */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full">
+        <div className="flex-1 max-w-xl hidden lg:block">
+          <form onSubmit={handleSearch} className="relative">
             <Input
               type="search"
               placeholder="Cari produk..."
-              className="w-full pl-10 pr-4 rounded-full h-10"
+              className="w-full pl-10 pr-4 rounded-full bg-gray-100 dark:bg-gray-700 border-none focus-visible:ring-0"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          </div>
+            <Button type="submit" variant="ghost" size="icon" className="absolute right-0 top-1/2 -translate-y-1/2 h-full w-10 rounded-full">
+              <Search className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+              <span className="sr-only">Cari</span>
+            </Button>
+          </form>
         </div>
 
-        {/* Right-side Icons */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Search className="h-6 w-6" />
-            <span className="sr-only">Search</span>
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => router.push("/cart")}>
-            <ShoppingCart className="h-6 w-6" />
-            {totalCartItems > 0 && (
-              <span className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full h-4 w-4 flex items-center justify-center text-xs">
-                {totalCartItems}
-              </span>
-            )}
-            <span className="sr-only">Cart</span>
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => router.push(`/search`)}>
+            <Search className="h-5 w-5" />
+            <span className="sr-only">Cari</span>
           </Button>
 
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={profile?.avatar_url || undefined} />
-                    <AvatarFallback>
-                      {profile?.first_name ? profile.first_name[0].toUpperCase() : <User className="h-5 w-5" />}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="sr-only">User menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>
-                  {profile?.first_name || "Pengguna"} {profile?.last_name || ""}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push("/profile")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Pengaturan Akun
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/orders")}>
-                  <History className="mr-2 h-4 w-4" />
-                  Riwayat Pesanan
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Keluar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* Always show Cart and Heart */}
+          <CartSheet />
+          <Button variant="ghost" size="icon">
+            <Heart className="h-5 w-5" />
+            <span className="sr-only">Favorit</span>
+          </Button>
+
+          {isAuthLoading ? (
+            <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
+          ) : session ? (
+            // Logged in: Show Chat, Bell, and UserNav dropdown
+            <>
+              {isAdmin ? (
+                <AdminChatNotificationIcon />
+              ) : (
+                <ChatNotificationIcon />
+              )}
+              <Button variant="ghost" size="icon">
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">Notifikasi</span>
+              </Button>
+              <UserNav />
+            </>
           ) : (
-            <Button variant="ghost" size="icon" onClick={() => router.push("/auth")}>
-              <User className="h-6 w-6" />
-              <span className="sr-only">Login</span>
-            </Button>
+            // Not logged in: Show Masuk/Daftar buttons
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" asChild>
+                <Link href="/auth">Masuk</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/auth">Daftar</Link>
+              </Button>
+            </div>
           )}
         </div>
       </div>
+      {appSettings?.scrolling_text_enabled && appSettings?.scrolling_text_content && (
+        <div className="bg-primary text-primary-foreground text-sm py-1 overflow-hidden whitespace-nowrap">
+          <div className="animate-marquee">
+            {appSettings.scrolling_text_content}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
