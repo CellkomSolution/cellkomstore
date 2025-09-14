@@ -86,7 +86,7 @@ export function Header() {
       </div>
       <div className="container mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Mobile-only Logo Row */}
-        <div className="md:hidden w-full flex justify-center mb-2">
+        <div className="md:hidden w-full flex justify-start mb-2">
           <Link href="/" className="flex items-center space-x-2">
             {appSettings?.site_logo_url ? (
               <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
