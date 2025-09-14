@@ -8,7 +8,7 @@ import { MainNav } from "./main-nav";
 import { MobileNav } from "./mobile-nav";
 import { UserNav } from "./user-nav";
 import { useAuth } from "@/hooks/use-auth";
-import { useEffect, useState } from "react";
+import { useEffect, useState } => "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSettings } from "@/lib/supabase/app-settings";
 import { useCart } from "@/context/cart-context";
@@ -126,7 +126,7 @@ export function Header() {
           </div>
 
           {/* Center: Desktop Search (hidden on mobile) */}
-          <div className="flex-1 max-w-xl hidden lg:block">
+          <div className="flex-1 max-w-xl hidden md:block"> {/* Changed from lg:block to md:block */}
             <form onSubmit={handleSearch} className="relative">
               <Input
                 type="search"
