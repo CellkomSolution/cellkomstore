@@ -61,12 +61,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         setSession(null);
         setUser(null);
         setProfile(null);
-        // Only redirect to /auth if the current path is not / (homepage), /auth, /product/*, or /category/*
+        // Only redirect to /auth if the current path is not publicly accessible
         if (
           pathname !== "/auth" &&
           pathname !== "/" &&
           !pathname.startsWith('/product/') &&
-          !pathname.startsWith('/category/')
+          !pathname.startsWith('/category/') &&
+          !pathname.startsWith('/blog') && // Added blog page
+          !pathname.startsWith('/services') && // Added services page
+          !pathname.startsWith('/contact') // Added contact page
         ) {
           router.push("/auth");
         }
