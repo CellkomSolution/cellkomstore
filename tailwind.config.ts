@@ -40,10 +40,6 @@ export default {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
-            success: {
-                DEFAULT: 'hsl(142.1 76.2% 36.3%)', // A shade of green
-                foreground: 'hsl(210 40% 98%)', // White or light text
-            },
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',

@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut } from "lucide-react";
+import { LogOut } from "lucide-react"; // Menghapus import User icon
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -67,18 +67,8 @@ export function UserNav() {
             <Link href="/profile">Profil</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/my-orders">Pesanan Saya</Link>
+            <Link href="/admin/dashboard">Dasbor Admin</Link>
           </DropdownMenuItem>
-          {user.role === 'admin' && (
-            <>
-              <DropdownMenuItem asChild>
-                <Link href="/admin/orders">Pesanan Masuk</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/admin/dashboard">Dasbor Admin</Link>
-              </DropdownMenuItem>
-            </>
-          )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
