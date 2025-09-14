@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, ShoppingCart, User, Search, Heart, Home, Package, Info, Phone, Download } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth"; // Diperbaiki: Menggunakan use-auth
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useAppSettings } from "@/hooks/useAppSettings";
+import { useAppSettings } from "@/hooks/use-app-settings"; // Diperbaiki: Menggunakan use-app-settings
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useCart } from "@/hooks/useCart";
+import { useCart } from "@/context/cart-context"; // Diperbaiki: Menggunakan cart-context
 import { useDebounce } from "@/hooks/useDebounce";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -24,7 +24,7 @@ const Header = () => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { session, signOut } = useAuth();
   const { data: appSettings } = useAppSettings();
-  const { cartItems } = useCart();
+  const { items: cartItems } = useCart(); // Diperbaiki: Mengakses 'items' dari useCart
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
