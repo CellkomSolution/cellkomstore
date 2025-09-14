@@ -59,7 +59,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
-      <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300">
+      <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300 md:block hidden"> {/* Ditambahkan md:block hidden */}
         <div className="container mx-auto px-4 py-1 flex justify-between items-center">
           <div className="flex space-x-4">
             {appSettings?.download_app_url && (
@@ -119,7 +119,6 @@ export function Header() {
             <span className="sr-only">Cari</span>
           </Button>
 
-          {/* Always show Cart and Heart */}
           <CartSheet />
           <Button variant="ghost" size="icon">
             <Heart className="h-5 w-5" />
@@ -129,7 +128,6 @@ export function Header() {
           {isAuthLoading ? (
             <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
           ) : session ? (
-            // Logged in: Show Chat, Bell, and UserNav dropdown
             <>
               {isAdmin ? (
                 <AdminChatNotificationIcon />
@@ -143,7 +141,6 @@ export function Header() {
               <UserNav />
             </>
           ) : (
-            // Not logged in: Show Masuk/Daftar buttons
             <div className="flex items-center space-x-2">
               <Button variant="outline" asChild>
                 <Link href="/auth">Masuk</Link>
