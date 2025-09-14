@@ -67,13 +67,40 @@ export async function updateFeaturedBrand(id: string, brandData: Partial<Omit<Fe
 }
 
 export async function deleteFeaturedBrand(id: string): Promise<void> {
-  const { error } = await supabase
+  // First, get the brand to retrieve its image_url
+  const { data: brandToDelete, error: fetchError } = await supabase
+    .from("featured_brands")
+    .select("image_url")
+    .eq("id", id)
+    .single();
+
+  if (fetchError) {
+    console.error(`Error fetching featured brand for deletion with ID ${id}:`, fetchError.message || fetchError);
+    throw fetchError;
+  }
+
+  // If an image_url exists, delete the image from storage
+  if (brandToDelete?.image_url) {
+    const imageUrlParts = brandToDelete.image_url.split('/');
+    const fileName = imageUrlParts[imageUrlParts.length - 1];
+    const { error: storageError } = await supabase.storage
+      .from('featured-brand-images')
+      .remove([fileName]);
+
+    if (storageError) {
+      console.warn("Failed to delete featured brand image from storage:", storageError.message);
+      // Don't throw error here, proceed with brand deletion even if image deletion fails
+    }
+  }
+
+  // Then, delete the brand from the database
+  const { error: dbError } = await supabase
     .from("featured_brands")
     .delete()
     .eq("id", id);
 
-  if (error) {
-    console.error(`Error deleting featured brand with ID ${id}:`, error.message || error);
-    throw error;
+  if (dbError) {
+    console.error(`Error deleting featured brand with ID ${id}:`, dbError.message || dbError);
+    throw dbError;
   }
 }
