@@ -10,6 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppSettings } from "@/lib/supabase/app-settings";
 import { getCategories, Category } from "@/lib/supabase/categories"; // Import getCategories dan Category
 import { CategorySheet } from "./category-sheet"; // Import CategorySheet
+import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
+import { adminNavItems } from "@/config/admin-nav"; // Import adminNavItems
+import { Separator } from "@/components/ui/separator"; // Import Separator
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -17,6 +20,7 @@ export function MobileNav() {
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]); // State untuk kategori
   const [isLoadingCategories, setIsLoadingCategories] = useState(true); // State loading kategori
+  const { isAdmin, isAdminLoading } = useAdmin(); // Gunakan hook useAdmin
 
   useEffect(() => {
     const fetchAppSettings = async () => {
@@ -105,6 +109,22 @@ export function MobileNav() {
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
             <Link href="/contact">Kontak</Link>
           </Button>
+
+          {/* Admin Dashboard Links (Conditional) */}
+          {!isAdminLoading && isAdmin && (
+            <>
+              <Separator className="my-4" />
+              <h3 className="text-sm font-semibold text-muted-foreground px-4 pt-2">Dasbor Admin</h3>
+              {adminNavItems.map((item) => (
+                <Button key={item.href} variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+                  <Link href={item.href}>
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.title}
+                  </Link>
+                </Button>
+              ))}
+            </>
+          )}
         </div>
       </SheetContent>
     </Sheet>
