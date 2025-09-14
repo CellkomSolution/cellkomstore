@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, DollarSign, ShoppingBag, LayoutGrid, Image as ImageIcon, CreditCard, Settings } from "lucide-react"; // Import additional icons
+import { Package, Users, DollarSign, ShoppingBag, LayoutGrid, Image as ImageIcon, CreditCard, Settings, BookOpen, MessageSquare } from "lucide-react"; // Import additional icons
 import { getTotalProductsCount } from "@/lib/supabase/products";
 import { getTotalUsersCount } from "@/lib/supabase/profiles";
 import { getTotalOrdersCount } from "@/lib/supabase/orders"; // Import getTotalOrdersCount
@@ -116,6 +116,12 @@ export default function AdminDashboardPage() {
               </Link>
             </li>
             <li>
+              <Link href="/admin/blog" className="flex items-center gap-2 hover:text-primary">
+                <BookOpen className="h-4 w-4" />
+                Blog
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/users" className="flex items-center gap-2 hover:text-primary">
                 <Users className="h-4 w-4" />
                 Pengguna
@@ -125,6 +131,12 @@ export default function AdminDashboardPage() {
               <Link href="/admin/payment-methods" className="flex items-center gap-2 hover:text-primary">
                 <CreditCard className="h-4 w-4" />
                 Metode Pembayaran
+              </Link>
+            </li>
+            <li>
+              <Link href="/chats" className="flex items-center gap-2 hover:text-primary">
+                <MessageSquare className="h-4 w-4" />
+                Chat Admin
               </Link>
             </li>
             <li>
