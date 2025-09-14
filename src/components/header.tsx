@@ -59,7 +59,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
-      <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300">
+      <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300 hidden md:block">
         <div className="container mx-auto px-4 py-1 flex justify-between items-center">
           <div className="flex space-x-4">
             {appSettings?.download_app_url && (
@@ -87,7 +87,7 @@ export function Header() {
       <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <MobileNav />
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="hidden md:flex items-center space-x-2">
             {appSettings?.site_logo_url ? (
               <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
             ) : (
@@ -95,6 +95,17 @@ export function Header() {
             )}
           </Link>
           <MainNav />
+        </div>
+
+        {/* Mobile Logo */}
+        <div className="md:hidden">
+          <Link href="/" className="flex items-center space-x-2">
+            {appSettings?.site_logo_url ? (
+              <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
+            ) : (
+              <span className="inline-block font-bold text-lg">{appSettings?.site_name || "Cellkom"}</span>
+            )}
+          </Link>
         </div>
 
         <div className="flex-1 max-w-xl hidden lg:block">
