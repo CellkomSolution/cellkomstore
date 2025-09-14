@@ -41,7 +41,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
   const fetchData = React.useCallback(async () => {
     setIsLoading(true);
     if (!user && !isSessionLoading) {
-      toast.error("Anda harus login untuk melihat detail pesanan.");
+      toast.error("Anda harus login untuk melihat detail pesanan Anda.");
       router.replace("/auth");
       return;
     }

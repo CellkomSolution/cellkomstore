@@ -9,7 +9,8 @@ import { getHeroCarouselSlideById, updateHeroCarouselSlide, HeroCarouselSlide } 
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton";
 
 export default function EditHeroCarouselSlidePage({ params }: { params: { id: string } }) {
-  const { id } = params;
+  const unwrappedParams = React.use(params); // Menggunakan React.use() untuk meng-unwrap params
+  const { id } = unwrappedParams; // Mengakses id dari objek yang sudah di-unwrap
   const router = useRouter();
 
   const [initialData, setInitialData] = React.useState<HeroCarouselSlide | null>(null);

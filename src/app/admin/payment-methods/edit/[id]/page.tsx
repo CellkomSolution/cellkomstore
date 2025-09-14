@@ -9,7 +9,8 @@ import { getPaymentMethodById, updatePaymentMethod, PaymentMethod } from "@/lib/
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Reusing skeleton
 
 export default function EditPaymentMethodPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+  const unwrappedParams = React.use(params); // Menggunakan React.use() untuk meng-unwrap params
+  const { id } = unwrappedParams; // Mengakses id dari objek yang sudah di-unwrap
   const router = useRouter();
 
   const [initialData, setInitialData] = React.useState<PaymentMethod | null>(null);
