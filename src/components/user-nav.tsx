@@ -66,9 +66,11 @@ export function UserNav() {
           <DropdownMenuItem asChild>
             <Link href="/profile">Profil</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/my-orders">Pesanan Saya</Link>
-          </DropdownMenuItem>
+          {profile.role !== 'admin' && (
+            <DropdownMenuItem asChild>
+              <Link href="/my-orders">Pesanan Saya</Link>
+            </DropdownMenuItem>
+          )}
           {profile.role === 'admin' && (
             <>
               <DropdownMenuItem asChild>
