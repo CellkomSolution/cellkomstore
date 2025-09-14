@@ -18,13 +18,11 @@ import { useRouter } from "next/navigation";
 import { ChatWidget } from "@/components/chat-widget"; // Import ChatWidget
 
 interface ProductDetailPageProps {
-  params: Promise<{ id: string }>; // Menyesuaikan tipe params menjadi Promise
+  params: { id: string }; // Mengoreksi tipe params
 }
 
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
-  // Menggunakan React.use() untuk meng-unwrap params
-  const unwrappedParams = React.use(params);
-  const { id } = unwrappedParams;
+  const { id } = params; // Langsung menggunakan id dari params
 
   const { addItem } = useCart();
   const isMobile = useIsMobile(); // Use the hook
