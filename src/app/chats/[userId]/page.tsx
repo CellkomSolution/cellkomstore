@@ -161,7 +161,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
     } else if (data) {
       const mappedData = {
         ...data,
-        products: data.products ? data.products.map(mapProductData) : [],
+        products: data.products ? [mapProductData(data.products)] : [], // Fixed: Wrap data.products in an array
       };
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
@@ -194,7 +194,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
           <Avatar className="h-10 w-10">
             <AvatarImage src={otherUserProfile.avatar_url || undefined} />
             <AvatarFallback>
-              {otherUserProfile.first_name ? otherUserProfile.first_name[0].toUpperCase() : <UserIcon className="h-5 w-5" />}
+              {otherUserProfile.first_name ? otherUserProfile.first_name[0].toUpperCase() : (otherUserProfile.email ? otherUserProfile.email[0].toUpperCase() : <UserIcon className="h-5 w-5" />)}
             </AvatarFallback>
           </Avatar>
           <div>

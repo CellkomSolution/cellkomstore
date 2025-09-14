@@ -184,7 +184,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
       // Map product data from snake_case to camelCase for the new message
       const mappedData = {
         ...data,
-        products: data.products ? data.products.map(mapProductData) : [],
+        products: data.products ? [mapProductData(data.products)] : [], // Fixed: Wrap data.products in an array
       };
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
