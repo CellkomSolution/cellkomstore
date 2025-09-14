@@ -18,17 +18,25 @@ import { getChatMessages, markMessagesAsRead, ChatMessage } from "@/lib/supabase
 import { getProductById, Product, mapProductData } from "@/lib/supabase/products";
 import Link from "next/link";
 import Image from "next/image";
+import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
 interface AdminChatDetailPageProps {
-  params: Promise<{ userId: string }>; // Mengembalikan tipe params sebagai Promise
+  params: Promise<{ userId: string }>;
 }
 
 export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps) {
-  const unwrappedParams = React.use(params); // Menggunakan React.use() untuk meng-unwrap params
-  const { userId } = unwrappedParams; // Mengakses userId dari objek yang sudah di-unwrap
+  const unwrappedParams = React.use(params);
+  const { userId } = unwrappedParams;
 
   const router = useRouter();
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();
+  const isMobile = useIsMobile(); // Dapatkan status mobile
 
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = React.useState("");
@@ -36,6 +44,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
   const [isSending, setIsSending] = React.useState(false);
   const [otherUserProfile, setOtherUserProfile] = React.useState<Profile | null>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(true); // State untuk mengontrol drawer
 
   const adminId = adminUser?.id;
 
@@ -161,7 +170,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
     } else if (data) {
       const mappedData = {
         ...data,
-        products: data.products ? [mapProductData(data.products)] : [], // Fixed: Wrap data.products in an array
+        products: data.products ? [mapProductData(data.products)] : [],
       };
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
@@ -169,42 +178,32 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
     setIsSending(false);
   };
 
-  if (isSessionLoading || !adminId || !otherUserProfile) {
-    return (
-      <Card className="h-full flex flex-col">
-        <CardHeader>
-          <CardTitle>Detail Chat Admin</CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <p className="ml-2">Memuat percakapan...</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="h-full flex flex-col">
-      <div className="border-b p-4 flex flex-row items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => router.push("/chats")}>
-            <ArrowLeft className="h-5 w-5" />
-            <span className="sr-only">Kembali</span>
-          </Button>
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={otherUserProfile.avatar_url || undefined} />
-            <AvatarFallback>
-              {otherUserProfile.first_name ? otherUserProfile.first_name[0].toUpperCase() : (otherUserProfile.email ? otherUserProfile.email[0].toUpperCase() : <UserIcon className="h-5 w-5" />)}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <CardTitle className="text-lg">
-              {otherUserProfile.first_name || "Pengguna"} {otherUserProfile.last_name || ""}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">{otherUserProfile.email}</p>
-          </div>
-        </div>
+  const ChatHeaderContent = (
+    <div className="flex items-center gap-3">
+      <Button variant="ghost" size="icon" onClick={() => {
+        setIsDrawerOpen(false); // Tutup drawer
+        router.push("/chats"); // Navigasi kembali
+      }}>
+        <ArrowLeft className="h-5 w-5" />
+        <span className="sr-only">Kembali</span>
+      </Button>
+      <Avatar className="h-10 w-10">
+        <AvatarImage src={otherUserProfile?.avatar_url || undefined} />
+        <AvatarFallback>
+          {otherUserProfile?.first_name ? otherUserProfile.first_name[0].toUpperCase() : (otherUserProfile?.email ? otherUserProfile.email[0].toUpperCase() : <UserIcon className="h-5 w-5" />)}
+        </AvatarFallback>
+      </Avatar>
+      <div>
+        <CardTitle className="text-lg">
+          {otherUserProfile?.first_name || "Pengguna"} {otherUserProfile?.last_name || ""}
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">{otherUserProfile?.email}</p>
       </div>
+    </div>
+  );
+
+  const ChatBodyContent = (
+    <>
       <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
         {isLoadingMessages ? (
           <div className="flex-1 flex items-center justify-center">
@@ -300,6 +299,47 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
           </Button>
         </form>
       </div>
+    </>
+  );
+
+  if (isSessionLoading || !adminId || !otherUserProfile) {
+    return (
+      <Card className="h-full flex flex-col">
+        <CardHeader>
+          <CardTitle>Detail Chat Admin</CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <p className="ml-2">Memuat percakapan...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <Drawer open={isDrawerOpen} onOpenChange={(open) => {
+        setIsDrawerOpen(open);
+        if (!open) {
+          router.push("/chats"); // Kembali ke daftar chat saat drawer ditutup
+        }
+      }}>
+        <DrawerContent className="h-[90vh] flex flex-col">
+          <DrawerHeader className="p-4 border-b">
+            <DrawerTitle>{ChatHeaderContent}</DrawerTitle>
+          </DrawerHeader>
+          {ChatBodyContent}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Card className="h-full flex flex-col">
+      <div className="border-b p-4 flex flex-row items-center justify-between">
+        {ChatHeaderContent}
+      </div>
+      {ChatBodyContent}
     </Card>
   );
 }
