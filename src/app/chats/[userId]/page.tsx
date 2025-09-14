@@ -211,8 +211,8 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
+          <ScrollArea className="flex-1">
+            <div className="space-y-4 p-4"> {/* Added p-4 here to maintain spacing for messages */}
               {messages.length === 0 ? (
                 <p className="text-center text-muted-foreground text-sm">
                   Belum ada pesan. Mulai chat Anda sekarang!
