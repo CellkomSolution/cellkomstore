@@ -15,16 +15,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Profile } from "@/lib/supabase/profiles"; 
 import { getChatMessages, markMessagesAsRead, ChatMessage } from "@/lib/supabase/chats";
-import { getProductById, Product, mapProductData } from "@/lib/supabase/products"; // Import mapProductData
+import { getProductById, Product, mapProductData } from "@/lib/supabase/products";
 import Link from "next/link";
 import Image from "next/image";
 
 interface AdminChatDetailPageProps {
-  params: { userId: string }; // Mengoreksi tipe params
+  params: Promise<{ userId: string }>; // Mengembalikan tipe params sebagai Promise
 }
 
 export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps) {
-  const { userId } = params; // Langsung menggunakan userId dari params
+  const unwrappedParams = React.use(params); // Menggunakan React.use() untuk meng-unwrap params
+  const { userId } = unwrappedParams; // Mengakses userId dari objek yang sudah di-unwrap
 
   const router = useRouter();
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();
@@ -81,7 +82,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
               updated_at: msg.created_at,
               sender_profile: [],
               receiver_profile: [],
-              products: [product], // Fixed: Pass the full product object
+              products: [product],
               type: 'system',
             });
             productsIntroduced.add(msg.product_id);
@@ -158,7 +159,6 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       console.error("Error sending message:", error.message);
       toast.error("Gagal mengirim pesan.");
     } else if (data) {
-      // Map product data from snake_case to camelCase for the new message
       const mappedData = {
         ...data,
         products: data.products ? data.products.map(mapProductData) : [],
@@ -239,7 +239,6 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                       </div>
                     ) : (
                       <>
-                        {/* Display avatar for messages from the other user */}
                         {msg.sender_id !== adminUser?.id && (
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
@@ -268,7 +267,6 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                             {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
                           </p>
                         </div>
-                        {/* Display avatar for messages from the admin */}
                         {msg.sender_id === adminUser?.id && (
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={adminProfile?.avatar_url || undefined} />

@@ -4,36 +4,37 @@ import * as React from "react";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, ShieldCheck, Truck, Store, ShoppingCart, MessageSquare } from "lucide-react"; // Import MessageSquare
+import { Star, ShieldCheck, Truck, Store, ShoppingCart, MessageSquare } from "lucide-react";
 import { useCart } from "@/context/cart-context";
-import { Product, getProductById, getProductsByCategory } from "@/lib/supabase/products"; // Import getProductsByCategory
+import { Product, getProductById, getProductsByCategory } from "@/lib/supabase/products";
 import { formatRupiah } from "@/lib/utils";
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton";
 import { StickyProductActions } from "@/components/sticky-product-actions";
-import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile
-import { ProductGrid } from "@/components/product-grid"; // Import ProductGrid
-import { useSession } from "@/context/session-context"; // Import useSession
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ProductGrid } from "@/components/product-grid";
+import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { ChatWidget } from "@/components/chat-widget"; // Import ChatWidget
+import { ChatWidget } from "@/components/chat-widget";
 
 interface ProductDetailPageProps {
-  params: { id: string }; // Mengoreksi tipe params
+  params: Promise<{ id: string }>; // Mengembalikan tipe params sebagai Promise
 }
 
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const { id } = params; // Langsung menggunakan id dari params
+  const unwrappedParams = React.use(params); // Menggunakan React.use() untuk meng-unwrap params
+  const { id } = unwrappedParams; // Mengakses id dari objek yang sudah di-unwrap
 
   const { addItem } = useCart();
-  const isMobile = useIsMobile(); // Use the hook
-  const { user } = useSession(); // Get user from session
+  const isMobile = useIsMobile();
+  const { user } = useSession();
   const router = useRouter();
   
   const [product, setProduct] = React.useState<Product | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [relatedProducts, setRelatedProducts] = React.useState<Product[]>([]);
   const [isLoadingRelatedProducts, setIsLoadingRelatedProducts] = React.useState(true);
-  const [isChatOpen, setIsChatOpen] = React.useState(false); // State untuk mengontrol ChatWidget
+  const [isChatOpen, setIsChatOpen] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchProductAndRelated() {
@@ -41,10 +42,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       const fetchedProduct = await getProductById(id);
       if (fetchedProduct) {
         setProduct(fetchedProduct);
-        // Fetch related products
         setIsLoadingRelatedProducts(true);
         const fetchedRelatedProducts = await getProductsByCategory(fetchedProduct.category);
-        setRelatedProducts(fetchedRelatedProducts.filter(p => p.id !== fetchedProduct.id)); // Filter out current product
+        setRelatedProducts(fetchedRelatedProducts.filter(p => p.id !== fetchedProduct.id));
         setIsLoadingRelatedProducts(false);
       } else {
         notFound();
@@ -118,7 +118,6 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             )}
           </div>
 
-          {/* Desktop Buy Now / Add to Cart / Chat buttons */}
           {!isMobile && (
             <div className="flex flex-col sm:flex-row gap-3 mt-6 mb-8">
               <Button variant="outline" size="lg" className="flex-1 h-12 text-base" onClick={handleBuyNow}>
@@ -159,7 +158,6 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         </div>
       </div>
 
-      {/* Related Products Section */}
       {relatedProducts.length > 0 && (
         <div className="mt-12">
           <ProductGrid 
@@ -171,11 +169,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         </div>
       )}
 
-      {/* Mobile Sticky Product Actions */}
       {isMobile && (
         <StickyProductActions product={product} onAddToCart={handleAddToCart} />
       )}
-      {/* Render ChatWidget di sini, dikontrol oleh state isChatOpen */}
       <ChatWidget 
         productId={product.id} 
         productName={product.name} 
