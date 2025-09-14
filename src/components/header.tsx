@@ -145,12 +145,12 @@ export function Header() {
           ) : (
             // Not logged in: Show Masuk/Daftar buttons
             <div className="flex items-center space-x-2">
-              <Link href="/auth">
-                <Button className="bg-black text-white hover:bg-gray-800">Masuk</Button>
-              </Link>
-              <Link href="/auth">
-                <Button className="bg-black text-white hover:bg-gray-800">Daftar</Button>
-              </Link>
+              <Button variant="outline" asChild>
+                <Link href="/auth">Masuk</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/auth">Daftar</Link>
+              </Button>
             </div>
           )}
         </div>
