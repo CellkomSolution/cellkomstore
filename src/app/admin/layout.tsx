@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAdmin } from "@/hooks/use-admin";
 import { useSession } from "@/context/session-context";
 import Link from "next/link";
-import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon, LayoutGrid, ShoppingBag, CreditCard } from "lucide-react";
+import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon, LayoutGrid, ShoppingBag, CreditCard, BookOpen } from "lucide-react"; // Import BookOpen
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -103,6 +103,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/featured-brands">
               <ImageIcon className="mr-2 h-4 w-4" />
               Merek Unggulan
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            className={cn("w-full justify-start", pathname.startsWith("/admin/blog") && "bg-muted hover:bg-muted")}
+            asChild
+          >
+            <Link href="/admin/blog">
+              <BookOpen className="mr-2 h-4 w-4" />
+              Blog
             </Link>
           </Button>
           <Button
