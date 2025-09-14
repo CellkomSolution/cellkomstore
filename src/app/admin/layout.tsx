@@ -5,11 +5,11 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAdmin } from "@/hooks/use-admin";
 import { useSession } from "@/context/session-context";
 import Link from "next/link";
-import { LayoutDashboard, Package, Settings, Users, Image as ImageIcon, LayoutGrid, ShoppingBag, CreditCard, BookOpen } from "lucide-react"; // Import BookOpen
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { adminNavItems } from "@/config/admin-nav"; // Import adminNavItems
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -45,107 +45,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <h2 className="text-xl font-bold text-primary">Admin Panel</h2>
         </div>
         <nav className="flex-1 space-y-2 py-4">
-          <Button
-            variant="ghost"
-            className={cn("w-full justify-start", pathname === "/admin/dashboard" && "bg-muted hover:bg-muted")}
-            asChild
-          >
-            <Link href="/admin/dashboard">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              Dashboard
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            className={cn("w-full justify-start", pathname.startsWith("/admin/orders") && "bg-muted hover:bg-muted")}
-            asChild
-          >
-            <Link href="/admin/orders">
-              <ShoppingBag className="mr-2 h-4 w-4" />
-              Pesanan
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            className={cn("w-full justify-start", pathname.startsWith("/admin/products") && "bg-muted hover:bg-muted")}
-            asChild
-          >
-            <Link href="/admin/products">
-              <Package className="mr-2 h-4 w-4" />
-              Produk
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            className={cn("w-full justify-start", pathname.startsWith("/admin/hero-carousel") && "bg-muted hover:bg-muted")}
-            asChild
-          >
-            <Link href="/admin/hero-carousel">
-              <ImageIcon className="mr-2 h-4 w-4" />
-              Hero Carousel
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            className={cn("w-full justify-start", pathname.startsWith("/admin/categories") && "bg-muted hover:bg-muted")}
-            asChild
-          >
-            <Link href="/admin/categories">
-              <LayoutGrid className="mr-2 h-4 w-4" />
-              Kategori
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            className={cn("w-full justify-start", pathname.startsWith("/admin/featured-brands") && "bg-muted hover:bg-muted")}
-            asChild
-          >
-            <Link href="/admin/featured-brands">
-              <ImageIcon className="mr-2 h-4 w-4" />
-              Merek Unggulan
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            className={cn("w-full justify-start", pathname.startsWith("/admin/blog") && "bg-muted hover:bg-muted")}
-            asChild
-          >
-            <Link href="/admin/blog">
-              <BookOpen className="mr-2 h-4 w-4" />
-              Blog
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            className={cn("w-full justify-start", pathname === "/admin/users" && "bg-muted hover:bg-muted")}
-            asChild
-          >
-            <Link href="/admin/users">
-              <Users className="mr-2 h-4 w-4" />
-              Pengguna
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            className={cn("w-full justify-start", pathname.startsWith("/admin/payment-methods") && "bg-muted hover:bg-muted")}
-            asChild
-          >
-            <Link href="/admin/payment-methods">
-              <CreditCard className="mr-2 h-4 w-4" />
-              Metode Pembayaran
-            </Link>
-          </Button>
-          <Separator className="my-4" />
-          <Button
-            variant="ghost"
-            className={cn("w-full justify-start", pathname === "/admin/settings" && "bg-muted hover:bg-muted")}
-            asChild
-          >
-            <Link href="/admin/settings">
-              <Settings className="mr-2 h-4 w-4" />
-              Pengaturan
-            </Link>
-          </Button>
+          {adminNavItems.map((item, index) => (
+            <React.Fragment key={item.href}>
+              <Button
+                variant="ghost"
+                className={cn("w-full justify-start", pathname.startsWith(item.href) && "bg-muted hover:bg-muted")}
+                asChild
+              >
+                <Link href={item.href}>
+                  <item.icon className="mr-2 h-4 w-4" />
+                  {item.title}
+                </Link>
+              </Button>
+              {item.title === "Metode Pembayaran" && <Separator className="my-4" />} {/* Add separator after Payment Methods */}
+            </React.Fragment>
+          ))}
         </nav>
       </aside>
 
