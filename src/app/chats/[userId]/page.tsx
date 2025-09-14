@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Hanya import CardContent, CardHeader, CardTitle
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageSquare, Send, Loader2, User as UserIcon, ArrowLeft } from "lucide-react";
@@ -171,7 +171,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
 
   if (isSessionLoading || !adminId || !otherUserProfile) {
     return (
-      <div className="h-full flex flex-col"> {/* Mengganti Card dengan div */}
+      <Card className="h-full flex flex-col">
         <CardHeader>
           <CardTitle>Detail Chat Admin</CardTitle>
         </CardHeader>
@@ -179,12 +179,12 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           <p className="ml-2">Memuat percakapan...</p>
         </CardContent>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="h-full flex flex-col"> {/* Mengganti Card dengan div */}
+    <Card className="h-full flex flex-col">
       <div className="border-b p-4 flex flex-row items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.push("/chats")}>
@@ -211,8 +211,8 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <ScrollArea className="flex-1">
-            <div className="space-y-4 p-4"> {/* Added p-4 here to maintain spacing for messages */}
+          <ScrollArea className="flex-1 p-4">
+            <div className="space-y-4">
               {messages.length === 0 ? (
                 <p className="text-center text-muted-foreground text-sm">
                   Belum ada pesan. Mulai chat Anda sekarang!
@@ -300,6 +300,6 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
           </Button>
         </form>
       </div>
-    </div>
+    </Card>
   );
 }

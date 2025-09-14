@@ -89,7 +89,7 @@ export function AdminChatList() {
   }
 
   return (
-    <ScrollArea className="flex-1"> {/* Removed px-4 here */}
+    <ScrollArea className="flex-1 px-4"> {/* Added px-4 here */}
       <Table>
         <TableHeader>
           <TableRow>
