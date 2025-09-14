@@ -1,21 +1,38 @@
 "use client";
 
-import * as React from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, Home, Tag, Sparkles, User, ShoppingBag, BookOpen } from "lucide-react"; // Menambahkan BookOpen untuk Blog
+import { Menu } from "lucide-react";
+
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
-import { CategorySheet } from "./category-sheet"; // Import CategorySheet
+import { supabase } from "@/integrations/supabase/client";
+import { AppSettings } from "@/lib/supabase/app-settings";
 
 export function MobileNav() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+
+  useEffect(() => {
+    const fetchAppSettings = async () => {
+      setIsLoadingSettings(true);
+      const { data, error } = await supabase
+        .from("app_settings")
+        .select("*")
+        .eq("id", "00000000-0000-0000-0000-000000000001")
+        .single();
+
+      if (error) {
+        console.error("Error fetching app settings:", error.message);
+      } else {
+        setAppSettings(data);
+      }
+      setIsLoadingSettings(false);
+    };
+
+    fetchAppSettings();
+  }, []);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -23,49 +40,42 @@ export function MobileNav() {
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden"
-          aria-label="Toggle mobile menu"
+          className="md:hidden"
         >
-          <Menu className="h-6 w-6" />
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="flex flex-col w-full sm:max-w-xs">
+      <SheetContent side="left" className="flex flex-col">
         <SheetHeader>
-          <SheetTitle>Navigasi</SheetTitle>
+          <SheetTitle className="flex items-center justify-start">
+            {isLoadingSettings ? (
+              <div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />
+            ) : appSettings?.site_logo_url ? (
+              <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
+            ) : (
+              <span className="inline-block font-bold text-lg">{appSettings?.site_name || "Cellkom"}</span>
+            )}
+          </SheetTitle>
         </SheetHeader>
         <div className="flex flex-col space-y-4 py-4">
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/">
-              <Home className="mr-2 h-4 w-4" />
-              Beranda
-            </Link>
-          </Button>
-          <CategorySheet /> {/* Menggunakan CategorySheet di sini */}
-          {/* Menghapus tautan Flash Sale */}
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/new-arrivals">
-              <Sparkles className="mr-2 h-4 w-4" /> {/* Menggunakan Sparkles untuk Produk Baru */}
-              Produk Baru
-            </Link>
+            <Link href="/">Beranda</Link>
           </Button>
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/blog"> {/* Mengubah href ke /blog */}
-              <BookOpen className="mr-2 h-4 w-4" /> {/* Menggunakan ikon BookOpen untuk Blog */}
-              Blog
-            </Link>
-          </Button>
-          <Separator />
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/profile">
-              <User className="mr-2 h-4 w-4" /> {/* Mengubah ikon menjadi User */}
-              Profil
-            </Link>
+            <Link href="/products">Produk</Link>
           </Button>
           <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/my-orders">
-              <ShoppingBag className="mr-2 h-4 w-4" /> {/* Mengubah ikon menjadi ShoppingBag */}
-              Pesanan Saya
-            </Link>
+            <Link href="/categories">Kategori</Link>
+          </Button>
+          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+            <Link href="/blog">Blog</Link>
+          </Button>
+          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+            <Link href="/about">Tentang Kami</Link>
+          </Button>
+          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+            <Link href="/contact">Kontak</Link>
           </Button>
         </div>
       </SheetContent>
