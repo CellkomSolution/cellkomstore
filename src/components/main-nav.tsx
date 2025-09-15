@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link"; // Pastikan Link diimpor
+import Link from "next/link";
+import Image from "next/image"; // Import Image
+import { icons, Tag } from "lucide-react"; // Import icons dan Tag
 
 import { cn } from "@/lib/utils";
 import {
@@ -16,15 +18,25 @@ import {
 import { Category } from "@/lib/supabase/categories";
 import { supabase } from "@/integrations/supabase/client";
 
+// Helper component for category icon
+function CategoryIcon({ name }: { name: string | null }) {
+  const Icon = icons[name as keyof typeof icons] || Tag;
+  return <Icon className="h-5 w-5 text-muted-foreground" />;
+}
+
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<typeof Link> // Mengubah tipe props agar sesuai dengan Link
->(({ className, title, children, href, ...props }, ref) => { // Destrukturisasi href
+  React.ComponentPropsWithoutRef<typeof Link> & {
+    title: string;
+    categoryIconName?: string | null;
+    categoryImageUrl?: string | null;
+  }
+>(({ className, title, children, href, categoryIconName, categoryImageUrl, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <Link // Mengganti <a> dengan Link
-          href={href || "#"} // Menggunakan href yang didestrukturisasi
+        <Link
+          href={href || "#"}
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
@@ -32,7 +44,18 @@ const ListItem = React.forwardRef<
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
+          <div className="flex items-center">
+            {categoryImageUrl ? (
+              <div className="relative h-6 w-6 mr-2 rounded-sm overflow-hidden">
+                <Image src={categoryImageUrl} alt={title} fill style={{ objectFit: 'cover' }} sizes="24px" />
+              </div>
+            ) : (
+              <div className="mr-2">
+                <CategoryIcon name={categoryIconName} />
+              </div>
+            )}
+            <div className="text-sm font-medium leading-none">{title}</div>
+          </div>
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
@@ -48,16 +71,9 @@ export function MainNav() {
 
   React.useEffect(() => {
     const fetchCategories = async () => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .order("order", { ascending: true });
-
-      if (error) {
-        console.error("Error fetching categories:", error.message);
-      } else {
-        setCategories(data);
-      }
+      // Menggunakan fungsi getCategories yang sudah diperbarui untuk menyertakan gambar
+      const data = await getCategories();
+      setCategories(data);
     };
 
     fetchCategories();
@@ -67,7 +83,7 @@ export function MainNav() {
     <NavigationMenu className="hidden lg:flex">
       <NavigationMenuList>
         <NavigationMenuItem>
-          <Link href="/" className={navigationMenuTriggerStyle()}> {/* Menghapus legacyBehavior dan passHref */}
+          <Link href="/" className={navigationMenuTriggerStyle()}>
             Beranda
           </Link>
         </NavigationMenuItem>
@@ -80,6 +96,8 @@ export function MainNav() {
                   key={category.id}
                   href={`/category/${category.slug}`}
                   title={category.name}
+                  categoryIconName={category.icon_name}
+                  categoryImageUrl={category.latest_product_image_url}
                 >
                   Lihat semua produk di {category.name}.
                 </ListItem>
@@ -88,7 +106,7 @@ export function MainNav() {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href="/blog" className={navigationMenuTriggerStyle()}> {/* Menghapus legacyBehavior dan passHref */}
+          <Link href="/blog" className={navigationMenuTriggerStyle()}>
             Blog
           </Link>
         </NavigationMenuItem>
@@ -98,7 +116,7 @@ export function MainNav() {
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href="/contact" className={navigationMenuTriggerStyle()}> {/* Menghapus legacyBehavior dan passHref */}
+          <Link href="/contact" className={navigationMenuTriggerStyle()}>
             Kontak
           </Link>
         </NavigationMenuItem>

@@ -12,17 +12,20 @@ export interface Category {
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const { data, error } = await supabase
-    .from("categories")
-    .select("*")
-    .order("order", { ascending: true })
-    .order("created_at", { ascending: false });
+  // Menggunakan RPC function yang sudah ada untuk mendapatkan gambar produk terbaru
+  const { data, error } = await supabase.rpc('get_categories_with_latest_product_image');
 
   if (error) {
-    console.error("Error fetching categories:", error.message || error);
+    console.error("Error fetching categories with latest product image:", error.message || error);
     return [];
   }
-  return data;
+  // Pastikan data diurutkan seperti sebelumnya
+  return (data as Category[]).sort((a, b) => {
+    if (a.order !== b.order) {
+      return a.order - b.order;
+    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 }
 
 export async function getCategoriesWithLatestProductImage(): Promise<Category[]> {

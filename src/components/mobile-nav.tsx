@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, LayoutGrid, Loader2 } from "lucide-react"; // Menambahkan LayoutGrid dan Loader2
+import { Menu, LayoutGrid, Loader2, Tag, X } from "lucide-react"; // Menambahkan LayoutGrid, Loader2, Tag, X
+import Image from "next/image"; // Import Image
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,13 @@ import { CategorySheet } from "./category-sheet"; // Import CategorySheet
 import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
 import { adminNavItems } from "@/config/admin-nav"; // Import adminNavItems
 import { Separator } from "@/components/ui/separator"; // Import Separator
+import { icons } from "lucide-react"; // Import icons dari lucide-react
+
+// Helper component for category icon (similar to CategoryIcons.tsx)
+function CategoryIcon({ name }: { name: string | null }) {
+  const Icon = icons[name as keyof typeof icons] || Tag;
+  return <Icon className="h-5 w-5 text-muted-foreground" />;
+}
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -41,6 +49,7 @@ export function MobileNav() {
 
     const fetchCategoriesData = async () => {
       setIsLoadingCategories(true);
+      // Menggunakan fungsi getCategories yang sudah diperbarui untuk menyertakan gambar
       const fetchedCategories = await getCategories();
       setCategories(fetchedCategories);
       setIsLoadingCategories(false);
@@ -90,7 +99,16 @@ export function MobileNav() {
             <>
               {categories.slice(0, 5).map((category) => ( // Tampilkan 5 kategori teratas
                 <Button key={category.id} variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-                  <Link href={`/category/${category.slug}`}>{category.name}</Link>
+                  <Link href={`/category/${category.slug}`} className="flex items-center gap-2">
+                    {category.latest_product_image_url ? (
+                      <div className="relative h-5 w-5 rounded-sm overflow-hidden">
+                        <Image src={category.latest_product_image_url} alt={category.name} fill style={{ objectFit: 'cover' }} sizes="20px" />
+                      </div>
+                    ) : (
+                      <CategoryIcon name={category.icon_name} />
+                    )}
+                    <span>{category.name}</span>
+                  </Link>
                 </Button>
               ))}
               {categories.length > 0 && (
