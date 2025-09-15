@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form"; // Import SubmitHandler
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { getAppSettings, updateAppSettings, AppSettings } from "@/lib/supabase/app-settings";
 import { ImageUploader } from "@/components/image-uploader";
-import { Switch } from "@/components/ui/switch"; // Import Switch component
+import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
   site_name: z.string().nullable().optional().or(z.literal("")),
@@ -34,14 +34,14 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().optional().or(z.literal("")),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().optional().or(z.literal("")),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().optional().or(z.literal("")),
-  scrolling_text_enabled: z.boolean().default(false), // Ensure default makes it non-optional
+  scrolling_text_enabled: z.boolean().default(false),
   scrolling_text_content: z.string().nullable().optional().or(z.literal("")),
-  right_header_text_enabled: z.boolean().default(false), // Ensure default makes it non-optional
+  right_header_text_enabled: z.boolean().default(false),
   right_header_text_content: z.string().nullable().optional().or(z.literal("")),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
   download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().optional().or(z.literal("")),
-  download_app_text: z.string().nullable().optional().or(z.literal("")), // New field
-  featured_brands_title: z.string().nullable().optional().or(z.literal("")), // Added to schema
+  download_app_text: z.string().nullable().optional().or(z.literal("")),
+  featured_brands_title: z.string().nullable().optional().or(z.literal("")),
 }).superRefine((data, ctx) => {
   if (data.scrolling_text_enabled && (!data.scrolling_text_content || data.scrolling_text_content.trim() === '')) {
     ctx.addIssue({
@@ -66,12 +66,14 @@ const formSchema = z.object({
   }
 });
 
+type SettingsFormValues = z.infer<typeof formSchema>; // Define type for form values
+
 export default function AdminSettingsPage() {
   const [initialData, setInitialData] = React.useState<AppSettings | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<SettingsFormValues>({ // Use SettingsFormValues here
     resolver: zodResolver(formSchema),
     defaultValues: {
       site_name: "",
@@ -84,14 +86,14 @@ export default function AdminSettingsPage() {
       twitter_url: null,
       youtube_url: null,
       linkedin_url: null,
-      scrolling_text_enabled: false,
+      scrolling_text_enabled: false, // Ensure boolean
       scrolling_text_content: null,
-      right_header_text_enabled: false,
+      right_header_text_enabled: false, // Ensure boolean
       right_header_text_content: null,
       right_header_text_link: null,
       download_app_url: null,
-      download_app_text: null, // Default value for new field
-      featured_brands_title: null, // Default value for new field
+      download_app_text: null,
+      featured_brands_title: null,
     },
   });
 
@@ -112,14 +114,14 @@ export default function AdminSettingsPage() {
           twitter_url: settings.twitter_url,
           youtube_url: settings.youtube_url,
           linkedin_url: settings.linkedin_url,
-          scrolling_text_enabled: settings.scrolling_text_enabled || false,
+          scrolling_text_enabled: settings.scrolling_text_enabled ?? false, // Use ?? for boolean
           scrolling_text_content: settings.scrolling_text_content || null,
-          right_header_text_enabled: settings.right_header_text_enabled || false,
+          right_header_text_enabled: settings.right_header_text_enabled ?? false, // Use ?? for boolean
           right_header_text_content: settings.right_header_text_content || null,
           right_header_text_link: settings.right_header_text_link || null,
           download_app_url: settings.download_app_url || null,
-          download_app_text: settings.download_app_text || null, // Set value for new field
-          featured_brands_title: settings.featured_brands_title || null, // Set value for new field
+          download_app_text: settings.download_app_text || null,
+          featured_brands_title: settings.featured_brands_title || null,
         });
       }
       setIsLoading(false);
@@ -127,7 +129,7 @@ export default function AdminSettingsPage() {
     fetchSettings();
   }, [form]);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit: SubmitHandler<SettingsFormValues> = async (values) => { // Explicitly type onSubmit
     console.log("onSubmit called with values:", values);
     setIsSubmitting(true);
     try {
@@ -453,7 +455,7 @@ export default function AdminSettingsPage() {
                   </FormItem>
                 )}
               />
-              {form.watch("download_app_url") && ( // Only show text input if URL is provided
+              {form.watch("download_app_url") && (
                 <FormField
                   control={form.control}
                   name="download_app_text"

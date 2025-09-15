@@ -2,20 +2,20 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, LayoutGrid, Loader2, Tag, X } from "lucide-react"; // Menambahkan LayoutGrid, Loader2, Tag, X
-import Image from "next/image"; // Import Image
+import { Menu, LayoutGrid, Loader2, Tag, X } from "lucide-react";
+import Image from "next/image";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSettings } from "@/lib/supabase/app-settings";
-import { getCategories, Category } from "@/lib/supabase/categories"; // Import getCategories dan Category
-import { CategorySheet } from "./category-sheet"; // Import CategorySheet
-import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
-import { adminNavItems } from "@/config/admin-nav"; // Import adminNavItems
-import { Separator } from "@/components/ui/separator"; // Import Separator
-import { icons } from "lucide-react"; // Import icons dari lucide-react
-import { ScrollArea } from "@/components/ui/scroll-area"; // Import ScrollArea
+import { getCategories, Category } from "@/lib/supabase/categories";
+import { CategorySheet } from "./category-sheet";
+import { useAdmin } from "@/hooks/use-admin";
+import { adminNavItems } from "@/config/admin-nav";
+import { Separator } from "@/components/ui/separator";
+import { icons } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Helper component for category icon (similar to CategoryIcons.tsx)
 function CategoryIcon({ name }: { name: string | null }) {
@@ -27,9 +27,9 @@ export function MobileNav() {
   const [open, setOpen] = useState(false);
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
-  const [categories, setCategories] = useState<Category[]>([]); // State untuk kategori
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true); // State loading kategori
-  const { isAdmin, isAdminLoading } = useAdmin(); // Gunakan hook useAdmin
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const { isAdmin, isAdminLoading } = useAdmin();
 
   useEffect(() => {
     const fetchAppSettings = async () => {
@@ -50,7 +50,6 @@ export function MobileNav() {
 
     const fetchCategoriesData = async () => {
       setIsLoadingCategories(true);
-      // Menggunakan fungsi getCategories yang sudah diperbarui untuk menyertakan gambar
       const fetchedCategories = await getCategories();
       setCategories(fetchedCategories);
       setIsLoadingCategories(false);
@@ -84,12 +83,11 @@ export function MobileNav() {
             )}
           </SheetTitle>
         </SheetHeader>
-        <ScrollArea className="flex-1 py-4"> {/* Wrap content with ScrollArea */}
-          <div className="flex flex-col space-y-1 pr-4"> {/* Add pr-4 for scrollbar spacing */}
+        <ScrollArea className="flex-1 py-4">
+          <div className="flex flex-col space-y-1 pr-4">
             <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
               <Link href="/">Beranda</Link>
             </Button>
-            {/* Tautan Kategori Dinamis */}
             <h3 className="text-sm font-semibold text-muted-foreground px-4 pt-2">Kategori</h3>
             {isLoadingCategories ? (
               <div className="px-4 space-y-2">
@@ -99,7 +97,7 @@ export function MobileNav() {
               </div>
             ) : (
               <>
-                {categories.slice(0, 5).map((category) => ( // Tampilkan 5 kategori teratas
+                {categories.slice(0, 5).map((category) => (
                   <Button key={category.id} variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
                     <Link href={`/category/${category.slug}`} className="flex items-center gap-2">
                       {category.latest_product_image_url ? (
@@ -114,7 +112,7 @@ export function MobileNav() {
                   </Button>
                 ))}
                 {categories.length > 0 && (
-                  <CategorySheet onOpenChange={setOpen}> {/* Menggunakan CategorySheet sebagai trigger */}
+                  <CategorySheet onOpenChange={setOpen}>
                     <Button variant="ghost" className="justify-start w-full flex items-center gap-2">
                       <LayoutGrid className="h-5 w-5" />
                       <span>Semua Kategori</span>

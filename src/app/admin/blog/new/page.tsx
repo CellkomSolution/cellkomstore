@@ -28,7 +28,7 @@ export default function NewBlogPostPage() {
         content: values.content,
         author_id: user.id, // Set current user as author
         image_url: values.image_url ?? null, // Ensure it's string | null
-        is_published: values.is_published,
+        is_published: values.is_published ?? false, // Ensure it's always boolean
       };
 
       await createBlogPost(postData);
