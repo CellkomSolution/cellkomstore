@@ -34,9 +34,9 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().optional().or(z.literal("")),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().optional().or(z.literal("")),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().optional().or(z.literal("")),
-  scrolling_text_enabled: z.boolean().default(false),
+  scrolling_text_enabled: z.boolean().nullable().default(false), // Changed to nullable
   scrolling_text_content: z.string().nullable().optional().or(z.literal("")),
-  right_header_text_enabled: z.boolean().default(false),
+  right_header_text_enabled: z.boolean().nullable().default(false), // Changed to nullable
   right_header_text_content: z.string().nullable().optional().or(z.literal("")),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
   download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().optional().or(z.literal("")),
@@ -75,7 +75,26 @@ export default function AdminSettingsPage() {
 
   const form = useForm<SettingsFormValues>({ // Use SettingsFormValues here
     resolver: zodResolver(formSchema),
-    // defaultValues removed, will be set in useEffect
+    defaultValues: { // Explicitly set default values here
+      site_name: initialData?.site_name || "",
+      site_logo_url: initialData?.site_logo_url || null,
+      contact_email: initialData?.contact_email || null,
+      contact_phone: initialData?.contact_phone || null,
+      contact_address: initialData?.contact_address || null,
+      facebook_url: initialData?.facebook_url || null,
+      instagram_url: initialData?.instagram_url || null,
+      twitter_url: initialData?.twitter_url || null,
+      youtube_url: initialData?.youtube_url || null,
+      linkedin_url: initialData?.linkedin_url || null,
+      scrolling_text_enabled: initialData?.scrolling_text_enabled ?? false,
+      scrolling_text_content: initialData?.scrolling_text_content || null,
+      right_header_text_enabled: initialData?.right_header_text_enabled ?? false,
+      right_header_text_content: initialData?.right_header_text_content || null,
+      right_header_text_link: initialData?.right_header_text_link || null,
+      download_app_url: initialData?.download_app_url || null,
+      download_app_text: initialData?.download_app_text || null,
+      featured_brands_title: initialData?.featured_brands_title || null,
+    },
   });
 
   React.useEffect(() => {
@@ -84,28 +103,10 @@ export default function AdminSettingsPage() {
       const settings = await getAppSettings();
       if (settings) {
         setInitialData(settings);
-        form.reset({
-          site_name: settings.site_name || "",
-          site_logo_url: settings.site_logo_url,
-          contact_email: settings.contact_email,
-          contact_phone: settings.contact_phone,
-          contact_address: settings.contact_address,
-          facebook_url: settings.facebook_url,
-          instagram_url: settings.instagram_url,
-          twitter_url: settings.twitter_url,
-          youtube_url: settings.youtube_url,
-          linkedin_url: settings.linkedin_url,
-          scrolling_text_enabled: settings.scrolling_text_enabled ?? false,
-          scrolling_text_content: settings.scrolling_text_content || null,
-          right_header_text_enabled: settings.right_header_text_enabled ?? false,
-          right_header_text_content: settings.right_header_text_content || null,
-          right_header_text_link: settings.right_header_text_link || null,
-          download_app_url: settings.download_app_url || null,
-          download_app_text: settings.download_app_text || null,
-          featured_brands_title: settings.featured_brands_title || null,
-        });
+        // form.reset is no longer needed here as defaultValues are set directly
+        // and will update when initialData changes.
       } else {
-        // Set default values for a new/empty settings state
+        // If no settings, ensure form is reset to schema defaults
         form.reset({
           site_name: "",
           site_logo_url: null,
@@ -130,7 +131,7 @@ export default function AdminSettingsPage() {
       setIsLoading(false);
     }
     fetchSettings();
-  }, [form, initialData]);
+  }, [form, initialData]); // Depend on initialData to re-evaluate defaultValues
 
   const onSubmit: SubmitHandler<SettingsFormValues> = async (values) => { // Explicitly type onSubmit
     console.log("onSubmit called with values:", values);

@@ -36,24 +36,14 @@ interface FeaturedBrandFormProps {
 export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: FeaturedBrandFormProps) {
   const form = useForm<FeaturedBrandFormValues>({
     resolver: zodResolver(formSchema),
-    // defaultValues removed, will be set in useEffect
+    defaultValues: { // Explicitly set default values here
+      image_url: initialData?.image_url || "",
+      link_url: initialData?.link_url || null,
+      order: initialData?.order ?? 0,
+    },
   });
 
-  React.useEffect(() => {
-    if (initialData) {
-      form.reset({
-        image_url: initialData.image_url || "",
-        link_url: initialData.link_url || null,
-        order: initialData.order ?? 0,
-      });
-    } else {
-      form.reset({
-        image_url: "",
-        link_url: null,
-        order: 0,
-      });
-    }
-  }, [initialData, form]);
+  // Removed the useEffect that called form.reset, as defaultValues now handle initial state.
 
   const handleImageUploadSuccess = (newUrl: string) => {
     form.setValue("image_url", newUrl, { shouldValidate: true });

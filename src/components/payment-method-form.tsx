@@ -48,28 +48,16 @@ interface PaymentMethodFormProps {
 export function PaymentMethodForm({ initialData, onSubmit, loading = false }: PaymentMethodFormProps) {
   const form = useForm<PaymentMethodFormValues>({
     resolver: zodResolver(formSchema),
-    // defaultValues removed, will be set in useEffect
+    defaultValues: { // Explicitly set default values here
+      name: initialData?.name ?? "",
+      type: initialData?.type ?? 'bank_transfer',
+      details: initialData?.details ? JSON.stringify(initialData.details, null, 2) : null,
+      is_active: initialData?.is_active ?? true,
+      order: initialData?.order ?? 0,
+    },
   });
 
-  React.useEffect(() => {
-    if (initialData) {
-      form.reset({
-        name: initialData.name,
-        type: initialData.type,
-        details: initialData.details ? JSON.stringify(initialData.details, null, 2) : null,
-        is_active: initialData.is_active ?? true,
-        order: initialData.order ?? 0,
-      });
-    } else {
-      form.reset({
-        name: "",
-        type: 'bank_transfer',
-        details: null,
-        is_active: true,
-        order: 0,
-      });
-    }
-  }, [initialData, form]);
+  // Removed the useEffect that called form.reset, as defaultValues now handle initial state.
 
   return (
     <Form {...form}>

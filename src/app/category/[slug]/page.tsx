@@ -8,13 +8,11 @@ import { getCategoryBySlug, Category } from "@/lib/supabase/categories"; // Impo
 import { SortDropdown } from "@/components/sort-dropdown";
 
 interface CategoryPageProps {
-  params: Promise<{ slug: string }>; // Menyesuaikan tipe params menjadi Promise
+  params: { slug: string }; // Corrected: params is a direct object, not a Promise
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
-  // Menggunakan React.use() untuk meng-unwrap params
-  const unwrappedParams = React.use(params);
-  const { slug } = unwrappedParams;
+  const { slug } = params; // Access slug directly, no need for React.use()
   
   const [categoryName, setCategoryName] = React.useState<string | null>(null);
   const [products, setProducts] = React.useState<Product[]>([]);
@@ -70,8 +68,8 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         products={products}
         title=""
         isLoading={isLoading}
-        emptyStateMessage="Oops! Belum ada produk di kategori ini."
-        emptyStateDescription=""
+        emptyStateMessage={products.length === 0 ? "Oops! Belum ada produk di kategori ini." : undefined}
+        emptyStateDescription={products.length === 0 ? "" : undefined}
       />
     </div>
   );

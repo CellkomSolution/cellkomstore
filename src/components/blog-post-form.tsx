@@ -46,29 +46,16 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
 
   const form = useForm<BlogPostFormValues>({
     resolver: zodResolver(formSchema),
-    // defaultValues removed, will be set in useEffect
+    defaultValues: { // Explicitly set default values here
+      title: initialData?.title ?? "",
+      slug: initialData?.slug ?? "",
+      content: initialData?.content ?? "",
+      image_url: initialData?.image_url ?? null,
+      is_published: initialData?.is_published ?? false,
+    },
   });
 
-  React.useEffect(() => {
-    if (initialData) {
-      form.reset({
-        title: initialData.title ?? "",
-        slug: initialData.slug ?? "",
-        content: initialData.content ?? "",
-        image_url: initialData.image_url ?? null,
-        is_published: initialData.is_published ?? false,
-      });
-    } else {
-      // Set default values for a new form
-      form.reset({
-        title: "",
-        slug: "",
-        content: "",
-        image_url: null,
-        is_published: false,
-      });
-    }
-  }, [initialData, form]);
+  // Removed the useEffect that called form.reset, as defaultValues now handle initial state.
 
   const handleImageUploadSuccess = (newUrl: string) => {
     form.setValue("image_url", newUrl, { shouldValidate: true });
