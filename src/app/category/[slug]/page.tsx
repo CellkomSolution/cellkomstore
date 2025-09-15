@@ -12,7 +12,8 @@ interface CategoryPageProps {
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
-  const { slug } = params; // Access slug directly, no need for React.use()
+  // Unwrap params using React.use()
+  const { slug } = React.use(params);
   
   const [categoryName, setCategoryName] = React.useState<string | null>(null);
   const [products, setProducts] = React.useState<Product[]>([]);
