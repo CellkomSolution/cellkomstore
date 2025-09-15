@@ -3,10 +3,8 @@
 import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
-  type EmblaOptionsType, // Imported from embla-carousel
-  type EmblaPluginType, // Imported from embla-carousel
 } from "embla-carousel-react"
-import { type EmblaCarouselType } from "embla-carousel" // Corrected import for EmblaCarouselType
+import { type EmblaCarouselType, type EmblaOptionsType, type EmblaPluginType } from "embla-carousel" // Corrected imports
 import ClassNames from "embla-carousel-class-names"
 import Autoplay from "embla-carousel-autoplay"
 
@@ -79,13 +77,13 @@ const Carousel = React.forwardRef<
     const onInit = React.useCallback((api: EmblaCarouselType) => {
       setCanScrollPrev(api.canScrollPrev())
       setCanScrollNext(api.canScrollNext())
-      setScrollSnaps(api.scrollSnaps())
+      setScrollSnaps(api.scrollSnapList()) // Corrected from api.scrollSnaps()
     }, [])
 
     const onReInit = React.useCallback((api: EmblaCarouselType) => {
       setCanScrollPrev(api.canScrollPrev())
       setCanScrollNext(api.canScrollNext())
-      setScrollSnaps(api.scrollSnaps())
+      setScrollSnaps(api.scrollSnapList()) // Corrected from api.scrollSnaps()
     }, [])
 
     const scrollPrev = React.useCallback(() => {
