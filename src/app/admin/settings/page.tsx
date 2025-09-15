@@ -22,6 +22,7 @@ import { Loader2 } from "lucide-react";
 import { getAppSettings, updateAppSettings, AppSettings } from "@/lib/supabase/app-settings";
 import { ImageUploader } from "@/components/image-uploader";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label"; // Import Label
 
 const formSchema = z.object({
   site_name: z.string().nullable().optional().or(z.literal("")),
@@ -302,7 +303,7 @@ export default function AdminSettingsPage() {
                 name="twitter_url"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>URL Twitter</Label>
+                    <FormLabel>URL Twitter</FormLabel> {/* Fixed JSX closing tag */}
                     <FormControl>
                       <Input placeholder="https://twitter.com/yourpage" {...field} value={field.value ?? ""} />
                     </FormControl>
