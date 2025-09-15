@@ -5,21 +5,27 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Facebook, Instagram, Twitter, Youtube, Linkedin, Mail, Phone } from 'lucide-react';
 import { Separator } from './ui/separator';
-import { getAppSettings, AppSettings } from '@/lib/supabase/app-settings'; // Import dari modul app-settings
+import { getAppSettings, AppSettings } from '@/lib/supabase/app-settings';
+import { getCategories, Category } from '@/lib/supabase/categories'; // Import getCategories dan Category
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function Footer() {
   const [appSettings, setAppSettings] = React.useState<AppSettings | null>(null);
+  const [categories, setCategories] = React.useState<Category[]>([]); // State untuk kategori
   const [isLoadingSettings, setIsLoadingSettings] = React.useState(true);
 
   React.useEffect(() => {
-    async function fetchSettings() {
+    async function fetchSettingsAndCategories() {
       setIsLoadingSettings(true);
       const settings = await getAppSettings();
       setAppSettings(settings);
+
+      const fetchedCategories = await getCategories(); // Ambil kategori
+      setCategories(fetchedCategories);
+
       setIsLoadingSettings(false);
     }
-    fetchSettings();
+    fetchSettingsAndCategories();
   }, []);
 
   return (
@@ -43,7 +49,7 @@ export function Footer() {
               )}
             </Link>
             <p className="text-sm text-muted-foreground mt-2">
-              Toko online terpercaya untuk kebutuhan gadget, elektronik, fashion, dan lainnya.
+              Solusi Total Untuk Gadget dan Komputer Anda
             </p>
             <div className="flex space-x-3 mt-4">
               {isLoadingSettings ? (
@@ -83,11 +89,17 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-foreground mb-4">Kategori Populer</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/category/handphone-tablet" className="text-muted-foreground hover:text-primary transition-colors">Handphone & Tablet</Link></li>
-              <li><Link href="/category/komputer-laptop" className="text-muted-foreground hover:text-primary transition-colors">Komputer & Laptop</Link></li>
-              <li><Link href="/category/pakaian-pria" className="text-muted-foreground hover:text-primary transition-colors">Pakaian Pria</Link></li>
-              <li><Link href="/category/kesehatan-kecantikan" className="text-muted-foreground hover:text-primary transition-colors">Kesehatan & Kecantikan</Link></li>
-              <li><Link href="/category/perhiasan-logam" className="text-muted-foreground hover:text-primary transition-colors">Perhiasan & Logam</Link></li>
+              {isLoadingSettings ? ( // Menggunakan isLoadingSettings untuk kategori juga
+                Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-4 w-32 mb-2" />)
+              ) : (
+                categories.slice(0, 5).map((category) => ( // Menampilkan 5 kategori teratas
+                  <li key={category.id}>
+                    <Link href={`/category/${category.slug}`} className="text-muted-foreground hover:text-primary transition-colors">
+                      {category.name}
+                    </Link>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
 
@@ -106,7 +118,7 @@ export function Footer() {
             <h3 className="font-semibold text-foreground mb-4">Tentang Kami</h3>
             <ul className="space-y-2 text-sm">
               <li><Link href="#" className="text-muted-foreground hover:text-primary transition-colors">Karir</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link></li>
+              <li><Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link></li>
               <li><Link href="#" className="text-muted-foreground hover:text-primary transition-colors">Mitra</Link></li>
               <li><Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">Kontak Kami</Link></li>
             </ul>
