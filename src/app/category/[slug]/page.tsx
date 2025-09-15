@@ -8,7 +8,7 @@ import { getCategoryBySlug, Category } from "@/lib/supabase/categories"; // Impo
 import { SortDropdown } from "@/components/sort-dropdown";
 
 interface CategoryPageProps {
-  params: { slug: string }; // Corrected: params is a direct object, not a Promise
+  params: Promise<{ slug: string }>; // Corrected: params is now a Promise
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
