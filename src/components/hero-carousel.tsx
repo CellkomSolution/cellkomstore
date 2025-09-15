@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // Import useRouter
 import {
   Carousel,
   CarouselContent,
@@ -18,6 +19,7 @@ import { formatRupiah } from "@/lib/utils";
 export function HeroCarousel() {
   const [slides, setSlides] = React.useState<HeroCarouselSlide[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const router = useRouter(); // Inisialisasi useRouter
 
   React.useEffect(() => {
     const fetchSlides = async () => {
@@ -112,38 +114,37 @@ export function HeroCarousel() {
                 </div>
               </Link>
             ) : (
-              <Link href={slide.link_url || "#"} className="block h-full">
-                <div className="relative w-full h-full rounded-lg overflow-hidden">
-                  <Image
-                    src={slide.product_image_url || "/placeholder-image.jpg"}
-                    alt={slide.alt}
-                    fill
-                    className="object-cover"
-                    priority
-                    sizes="(max-width: 768px) 100vw, 100vw"
-                  />
-                  {/* Overlay content for full display style */}
-                  <div className="absolute inset-0 bg-black/50 flex flex-col items-start justify-center p-6 md:p-12 text-white">
-                    {slide.alt && ( // Using alt for the main title
-                      <h3 className="text-2xl md:text-4xl font-bold mb-2">
-                        {slide.alt}
-                      </h3>
-                    )}
-                    {slide.hashtag && ( // Using hashtag for the description
-                      <p className="text-base md:text-lg mb-4 max-w-md">
-                        {slide.hashtag}
-                      </p>
-                    )}
-                    {slide.link_url && (
-                      <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-6 py-3 h-auto">
-                        <Link href={slide.link_url}>
-                          LAYANAN SERVIS
-                        </Link>
-                      </Button>
-                    )}
-                  </div>
+              <div className="relative w-full h-full rounded-lg overflow-hidden"> {/* Changed from Link to div */}
+                <Image
+                  src={slide.product_image_url || "/placeholder-image.jpg"}
+                  alt={slide.alt}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 100vw"
+                />
+                {/* Overlay content for full display style */}
+                <div className="absolute inset-0 bg-black/50 flex flex-col items-start justify-center p-6 md:p-12 text-white">
+                  {slide.alt && ( // Using alt for the main title
+                    <h3 className="text-2xl md:text-4xl font-bold mb-2">
+                      {slide.alt}
+                    </h3>
+                  )}
+                  {slide.hashtag && ( // Using hashtag for the description
+                    <p className="text-base md:text-lg mb-4 max-w-md">
+                      {slide.hashtag}
+                    </p>
+                  )}
+                  {slide.link_url && (
+                    <Button
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-6 py-3 h-auto"
+                      onClick={() => router.push(slide.link_url!)} // Use router.push for navigation
+                    >
+                      LAYANAN SERVIS
+                    </Button>
+                  )}
                 </div>
-              </Link>
+              </div>
             )}
           </CarouselItem>
         ))}
