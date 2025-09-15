@@ -145,10 +145,9 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <Separator className="my-8" />
-        <div className="text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} {appSettings?.site_name || "Cellkom Store"}. All rights reserved.
-        </div>
+      </div>
+      <div className="bg-gray-950 py-4 text-center text-sm text-gray-300">
+        &copy; {new Date().getFullYear()} {appSettings?.site_name || "Cellkom Store"}. All rights reserved.
       </div>
     </footer>
   );
