@@ -142,11 +142,18 @@ export async function getTotalProductsCount(): Promise<number> {
 
 // New function to create a product
 export async function createProduct(productData: Omit<Product, 'id' | 'rating' | 'soldCount'>): Promise<Product | null> {
+  const { name, price, originalPrice, imageUrl, location, category, isFlashSale, description } = productData;
   const { data, error } = await supabase
     .from("products")
     .insert({
-      ...productData,
-      original_price: productData.originalPrice === 0 ? null : productData.originalPrice,
+      name,
+      price,
+      original_price: originalPrice === 0 ? null : originalPrice,
+      image_url: imageUrl, // Mapped to snake_case
+      location,
+      category,
+      is_flash_sale: isFlashSale, // Mapped to snake_case
+      description,
       rating: 0, // Default rating
       sold_count: "0", // Default sold count
       created_at: new Date().toISOString(),
@@ -163,13 +170,22 @@ export async function createProduct(productData: Omit<Product, 'id' | 'rating' |
 
 // New function to update a product
 export async function updateProduct(id: string, productData: Partial<Omit<Product, 'id' | 'created_at' | 'rating' | 'soldCount'>>): Promise<Product | null> {
+  const updatePayload: Record<string, any> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  if (productData.name !== undefined) updatePayload.name = productData.name;
+  if (productData.price !== undefined) updatePayload.price = productData.price;
+  if (productData.originalPrice !== undefined) updatePayload.original_price = productData.originalPrice === 0 ? null : productData.originalPrice;
+  if (productData.imageUrl !== undefined) updatePayload.image_url = productData.imageUrl; // Mapped to snake_case
+  if (productData.location !== undefined) updatePayload.location = productData.location;
+  if (productData.category !== undefined) updatePayload.category = productData.category;
+  if (productData.isFlashSale !== undefined) updatePayload.is_flash_sale = productData.isFlashSale; // Mapped to snake_case
+  if (productData.description !== undefined) updatePayload.description = productData.description;
+
   const { data, error } = await supabase
     .from("products")
-    .update({
-      ...productData,
-      original_price: productData.originalPrice === 0 ? null : productData.originalPrice,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updatePayload)
     .eq("id", id)
     .select()
     .single();
