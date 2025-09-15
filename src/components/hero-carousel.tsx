@@ -107,7 +107,6 @@ export function HeroCarousel() {
                       alt={slide.alt}
                       fill
                       className="object-cover"
-                      priority
                       sizes="(max-width: 768px) 50vw, 50vw"
                     />
                   </div>
@@ -120,7 +119,6 @@ export function HeroCarousel() {
                   alt={slide.alt}
                   fill
                   className="object-cover"
-                  priority
                   sizes="(max-width: 768px) 100vw, 100vw"
                 />
                 {/* Overlay content for full display style */}
@@ -138,7 +136,15 @@ export function HeroCarousel() {
                   {slide.link_url && (
                     <Button
                       className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-6 py-3 h-auto"
-                      onClick={() => router.push(slide.link_url!)} // Use router.push for navigation
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (slide.link_url) {
+                          router.push(slide.link_url);
+                        } else {
+                          console.warn("Attempted to navigate with null link_url for slide:", slide);
+                          toast.error("Tautan tidak tersedia.");
+                        }
+                      }}
                     >
                       LAYANAN SERVIS
                     </Button>
