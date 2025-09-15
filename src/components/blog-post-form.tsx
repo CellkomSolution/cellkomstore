@@ -123,7 +123,7 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
           <FormControl>
             <ImageUploader
               bucketName="blog-images"
-              currentImageUrl={form.watch("image_url")}
+              currentImageUrl={form.watch("image_url") ?? null}
               onUploadSuccess={handleImageUploadSuccess}
               onRemove={handleRemoveImage}
               disabled={loading}

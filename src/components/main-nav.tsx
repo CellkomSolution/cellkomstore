@@ -51,7 +51,7 @@ const ListItem = React.forwardRef<
               </div>
             ) : (
               <div className="mr-2">
-                <CategoryIcon name={categoryIconName} />
+                <CategoryIcon name={categoryIconName ?? null} />
               </div>
             )}
             <div className="text-sm font-medium leading-none">{title}</div>

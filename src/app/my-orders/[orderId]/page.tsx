@@ -21,12 +21,11 @@ import { Label } from "@/components/ui/label";
 import { useCart } from "@/context/cart-context"; // Import useCart to clear cart
 
 interface UserOrderDetailPageProps {
-  params: Promise<{ orderId: string }>;
+  params: { orderId: string }; // Changed to direct object
 }
 
 export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps) {
-  const unwrappedParams = React.use(params);
-  const { orderId } = unwrappedParams;
+  const { orderId } = params; // Access orderId directly
   const router = useRouter();
   const { user, isLoading: isSessionLoading } = useSession();
   const { clearCart } = useCart(); // Get clearCart from context

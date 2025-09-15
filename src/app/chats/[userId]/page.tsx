@@ -27,12 +27,11 @@ import {
 } from "@/components/ui/drawer";
 
 interface AdminChatDetailPageProps {
-  params: Promise<{ userId: string }>;
+  params: { userId: string }; // Changed to direct object
 }
 
 export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps) {
-  const unwrappedParams = React.use(params);
-  const { userId } = unwrappedParams;
+  const { userId } = params; // Access userId directly
 
   const router = useRouter();
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();

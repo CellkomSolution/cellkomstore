@@ -23,12 +23,11 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AdminOrderDetailPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string }; // Changed to direct object
 }
 
 export default function AdminOrderDetailPage({ params }: AdminOrderDetailPageProps) {
-  const unwrappedParams = React.use(params);
-  const { id: orderId } = unwrappedParams;
+  const { id: orderId } = params; // Access orderId directly
   const router = useRouter();
 
   const [order, setOrder] = React.useState<Order | null>(null);

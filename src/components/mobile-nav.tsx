@@ -114,8 +114,8 @@ export function MobileNav() {
                   </Button>
                 ))}
                 {categories.length > 0 && (
-                  <CategorySheet> {/* Menggunakan CategorySheet sebagai trigger */}
-                    <Button variant="ghost" className="justify-start w-full flex items-center gap-2" onClick={() => setOpen(false)}>
+                  <CategorySheet onOpenChange={setOpen}> {/* Menggunakan CategorySheet sebagai trigger */}
+                    <Button variant="ghost" className="justify-start w-full flex items-center gap-2">
                       <LayoutGrid className="h-5 w-5" />
                       <span>Semua Kategori</span>
                     </Button>

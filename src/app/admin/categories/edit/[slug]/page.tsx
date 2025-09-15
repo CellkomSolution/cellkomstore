@@ -9,8 +9,7 @@ import { getCategoryBySlug, updateCategory, Category } from "@/lib/supabase/cate
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton";
 
 export default function EditCategoryPage({ params }: { params: { slug: string } }) {
-  const unwrappedParams = React.use(params); // Menggunakan React.use() untuk meng-unwrap params
-  const { slug } = unwrappedParams; // Mengakses slug dari objek yang sudah di-unwrap
+  const { slug } = params; // Mengakses slug langsung dari params
   const router = useRouter();
 
   const [initialData, setInitialData] = React.useState<Category | null>(null);

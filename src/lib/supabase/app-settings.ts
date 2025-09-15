@@ -18,6 +18,7 @@ export interface AppSettings {
   right_header_text_enabled: boolean | null;
   right_header_text_content: string | null;
   right_header_text_link: string | null;
+  featured_brands_title: string | null; // New field added
   download_app_url: string | null;
   download_app_text: string | null; // New field
 }

@@ -33,8 +33,8 @@ const formSchema = z.object({
   name: z.string().min(3, { message: "Nama metode pembayaran minimal 3 karakter." }).max(100, { message: "Nama metode pembayaran maksimal 100 karakter." }),
   type: z.enum(['bank_transfer', 'e_wallet', 'card', 'other'], { message: "Tipe metode pembayaran harus dipilih." }),
   details: z.string().optional().nullable(), // JSON string for details
-  is_active: z.boolean().optional().default(true),
-  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).optional().default(0),
+  is_active: z.boolean().default(true), // Ensure default makes it non-optional
+  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0), // Ensure default makes it non-optional
 });
 
 export type PaymentMethodFormValues = z.infer<typeof formSchema>;

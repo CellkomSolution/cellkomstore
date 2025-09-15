@@ -11,12 +11,11 @@ import { Separator } from "@/components/ui/separator";
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Reusing skeleton
 
 interface BlogPostDetailPageProps {
-  params: Promise<{ slug: string }>;
+  params: { slug: string }; // Changed to direct object
 }
 
 export default function BlogPostDetailPage({ params }: BlogPostDetailPageProps) {
-  const unwrappedParams = React.use(params);
-  const { slug } = unwrappedParams;
+  const { slug } = params; // Access slug directly
 
   const [blogPost, setBlogPost] = React.useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);

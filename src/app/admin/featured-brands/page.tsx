@@ -51,7 +51,7 @@ export default function FeaturedBrandsAdminPage() {
           toast.success("Merek berhasil diperbarui.");
         }
       } else {
-        const newBrand = await createFeaturedBrand({ ...values, order: brands.length });
+        const newBrand = await createFeaturedBrand({ ...values, link_url: values.link_url ?? null }); // Ensure link_url is null if empty
         if (newBrand) {
           setBrands([...brands, newBrand]);
           toast.success("Merek berhasil ditambahkan.");

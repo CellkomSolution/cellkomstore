@@ -15,6 +15,7 @@ import { getHeroCarouselSlides, HeroCarouselSlide } from "@/lib/supabase/hero-ca
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatRupiah } from "@/lib/utils";
+import { toast } from "sonner"; // Import toast
 
 export function HeroCarousel() {
   const [slides, setSlides] = React.useState<HeroCarouselSlide[]>([]);

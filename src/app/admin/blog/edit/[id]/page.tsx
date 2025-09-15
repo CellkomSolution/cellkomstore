@@ -54,7 +54,7 @@ export default function EditBlogPostPage({ params }: EditBlogPostPageProps) {
         title: values.title,
         slug: values.slug,
         content: values.content,
-        image_url: values.image_url,
+        image_url: values.image_url ?? null, // Ensure it's string | null
         is_published: values.is_published,
         // author_id is not updated here, it remains the original author
       };

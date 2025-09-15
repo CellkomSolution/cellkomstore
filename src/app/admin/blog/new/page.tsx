@@ -27,7 +27,7 @@ export default function NewBlogPostPage() {
         slug: values.slug,
         content: values.content,
         author_id: user.id, // Set current user as author
-        image_url: values.image_url,
+        image_url: values.image_url ?? null, // Ensure it's string | null
         is_published: values.is_published,
       };
 
