@@ -9,8 +9,12 @@ import { getBlogPostById, updateBlogPost, BlogPost } from "@/lib/supabase/blog-p
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Reusing skeleton
 import { useSession } from "@/context/session-context";
 
-export default function EditBlogPostPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+interface EditBlogPostPageProps {
+  params: { id: string }; // Mengubah tipe params menjadi objek langsung
+}
+
+export default function EditBlogPostPage({ params }: EditBlogPostPageProps) {
+  const { id } = params; // Mengakses id langsung dari params
   const router = useRouter();
   const { user } = useSession();
 
