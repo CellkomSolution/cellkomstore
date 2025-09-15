@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { useForm, SubmitHandler } from "react-hook-form"; // Import SubmitHandler
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -33,8 +33,8 @@ const formSchema = z.object({
   name: z.string().min(3, { message: "Nama metode pembayaran minimal 3 karakter." }).max(100, { message: "Nama metode pembayaran maksimal 100 karakter." }),
   type: z.enum(['bank_transfer', 'e_wallet', 'card', 'other'], { message: "Tipe metode pembayaran harus dipilih." }),
   details: z.string().optional().nullable(), // JSON string for details
-  is_active: z.boolean().default(true), // Type is boolean, not boolean | undefined
-  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0), // Type is number, not number | undefined
+  is_active: z.boolean().default(true),
+  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
 export type PaymentMethodFormValues = z.infer<typeof formSchema>;
@@ -52,9 +52,9 @@ export function PaymentMethodForm({ initialData, onSubmit, loading = false }: Pa
       name: initialData?.name ?? "",
       type: initialData?.type ?? 'bank_transfer',
       details: initialData?.details ? JSON.stringify(initialData.details, null, 2) : null,
-      is_active: initialData?.is_active ?? true, // Ensure boolean
-      order: initialData?.order ?? 0, // Ensure number
-    },
+      is_active: initialData?.is_active ?? true,
+      order: initialData?.order ?? 0,
+    } as PaymentMethodFormValues, // Explicit cast
   });
 
   return (

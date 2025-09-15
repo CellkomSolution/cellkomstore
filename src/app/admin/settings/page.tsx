@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useForm, SubmitHandler, FormProvider } from "react-hook-form"; // Import FormProvider
+import { useForm, SubmitHandler, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
@@ -25,9 +25,9 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().optional().or(z.literal("")),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().optional().or(z.literal("")),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().optional().or(z.literal("")),
-  scrolling_text_enabled: z.boolean().default(false), // Type is boolean, not boolean | null | undefined
+  scrolling_text_enabled: z.boolean().default(false),
   scrolling_text_content: z.string().nullable().optional().or(z.literal("")),
-  right_header_text_enabled: z.boolean().default(false), // Type is boolean, not boolean | null | undefined
+  right_header_text_enabled: z.boolean().default(false),
   right_header_text_content: z.string().nullable().optional().or(z.literal("")),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
   download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().optional().or(z.literal("")),
@@ -57,7 +57,7 @@ const formSchema = z.object({
   }
 });
 
-export type SettingsFormValues = z.infer<typeof formSchema>; // Export type for modular components
+export type SettingsFormValues = z.infer<typeof formSchema>;
 
 export default function AdminSettingsPage() {
   const [initialData, setInitialData] = React.useState<AppSettings | null>(null);
@@ -77,15 +77,15 @@ export default function AdminSettingsPage() {
       twitter_url: null,
       youtube_url: null,
       linkedin_url: null,
-      scrolling_text_enabled: false, // Default to false as per schema
+      scrolling_text_enabled: false,
       scrolling_text_content: null,
-      right_header_text_enabled: false, // Default to false as per schema
+      right_header_text_enabled: false,
       right_header_text_content: null,
       right_header_text_link: null,
       download_app_url: null,
       download_app_text: null,
       featured_brands_title: null,
-    },
+    } as SettingsFormValues, // Explicit cast
   });
 
   React.useEffect(() => {
@@ -105,9 +105,9 @@ export default function AdminSettingsPage() {
           twitter_url: settings.twitter_url ?? null,
           youtube_url: settings.youtube_url ?? null,
           linkedin_url: settings.linkedin_url ?? null,
-          scrolling_text_enabled: settings.scrolling_text_enabled ?? false, // Ensure boolean
+          scrolling_text_enabled: settings.scrolling_text_enabled ?? false,
           scrolling_text_content: settings.scrolling_text_content || null,
-          right_header_text_enabled: settings.right_header_text_enabled ?? false, // Ensure boolean
+          right_header_text_enabled: settings.right_header_text_enabled ?? false,
           right_header_text_content: settings.right_header_text_content || null,
           right_header_text_link: settings.right_header_text_link || null,
           download_app_url: settings.download_app_url || null,
@@ -140,7 +140,7 @@ export default function AdminSettingsPage() {
       setIsLoading(false);
     }
     fetchSettings();
-  }, [form, initialData]); // Depend on initialData to re-evaluate defaultValues
+  }, [form, initialData]);
 
   const onSubmit: SubmitHandler<SettingsFormValues> = async (values) => {
     console.log("onSubmit called with values:", values);
@@ -191,7 +191,7 @@ export default function AdminSettingsPage() {
         Kelola pengaturan umum aplikasi Anda di sini, termasuk nama situs, logo, dan informasi kontak.
       </p>
 
-      <FormProvider {...form}> {/* Use FormProvider to pass form context */}
+      <FormProvider {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <Card>
             <CardHeader>

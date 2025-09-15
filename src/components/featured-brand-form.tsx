@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useForm, SubmitHandler } from "react-hook-form"; // Import SubmitHandler
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -22,7 +22,7 @@ import { FeaturedBrand } from "@/lib/supabase/featured-brands";
 const formSchema = z.object({
   image_url: z.string().url({ message: "URL gambar tidak valid." }).min(1, { message: "Gambar merek diperlukan." }),
   link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
-  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0), // Type is number, not number | undefined
+  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
 export type FeaturedBrandFormValues = z.infer<typeof formSchema>;
@@ -39,8 +39,8 @@ export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: Fe
     defaultValues: {
       image_url: initialData?.image_url || "",
       link_url: initialData?.link_url || null,
-      order: initialData?.order ?? 0, // Ensure number
-    },
+      order: initialData?.order ?? 0,
+    } as FeaturedBrandFormValues, // Explicit cast
   });
 
   const handleImageUploadSuccess = (newUrl: string) => {
