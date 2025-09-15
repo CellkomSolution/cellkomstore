@@ -112,7 +112,7 @@ export function MobileNav() {
                   </Button>
                 ))}
                 {categories.length > 0 && (
-                  <CategorySheet onOpenChange={setOpen}>
+                  <CategorySheet open={open} onOpenChange={setOpen}>
                     <Button variant="ghost" className="justify-start w-full flex items-center gap-2">
                       <LayoutGrid className="h-5 w-5" />
                       <span>Semua Kategori</span>

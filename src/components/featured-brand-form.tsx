@@ -38,9 +38,9 @@ export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: Fe
     resolver: zodResolver(formSchema),
     defaultValues: {
       image_url: initialData?.image_url || "",
-      link_url: initialData?.link_url || null,
-      order: initialData?.order ?? 0, // Ensure order is always a number
-    },
+      link_url: initialData?.link_url || "", // Ensure it's a string, empty string is allowed by schema
+      order: initialData?.order ?? 0,
+    } satisfies FeaturedBrandFormValues, // Use 'satisfies' to ensure type correctness
   });
 
   const handleImageUploadSuccess = (newUrl: string) => {

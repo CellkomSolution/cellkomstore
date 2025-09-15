@@ -14,7 +14,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger, // <-- Menambahkan DrawerTrigger di sini
+  DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, Loader2, Tag, X } from "lucide-react";
@@ -29,14 +29,19 @@ function CategoryIcon({ name }: { name: string | null }) {
   return <Icon className="h-6 w-6 text-muted-foreground" />;
 }
 
-export function CategorySheet() {
+interface CategorySheetProps {
+  children: React.ReactNode; // The trigger element
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function CategorySheet({ children, open, onOpenChange }: CategorySheetProps) {
   const isMobile = useIsMobile();
-  const [open, setOpen] = React.useState(false);
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    if (open) {
+    if (open) { // Only fetch when the sheet/drawer is open
       async function fetchCategories() {
         setIsLoading(true);
         const fetchedCategories = await getCategoriesWithLatestProductImage();
@@ -76,7 +81,7 @@ export function CategorySheet() {
                 key={category.id}
                 href={`/category/${category.slug}`}
                 className="flex flex-col items-center justify-start space-y-2 text-center p-2 rounded-lg hover:bg-muted/50 transition-colors"
-                onClick={() => setOpen(false)} // Close sheet on click
+                onClick={() => onOpenChange(false)} // Close sheet on click
               >
                 <div className="flex items-center justify-center h-16 w-16 rounded-full bg-muted relative overflow-hidden">
                   {category.latest_product_image_url ? (
@@ -104,12 +109,9 @@ export function CategorySheet() {
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={setOpen}>
+      <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerTrigger asChild>
-          <Button variant="ghost" className="flex md:hidden items-center gap-2 text-sm text-gray-500 hover:text-primary">
-            <LayoutGrid className="h-5 w-5" />
-            <span>Kategori</span>
-          </Button>
+          {children}
         </DrawerTrigger>
         <DrawerContent className="h-[80vh] flex flex-col">
           {Content}
@@ -119,12 +121,9 @@ export function CategorySheet() {
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="ghost" className="hidden md:flex items-center gap-2 text-sm text-gray-500 hover:text-primary">
-          <LayoutGrid className="h-5 w-5" />
-          <span>Kategori</span>
-        </Button>
+        {children}
       </SheetTrigger>
       <SheetContent side="left" className="flex flex-col w-full sm:max-w-md p-0">
         {Content}

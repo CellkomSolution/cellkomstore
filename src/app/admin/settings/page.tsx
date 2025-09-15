@@ -86,15 +86,15 @@ export default function AdminSettingsPage() {
       twitter_url: null,
       youtube_url: null,
       linkedin_url: null,
-      scrolling_text_enabled: false, // Ensure boolean
+      scrolling_text_enabled: false,
       scrolling_text_content: null,
-      right_header_text_enabled: false, // Ensure boolean
+      right_header_text_enabled: false,
       right_header_text_content: null,
       right_header_text_link: null,
       download_app_url: null,
       download_app_text: null,
       featured_brands_title: null,
-    },
+    } satisfies SettingsFormValues, // Use 'satisfies' here
   });
 
   React.useEffect(() => {
@@ -122,12 +122,12 @@ export default function AdminSettingsPage() {
           download_app_url: settings.download_app_url || null,
           download_app_text: settings.download_app_text || null,
           featured_brands_title: settings.featured_brands_title || null,
-        });
+        } satisfies SettingsFormValues); // Also use 'satisfies' here
       }
       setIsLoading(false);
     }
     fetchSettings();
-  }, [form]);
+  }, []); // Removed 'form' from dependency array
 
   const onSubmit: SubmitHandler<SettingsFormValues> = async (values) => { // Explicitly type onSubmit
     console.log("onSubmit called with values:", values);
@@ -302,7 +302,7 @@ export default function AdminSettingsPage() {
                 name="twitter_url"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>URL Twitter</FormLabel>
+                    <FormLabel>URL Twitter</Label>
                     <FormControl>
                       <Input placeholder="https://twitter.com/yourpage" {...field} value={field.value ?? ""} />
                     </FormControl>

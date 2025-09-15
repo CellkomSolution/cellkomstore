@@ -54,13 +54,13 @@ export function PaymentMethodForm({ initialData, onSubmit, loading = false }: Pa
       details: initialData.details ? JSON.stringify(initialData.details, null, 2) : null,
       is_active: initialData.is_active ?? true, // Ensure is_active is always boolean
       order: initialData.order ?? 0, // Ensure order is always a number
-    } : {
+    } satisfies PaymentMethodFormValues : {
       name: "",
       type: 'bank_transfer',
       details: null,
       is_active: true,
       order: 0,
-    },
+    } satisfies PaymentMethodFormValues, // Use 'satisfies' to ensure type correctness
   });
 
   return (
