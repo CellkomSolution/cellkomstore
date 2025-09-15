@@ -25,9 +25,9 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().optional().or(z.literal("")),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().optional().or(z.literal("")),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().optional().or(z.literal("")),
-  scrolling_text_enabled: z.boolean().nullable().default(false),
+  scrolling_text_enabled: z.boolean().default(false), // Type is boolean, not boolean | null | undefined
   scrolling_text_content: z.string().nullable().optional().or(z.literal("")),
-  right_header_text_enabled: z.boolean().nullable().default(false),
+  right_header_text_enabled: z.boolean().default(false), // Type is boolean, not boolean | null | undefined
   right_header_text_content: z.string().nullable().optional().or(z.literal("")),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
   download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().optional().or(z.literal("")),
@@ -66,7 +66,7 @@ export default function AdminSettingsPage() {
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { // Explicitly set default values here
+    defaultValues: {
       site_name: "",
       site_logo_url: null,
       contact_email: null,
@@ -77,15 +77,15 @@ export default function AdminSettingsPage() {
       twitter_url: null,
       youtube_url: null,
       linkedin_url: null,
-      scrolling_text_enabled: null, // Use null to match schema's nullable
+      scrolling_text_enabled: false, // Default to false as per schema
       scrolling_text_content: null,
-      right_header_text_enabled: null, // Use null to match schema's nullable
+      right_header_text_enabled: false, // Default to false as per schema
       right_header_text_content: null,
       right_header_text_link: null,
       download_app_url: null,
       download_app_text: null,
       featured_brands_title: null,
-    } as SettingsFormValues, // Explicit cast
+    },
   });
 
   React.useEffect(() => {
@@ -105,17 +105,17 @@ export default function AdminSettingsPage() {
           twitter_url: settings.twitter_url ?? null,
           youtube_url: settings.youtube_url ?? null,
           linkedin_url: settings.linkedin_url ?? null,
-          scrolling_text_enabled: settings.scrolling_text_enabled ?? null, // Ensure null for nullable
+          scrolling_text_enabled: settings.scrolling_text_enabled ?? false, // Ensure boolean
           scrolling_text_content: settings.scrolling_text_content || null,
-          right_header_text_enabled: settings.right_header_text_enabled ?? null, // Ensure null for nullable
+          right_header_text_enabled: settings.right_header_text_enabled ?? false, // Ensure boolean
           right_header_text_content: settings.right_header_text_content || null,
           right_header_text_link: settings.right_header_text_link || null,
           download_app_url: settings.download_app_url || null,
           download_app_text: settings.download_app_text || null,
           featured_brands_title: settings.featured_brands_title || null,
-        } as SettingsFormValues); // Explicit cast
+        });
       } else {
-        // If no settings, ensure form is reset to schema defaults (which are null for nullable fields)
+        // If no settings, ensure form is reset to schema defaults
         form.reset({
           site_name: "",
           site_logo_url: null,
@@ -127,15 +127,15 @@ export default function AdminSettingsPage() {
           twitter_url: null,
           youtube_url: null,
           linkedin_url: null,
-          scrolling_text_enabled: null, // Default to null
+          scrolling_text_enabled: false,
           scrolling_text_content: null,
-          right_header_text_enabled: null, // Default to null
+          right_header_text_enabled: false,
           right_header_text_content: null,
           right_header_text_link: null,
           download_app_url: null,
           download_app_text: null,
           featured_brands_title: null,
-        } as SettingsFormValues); // Explicit cast
+        });
       }
       setIsLoading(false);
     }

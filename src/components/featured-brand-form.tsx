@@ -22,7 +22,7 @@ import { FeaturedBrand } from "@/lib/supabase/featured-brands";
 const formSchema = z.object({
   image_url: z.string().url({ message: "URL gambar tidak valid." }).min(1, { message: "Gambar merek diperlukan." }),
   link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
-  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
+  order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0), // Type is number, not number | undefined
 });
 
 export type FeaturedBrandFormValues = z.infer<typeof formSchema>;
@@ -36,11 +36,11 @@ interface FeaturedBrandFormProps {
 export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: FeaturedBrandFormProps) {
   const form = useForm<FeaturedBrandFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { // Explicitly set default values here
-      image_url: initialData?.image_url || "", // Must be string
-      link_url: initialData?.link_url || null, // Must be string | null
-      order: initialData?.order ?? 0, // Must be number
-    } as FeaturedBrandFormValues, // Explicit cast
+    defaultValues: {
+      image_url: initialData?.image_url || "",
+      link_url: initialData?.link_url || null,
+      order: initialData?.order ?? 0, // Ensure number
+    },
   });
 
   const handleImageUploadSuccess = (newUrl: string) => {
