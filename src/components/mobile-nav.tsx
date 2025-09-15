@@ -15,6 +15,7 @@ import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
 import { adminNavItems } from "@/config/admin-nav"; // Import adminNavItems
 import { Separator } from "@/components/ui/separator"; // Import Separator
 import { icons } from "lucide-react"; // Import icons dari lucide-react
+import { ScrollArea } from "@/components/ui/scroll-area"; // Import ScrollArea
 
 // Helper component for category icon (similar to CategoryIcons.tsx)
 function CategoryIcon({ name }: { name: string | null }) {
@@ -83,70 +84,72 @@ export function MobileNav() {
             )}
           </SheetTitle>
         </SheetHeader>
-        <div className="flex flex-col space-y-4 py-4">
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/">Beranda</Link>
-          </Button>
-          {/* Tautan Kategori Dinamis */}
-          <h3 className="text-sm font-semibold text-muted-foreground px-4 pt-2">Kategori</h3>
-          {isLoadingCategories ? (
-            <div className="px-4 space-y-2">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-8 w-full bg-muted animate-pulse rounded" />
-              ))}
-            </div>
-          ) : (
-            <>
-              {categories.slice(0, 5).map((category) => ( // Tampilkan 5 kategori teratas
-                <Button key={category.id} variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-                  <Link href={`/category/${category.slug}`} className="flex items-center gap-2">
-                    {category.latest_product_image_url ? (
-                      <div className="relative h-5 w-5 rounded-sm overflow-hidden">
-                        <Image src={category.latest_product_image_url} alt={category.name} fill style={{ objectFit: 'cover' }} sizes="20px" />
-                      </div>
-                    ) : (
-                      <CategoryIcon name={category.icon_name} />
-                    )}
-                    <span>{category.name}</span>
-                  </Link>
-                </Button>
-              ))}
-              {categories.length > 0 && (
-                <CategorySheet> {/* Menggunakan CategorySheet sebagai trigger */}
-                  <Button variant="ghost" className="justify-start w-full flex items-center gap-2" onClick={() => setOpen(false)}>
-                    <LayoutGrid className="h-5 w-5" />
-                    <span>Semua Kategori</span>
+        <ScrollArea className="flex-1 py-4"> {/* Wrap content with ScrollArea */}
+          <div className="flex flex-col space-y-1 pr-4"> {/* Add pr-4 for scrollbar spacing */}
+            <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+              <Link href="/">Beranda</Link>
+            </Button>
+            {/* Tautan Kategori Dinamis */}
+            <h3 className="text-sm font-semibold text-muted-foreground px-4 pt-2">Kategori</h3>
+            {isLoadingCategories ? (
+              <div className="px-4 space-y-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="h-8 w-full bg-muted animate-pulse rounded" />
+                ))}
+              </div>
+            ) : (
+              <>
+                {categories.slice(0, 5).map((category) => ( // Tampilkan 5 kategori teratas
+                  <Button key={category.id} variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+                    <Link href={`/category/${category.slug}`} className="flex items-center gap-2">
+                      {category.latest_product_image_url ? (
+                        <div className="relative h-5 w-5 rounded-sm overflow-hidden">
+                          <Image src={category.latest_product_image_url} alt={category.name} fill style={{ objectFit: 'cover' }} sizes="20px" />
+                        </div>
+                      ) : (
+                        <CategoryIcon name={category.icon_name} />
+                      )}
+                      <span>{category.name}</span>
+                    </Link>
                   </Button>
-                </CategorySheet>
-              )}
-            </>
-          )}
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/blog">Blog</Link>
-          </Button>
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/services">Layanan Servis</Link>
-          </Button>
-          <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-            <Link href="/contact">Kontak</Link>
-          </Button>
+                ))}
+                {categories.length > 0 && (
+                  <CategorySheet> {/* Menggunakan CategorySheet sebagai trigger */}
+                    <Button variant="ghost" className="justify-start w-full flex items-center gap-2" onClick={() => setOpen(false)}>
+                      <LayoutGrid className="h-5 w-5" />
+                      <span>Semua Kategori</span>
+                    </Button>
+                  </CategorySheet>
+                )}
+              </>
+            )}
+            <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+              <Link href="/blog">Blog</Link>
+            </Button>
+            <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+              <Link href="/services">Layanan Servis</Link>
+            </Button>
+            <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+              <Link href="/contact">Kontak</Link>
+            </Button>
 
-          {/* Admin Dashboard Links (Conditional) */}
-          {!isAdminLoading && isAdmin && (
-            <>
-              <Separator className="my-4" />
-              <h3 className="text-sm font-semibold text-muted-foreground px-4 pt-2">Dasbor Admin</h3>
-              {adminNavItems.map((item) => (
-                <Button key={item.href} variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
-                  <Link href={item.href}>
-                    <item.icon className="mr-2 h-4 w-4" />
-                    {item.title}
-                  </Link>
-                </Button>
-              ))}
-            </>
-          )}
-        </div>
+            {/* Admin Dashboard Links (Conditional) */}
+            {!isAdminLoading && isAdmin && (
+              <>
+                <Separator className="my-4" />
+                <h3 className="text-sm font-semibold text-muted-foreground px-4 pt-2">Dasbor Admin</h3>
+                {adminNavItems.map((item) => (
+                  <Button key={item.href} variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+                    <Link href={item.href}>
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {item.title}
+                    </Link>
+                  </Button>
+                ))}
+              </>
+            )}
+          </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );
