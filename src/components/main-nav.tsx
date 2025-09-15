@@ -15,7 +15,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Category } from "@/lib/supabase/categories";
+import { getCategories, Category } from "@/lib/supabase/categories"; // Import getCategories
 import { supabase } from "@/integrations/supabase/client";
 
 // Helper component for category icon
