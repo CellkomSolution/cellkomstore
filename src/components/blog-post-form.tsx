@@ -52,7 +52,7 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
       content: initialData?.content ?? "",
       image_url: initialData?.image_url ?? null, // Ensure null for optional image_url
       is_published: initialData?.is_published ?? false, // Ensure boolean
-    },
+    } as BlogPostFormValues, // Explicit cast
   });
 
   const handleImageUploadSuccess = (newUrl: string) => {

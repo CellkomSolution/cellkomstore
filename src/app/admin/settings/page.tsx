@@ -67,25 +67,25 @@ export default function AdminSettingsPage() {
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { // Explicitly set default values here
-      site_name: initialData?.site_name || "",
-      site_logo_url: initialData?.site_logo_url || null,
-      contact_email: initialData?.contact_email || null,
-      contact_phone: initialData?.contact_phone || null,
-      contact_address: initialData?.contact_address || null,
-      facebook_url: initialData?.facebook_url || null,
-      instagram_url: initialData?.instagram_url || null,
-      twitter_url: initialData?.twitter_url || null,
-      youtube_url: initialData?.youtube_url || null,
-      linkedin_url: initialData?.linkedin_url || null,
-      scrolling_text_enabled: initialData?.scrolling_text_enabled ?? null, // Use null to match schema's nullable
-      scrolling_text_content: initialData?.scrolling_text_content || null,
-      right_header_text_enabled: initialData?.right_header_text_enabled ?? null, // Use null to match schema's nullable
-      right_header_text_content: initialData?.right_header_text_content || null,
-      right_header_text_link: initialData?.right_header_text_link || null,
-      download_app_url: initialData?.download_app_url || null,
-      download_app_text: initialData?.download_app_text || null,
-      featured_brands_title: initialData?.featured_brands_title || null,
-    },
+      site_name: "",
+      site_logo_url: null,
+      contact_email: null,
+      contact_phone: null,
+      contact_address: null,
+      facebook_url: null,
+      instagram_url: null,
+      twitter_url: null,
+      youtube_url: null,
+      linkedin_url: null,
+      scrolling_text_enabled: null, // Use null to match schema's nullable
+      scrolling_text_content: null,
+      right_header_text_enabled: null, // Use null to match schema's nullable
+      right_header_text_content: null,
+      right_header_text_link: null,
+      download_app_url: null,
+      download_app_text: null,
+      featured_brands_title: null,
+    } as SettingsFormValues, // Explicit cast
   });
 
   React.useEffect(() => {
@@ -95,25 +95,25 @@ export default function AdminSettingsPage() {
       if (settings) {
         setInitialData(settings);
         form.reset({
-          site_name: settings.site_name || "",
-          site_logo_url: settings.site_logo_url,
-          contact_email: settings.contact_email,
-          contact_phone: settings.contact_phone,
-          contact_address: settings.contact_address,
-          facebook_url: settings.facebook_url,
-          instagram_url: settings.instagram_url,
-          twitter_url: settings.twitter_url,
-          youtube_url: settings.youtube_url,
-          linkedin_url: settings.linkedin_url,
-          scrolling_text_enabled: settings.scrolling_text_enabled, // Pass directly, can be boolean or null
+          site_name: settings.site_name ?? "",
+          site_logo_url: settings.site_logo_url ?? null,
+          contact_email: settings.contact_email ?? null,
+          contact_phone: settings.contact_phone ?? null,
+          contact_address: settings.contact_address ?? null,
+          facebook_url: settings.facebook_url ?? null,
+          instagram_url: settings.instagram_url ?? null,
+          twitter_url: settings.twitter_url ?? null,
+          youtube_url: settings.youtube_url ?? null,
+          linkedin_url: settings.linkedin_url ?? null,
+          scrolling_text_enabled: settings.scrolling_text_enabled ?? null, // Ensure null for nullable
           scrolling_text_content: settings.scrolling_text_content || null,
-          right_header_text_enabled: settings.right_header_text_enabled, // Pass directly, can be boolean or null
+          right_header_text_enabled: settings.right_header_text_enabled ?? null, // Ensure null for nullable
           right_header_text_content: settings.right_header_text_content || null,
           right_header_text_link: settings.right_header_text_link || null,
           download_app_url: settings.download_app_url || null,
           download_app_text: settings.download_app_text || null,
           featured_brands_title: settings.featured_brands_title || null,
-        });
+        } as SettingsFormValues); // Explicit cast
       } else {
         // If no settings, ensure form is reset to schema defaults (which are null for nullable fields)
         form.reset({
@@ -135,7 +135,7 @@ export default function AdminSettingsPage() {
           download_app_url: null,
           download_app_text: null,
           featured_brands_title: null,
-        });
+        } as SettingsFormValues); // Explicit cast
       }
       setIsLoading(false);
     }

@@ -40,7 +40,7 @@ export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: Fe
       image_url: initialData?.image_url || "", // Must be string
       link_url: initialData?.link_url || null, // Must be string | null
       order: initialData?.order ?? 0, // Must be number
-    },
+    } as FeaturedBrandFormValues, // Explicit cast
   });
 
   const handleImageUploadSuccess = (newUrl: string) => {
