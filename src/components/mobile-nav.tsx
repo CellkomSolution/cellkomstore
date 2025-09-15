@@ -112,8 +112,11 @@ export function MobileNav() {
                   </Button>
                 ))}
                 {categories.length > 0 && (
-                  <CategorySheet onOpenChange={setOpen}>
-                    {/* CategorySheet renders its own trigger button internally */}
+                  <CategorySheet open={open} onOpenChange={setOpen}>
+                    <Button variant="ghost" className="justify-start">
+                      <LayoutGrid className="mr-2 h-4 w-4" />
+                      <span>Semua Kategori</span>
+                    </Button>
                   </CategorySheet>
                 )}
               </>

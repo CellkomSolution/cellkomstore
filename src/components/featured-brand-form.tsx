@@ -36,12 +36,24 @@ interface FeaturedBrandFormProps {
 export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: FeaturedBrandFormProps) {
   const form = useForm<FeaturedBrandFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      image_url: initialData?.image_url || "",
-      link_url: initialData?.link_url || null,
-      order: initialData?.order ?? 0, // Ensure order is always a number
-    },
+    // defaultValues removed, will be set in useEffect
   });
+
+  React.useEffect(() => {
+    if (initialData) {
+      form.reset({
+        image_url: initialData.image_url || "",
+        link_url: initialData.link_url || null,
+        order: initialData.order ?? 0,
+      });
+    } else {
+      form.reset({
+        image_url: "",
+        link_url: null,
+        order: 0,
+      });
+    }
+  }, [initialData, form]);
 
   const handleImageUploadSuccess = (newUrl: string) => {
     form.setValue("image_url", newUrl, { shouldValidate: true });

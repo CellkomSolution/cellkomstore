@@ -29,7 +29,7 @@ const formSchema = z.object({
   slug: z.string().min(5, { message: "Slug minimal 5 karakter." }).max(200, { message: "Slug maksimal 200 karakter." }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: "Slug harus berupa huruf kecil, angka, dan tanda hubung (tanpa spasi)." }),
   content: z.string().min(50, { message: "Konten minimal 50 karakter." }),
   image_url: z.string().url({ message: "URL gambar tidak valid." }).nullable().optional(),
-  is_published: z.boolean().default(false), // Removed .optional() as it has a default
+  is_published: z.boolean().default(false),
 });
 
 export type BlogPostFormValues = z.infer<typeof formSchema>;
@@ -44,18 +44,31 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
   const { user } = useSession(); // Get current user for author_id
   const router = useRouter();
 
-  const defaultValues: BlogPostFormValues = {
-    title: initialData?.title ?? "",
-    slug: initialData?.slug ?? "",
-    content: initialData?.content ?? "",
-    image_url: initialData?.image_url ?? null,
-    is_published: initialData?.is_published ?? false, // Ensure it's always boolean
-  };
-
   const form = useForm<BlogPostFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    // defaultValues removed, will be set in useEffect
   });
+
+  React.useEffect(() => {
+    if (initialData) {
+      form.reset({
+        title: initialData.title ?? "",
+        slug: initialData.slug ?? "",
+        content: initialData.content ?? "",
+        image_url: initialData.image_url ?? null,
+        is_published: initialData.is_published ?? false,
+      });
+    } else {
+      // Set default values for a new form
+      form.reset({
+        title: "",
+        slug: "",
+        content: "",
+        image_url: null,
+        is_published: false,
+      });
+    }
+  }, [initialData, form]);
 
   const handleImageUploadSuccess = (newUrl: string) => {
     form.setValue("image_url", newUrl, { shouldValidate: true });

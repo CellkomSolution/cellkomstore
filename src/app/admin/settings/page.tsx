@@ -34,9 +34,9 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().optional().or(z.literal("")),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().optional().or(z.literal("")),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().optional().or(z.literal("")),
-  scrolling_text_enabled: z.boolean().default(false), // Removed .optional()
+  scrolling_text_enabled: z.boolean().default(false),
   scrolling_text_content: z.string().nullable().optional().or(z.literal("")),
-  right_header_text_enabled: z.boolean().default(false), // Removed .optional()
+  right_header_text_enabled: z.boolean().default(false),
   right_header_text_content: z.string().nullable().optional().or(z.literal("")),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
   download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().optional().or(z.literal("")),
@@ -75,26 +75,7 @@ export default function AdminSettingsPage() {
 
   const form = useForm<SettingsFormValues>({ // Use SettingsFormValues here
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      site_name: "",
-      site_logo_url: null,
-      contact_email: null,
-      contact_phone: null,
-      contact_address: null,
-      facebook_url: null,
-      instagram_url: null,
-      twitter_url: null,
-      youtube_url: null,
-      linkedin_url: null,
-      scrolling_text_enabled: false, // Ensure boolean
-      scrolling_text_content: null,
-      right_header_text_enabled: false, // Ensure boolean
-      right_header_text_content: null,
-      right_header_text_link: null,
-      download_app_url: null,
-      download_app_text: null,
-      featured_brands_title: null,
-    },
+    // defaultValues removed, will be set in useEffect
   });
 
   React.useEffect(() => {
@@ -114,20 +95,42 @@ export default function AdminSettingsPage() {
           twitter_url: settings.twitter_url,
           youtube_url: settings.youtube_url,
           linkedin_url: settings.linkedin_url,
-          scrolling_text_enabled: settings.scrolling_text_enabled ?? false, // Use ?? for boolean
+          scrolling_text_enabled: settings.scrolling_text_enabled ?? false,
           scrolling_text_content: settings.scrolling_text_content || null,
-          right_header_text_enabled: settings.right_header_text_enabled ?? false, // Use ?? for boolean
+          right_header_text_enabled: settings.right_header_text_enabled ?? false,
           right_header_text_content: settings.right_header_text_content || null,
           right_header_text_link: settings.right_header_text_link || null,
           download_app_url: settings.download_app_url || null,
           download_app_text: settings.download_app_text || null,
           featured_brands_title: settings.featured_brands_title || null,
         });
+      } else {
+        // Set default values for a new/empty settings state
+        form.reset({
+          site_name: "",
+          site_logo_url: null,
+          contact_email: null,
+          contact_phone: null,
+          contact_address: null,
+          facebook_url: null,
+          instagram_url: null,
+          twitter_url: null,
+          youtube_url: null,
+          linkedin_url: null,
+          scrolling_text_enabled: false,
+          scrolling_text_content: null,
+          right_header_text_enabled: false,
+          right_header_text_content: null,
+          right_header_text_link: null,
+          download_app_url: null,
+          download_app_text: null,
+          featured_brands_title: null,
+        });
       }
       setIsLoading(false);
     }
     fetchSettings();
-  }, [form]);
+  }, [form, initialData]);
 
   const onSubmit: SubmitHandler<SettingsFormValues> = async (values) => { // Explicitly type onSubmit
     console.log("onSubmit called with values:", values);
