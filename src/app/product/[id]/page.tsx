@@ -137,7 +137,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           <div className="border-t pt-6 space-y-4">
              <div className="flex items-center gap-3">
                 <Store className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">Dijual oleh <a href="#" className="font-semibold text-primary">Official Store</a></span>
+                <span className="text-sm">Dijual oleh <a href="#" className="font-semibold text-primary">Cellkom Store</a></span>
              </div>
              <div className="flex items-center gap-3">
                 <Truck className="h-5 w-5 text-muted-foreground" />
