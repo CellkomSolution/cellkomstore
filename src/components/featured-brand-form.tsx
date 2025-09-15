@@ -37,13 +37,11 @@ export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: Fe
   const form = useForm<FeaturedBrandFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { // Explicitly set default values here
-      image_url: initialData?.image_url || "",
-      link_url: initialData?.link_url || null,
-      order: initialData?.order ?? 0,
+      image_url: initialData?.image_url || "", // Must be string
+      link_url: initialData?.link_url || null, // Must be string | null
+      order: initialData?.order ?? 0, // Must be number
     },
   });
-
-  // Removed the useEffect that called form.reset, as defaultValues now handle initial state.
 
   const handleImageUploadSuccess = (newUrl: string) => {
     form.setValue("image_url", newUrl, { shouldValidate: true });

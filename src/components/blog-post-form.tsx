@@ -50,12 +50,10 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
       title: initialData?.title ?? "",
       slug: initialData?.slug ?? "",
       content: initialData?.content ?? "",
-      image_url: initialData?.image_url ?? null,
-      is_published: initialData?.is_published ?? false,
+      image_url: initialData?.image_url ?? null, // Ensure null for optional image_url
+      is_published: initialData?.is_published ?? false, // Ensure boolean
     },
   });
-
-  // Removed the useEffect that called form.reset, as defaultValues now handle initial state.
 
   const handleImageUploadSuccess = (newUrl: string) => {
     form.setValue("image_url", newUrl, { shouldValidate: true });

@@ -52,12 +52,10 @@ export function PaymentMethodForm({ initialData, onSubmit, loading = false }: Pa
       name: initialData?.name ?? "",
       type: initialData?.type ?? 'bank_transfer',
       details: initialData?.details ? JSON.stringify(initialData.details, null, 2) : null,
-      is_active: initialData?.is_active ?? true,
-      order: initialData?.order ?? 0,
+      is_active: initialData?.is_active ?? true, // Must be boolean
+      order: initialData?.order ?? 0, // Must be number
     },
   });
-
-  // Removed the useEffect that called form.reset, as defaultValues now handle initial state.
 
   return (
     <Form {...form}>
