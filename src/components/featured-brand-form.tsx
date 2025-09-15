@@ -25,7 +25,12 @@ const formSchema = z.object({
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
-export type FeaturedBrandFormValues = z.infer<typeof formSchema>;
+// Explicitly define the type to ensure non-optional fields are correctly typed
+export type FeaturedBrandFormValues = {
+  image_url: string;
+  link_url: string | null | undefined; // Can be string, null, or undefined
+  order: number; // Guaranteed number by .default(0)
+};
 
 interface FeaturedBrandFormProps {
   initialData?: FeaturedBrand | null;
@@ -38,9 +43,9 @@ export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: Fe
     resolver: zodResolver(formSchema),
     defaultValues: {
       image_url: initialData?.image_url || "",
-      link_url: initialData?.link_url || null,
-      order: initialData?.order ?? 0,
-    } as FeaturedBrandFormValues, // Explicit cast
+      link_url: initialData?.link_url ?? null, // Ensure null if undefined
+      order: initialData?.order ?? 0, // Ensure number
+    },
   });
 
   const handleImageUploadSuccess = (newUrl: string) => {

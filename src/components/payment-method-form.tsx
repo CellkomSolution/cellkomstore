@@ -37,7 +37,14 @@ const formSchema = z.object({
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
-export type PaymentMethodFormValues = z.infer<typeof formSchema>;
+// Explicitly define the type to ensure non-optional fields are correctly typed
+export type PaymentMethodFormValues = {
+  name: string;
+  type: 'bank_transfer' | 'e_wallet' | 'card' | 'other';
+  details: string | null | undefined; // Can be string, null, or undefined
+  is_active: boolean; // Guaranteed boolean by .default(true)
+  order: number; // Guaranteed number by .default(0)
+};
 
 interface PaymentMethodFormProps {
   initialData?: PaymentMethod | null;
@@ -51,10 +58,10 @@ export function PaymentMethodForm({ initialData, onSubmit, loading = false }: Pa
     defaultValues: {
       name: initialData?.name ?? "",
       type: initialData?.type ?? 'bank_transfer',
-      details: initialData?.details ? JSON.stringify(initialData.details, null, 2) : null,
-      is_active: initialData?.is_active ?? true,
-      order: initialData?.order ?? 0,
-    } as PaymentMethodFormValues, // Explicit cast
+      details: initialData?.details ? JSON.stringify(initialData.details, null, 2) : null, // Ensure null if undefined
+      is_active: initialData?.is_active ?? true, // Ensure boolean
+      order: initialData?.order ?? 0, // Ensure number
+    },
   });
 
   return (

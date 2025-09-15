@@ -32,7 +32,14 @@ const formSchema = z.object({
   is_published: z.boolean().default(false),
 });
 
-export type BlogPostFormValues = z.infer<typeof formSchema>;
+// Explicitly define the type to ensure non-optional fields are correctly typed
+export type BlogPostFormValues = {
+  title: string;
+  slug: string;
+  content: string;
+  image_url: string | null | undefined; // Can be string, null, or undefined
+  is_published: boolean; // Guaranteed boolean by .default(false)
+};
 
 interface BlogPostFormProps {
   initialData?: BlogPost | null;
@@ -50,9 +57,9 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
       title: initialData?.title ?? "",
       slug: initialData?.slug ?? "",
       content: initialData?.content ?? "",
-      image_url: initialData?.image_url ?? null,
-      is_published: initialData?.is_published ?? false,
-    } as BlogPostFormValues, // Explicit cast
+      image_url: initialData?.image_url ?? null, // Ensure null if undefined
+      is_published: initialData?.is_published ?? false, // Ensure boolean
+    },
   });
 
   const handleImageUploadSuccess = (newUrl: string) => {
