@@ -127,9 +127,17 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 Tambah ke Keranjang
               </Button>
-              <Button variant="outline" size="lg" className="flex-1 h-12 text-base" onClick={() => setIsChatOpen(true)}>
-                <MessageSquare className="h-5 w-5 mr-2" />
-                Chat Penjual
+              <Button 
+                variant="outline" 
+                className="
+                  h-12 px-8 text-base flex-1 // Default for sm and up (before md)
+                  md:h-10 md:w-10 md:p-0 md:flex-none // Icon size for md
+                  lg:h-12 lg:px-8 lg:text-base lg:flex-1 lg:w-auto // Back to lg size for lg
+                " 
+                onClick={() => setIsChatOpen(true)}
+              >
+                <MessageSquare className="h-5 w-5 md:mr-0 lg:mr-2" />
+                <span className="md:sr-only lg:not-sr-only">Chat Penjual</span>
               </Button>
             </div>
           )}
