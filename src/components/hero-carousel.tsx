@@ -40,7 +40,7 @@ export function HeroCarousel() {
 
   if (isLoading) {
     return (
-      <div className="relative w-full aspect-[16/9] md:h-[350px] rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+      <div className="relative w-full aspect-[16/9] md:h-[300px] rounded-lg overflow-hidden bg-muted flex items-center justify-center">
         <div className="h-full w-full bg-gray-200 animate-pulse" />
       </div>
     );
@@ -49,21 +49,21 @@ export function HeroCarousel() {
   if (slides.length === 0) {
     console.log("No hero carousel slides to display. Current slides array is empty."); // Log jika array kosong
     return (
-      <div className="relative w-full aspect-[16/9] md:h-[350px] rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
+      <div className="relative w-full aspect-[16/9] md:h-[300px] rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
         Tidak ada slide carousel untuk ditampilkan.
       </div>
     );
   }
 
   return (
-    <Carousel className="w-full aspect-[16/9] md:h-[350px]">
+    <Carousel className="w-full aspect-[16/9] md:h-[300px] rounded-lg overflow-hidden"> {/* Added rounded-lg and adjusted height */}
       <CarouselContent>
         {slides.map((slide) => (
           <CarouselItem key={slide.id}>
             {slide.display_style === "split" ? (
               <Link href={slide.link_url || "#"} className="block h-full">
                 <div
-                  className="relative flex h-full w-full rounded-lg overflow-hidden"
+                  className="relative flex h-full w-full"
                   style={{ backgroundColor: slide.left_panel_bg_color || "#f0f0f0" }}
                 >
                   <div className="flex-1 p-6 flex flex-col justify-center items-start text-left">
@@ -113,7 +113,7 @@ export function HeroCarousel() {
               </Link>
             ) : (
               <Link href={slide.link_url || "#"} className="block h-full">
-                <div className="relative w-full h-full rounded-lg overflow-hidden">
+                <div className="relative w-full h-full">
                   <Image
                     src={slide.product_image_url || "/placeholder-image.jpg"}
                     alt={slide.alt}
