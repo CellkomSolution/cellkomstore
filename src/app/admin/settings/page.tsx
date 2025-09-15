@@ -3,9 +3,7 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useForm, SubmitHandler } from "react-hook-form"; // Import SubmitHandler
+import { useForm, SubmitHandler, FormProvider } from "react-hook-form"; // Import FormProvider
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -20,8 +18,10 @@ import {
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { getAppSettings, updateAppSettings, AppSettings } from "@/lib/supabase/app-settings";
-import { ImageUploader } from "@/components/image-uploader";
-import { Switch } from "@/components/ui/switch";
+import { GeneralSettingsForm } from "@/components/admin/settings/general-settings-form";
+import { ContactSocialSettingsForm } from "@/components/admin/settings/contact-social-settings-form";
+import { HeaderFooterSettingsForm } from "@/components/admin/settings/header-footer-settings-form";
+import { FeaturedBrandsSettingsForm } from "@/components/admin/settings/featured-brands-settings-form";
 
 const formSchema = z.object({
   site_name: z.string().nullable().optional().or(z.literal("")),
@@ -34,9 +34,9 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().optional().or(z.literal("")),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().optional().or(z.literal("")),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().optional().or(z.literal("")),
-  scrolling_text_enabled: z.boolean().nullable().default(false), // Changed to nullable
+  scrolling_text_enabled: z.boolean().nullable().default(false),
   scrolling_text_content: z.string().nullable().optional().or(z.literal("")),
-  right_header_text_enabled: z.boolean().nullable().default(false), // Changed to nullable
+  right_header_text_enabled: z.boolean().nullable().default(false),
   right_header_text_content: z.string().nullable().optional().or(z.literal("")),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
   download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().optional().or(z.literal("")),
@@ -66,34 +66,34 @@ const formSchema = z.object({
   }
 });
 
-type SettingsFormValues = z.infer<typeof formSchema>; // Define type for form values
+export type SettingsFormValues = z.infer<typeof formSchema>; // Export type for modular components
 
 export default function AdminSettingsPage() {
   const [initialData, setInitialData] = React.useState<AppSettings | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const form = useForm<SettingsFormValues>({ // Use SettingsFormValues here
+  const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { // Explicitly set default values here
-      site_name: initialData?.site_name || "",
-      site_logo_url: initialData?.site_logo_url || null,
-      contact_email: initialData?.contact_email || null,
-      contact_phone: initialData?.contact_phone || null,
-      contact_address: initialData?.contact_address || null,
-      facebook_url: initialData?.facebook_url || null,
-      instagram_url: initialData?.instagram_url || null,
-      twitter_url: initialData?.twitter_url || null,
-      youtube_url: initialData?.youtube_url || null,
-      linkedin_url: initialData?.linkedin_url || null,
-      scrolling_text_enabled: initialData?.scrolling_text_enabled ?? false,
-      scrolling_text_content: initialData?.scrolling_text_content || null,
-      right_header_text_enabled: initialData?.right_header_text_enabled ?? false,
-      right_header_text_content: initialData?.right_header_text_content || null,
-      right_header_text_link: initialData?.right_header_text_link || null,
-      download_app_url: initialData?.download_app_url || null,
-      download_app_text: initialData?.download_app_text || null,
-      featured_brands_title: initialData?.featured_brands_title || null,
+    defaultValues: {
+      site_name: "",
+      site_logo_url: null,
+      contact_email: null,
+      contact_phone: null,
+      contact_address: null,
+      facebook_url: null,
+      instagram_url: null,
+      twitter_url: null,
+      youtube_url: null,
+      linkedin_url: null,
+      scrolling_text_enabled: false,
+      scrolling_text_content: null,
+      right_header_text_enabled: false,
+      right_header_text_content: null,
+      right_header_text_link: null,
+      download_app_url: null,
+      download_app_text: null,
+      featured_brands_title: null,
     },
   });
 
@@ -103,8 +103,26 @@ export default function AdminSettingsPage() {
       const settings = await getAppSettings();
       if (settings) {
         setInitialData(settings);
-        // form.reset is no longer needed here as defaultValues are set directly
-        // and will update when initialData changes.
+        form.reset({
+          site_name: settings.site_name || "",
+          site_logo_url: settings.site_logo_url,
+          contact_email: settings.contact_email,
+          contact_phone: settings.contact_phone,
+          contact_address: settings.contact_address,
+          facebook_url: settings.facebook_url,
+          instagram_url: settings.instagram_url,
+          twitter_url: settings.twitter_url,
+          youtube_url: settings.youtube_url,
+          linkedin_url: settings.linkedin_url,
+          scrolling_text_enabled: settings.scrolling_text_enabled ?? false,
+          scrolling_text_content: settings.scrolling_text_content || null,
+          right_header_text_enabled: settings.right_header_text_enabled ?? false,
+          right_header_text_content: settings.right_header_text_content || null,
+          right_header_text_link: settings.right_header_text_link || null,
+          download_app_url: settings.download_app_url || null,
+          download_app_text: settings.download_app_text || null,
+          featured_brands_title: settings.featured_brands_title || null,
+        });
       } else {
         // If no settings, ensure form is reset to schema defaults
         form.reset({
@@ -131,9 +149,9 @@ export default function AdminSettingsPage() {
       setIsLoading(false);
     }
     fetchSettings();
-  }, [form, initialData]); // Depend on initialData to re-evaluate defaultValues
+  }, [form]); // Removed initialData from dependency array as form.reset handles it
 
-  const onSubmit: SubmitHandler<SettingsFormValues> = async (values) => { // Explicitly type onSubmit
+  const onSubmit: SubmitHandler<SettingsFormValues> = async (values) => {
     console.log("onSubmit called with values:", values);
     setIsSubmitting(true);
     try {
@@ -154,14 +172,6 @@ export default function AdminSettingsPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleLogoUploadSuccess = (newUrl: string) => {
-    form.setValue("site_logo_url", newUrl, { shouldValidate: true });
-  };
-
-  const handleRemoveLogo = () => {
-    form.setValue("site_logo_url", null, { shouldValidate: true });
   };
 
   if (isLoading) {
@@ -190,325 +200,56 @@ export default function AdminSettingsPage() {
         Kelola pengaturan umum aplikasi Anda di sini, termasuk nama situs, logo, dan informasi kontak.
       </p>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Pengaturan Umum</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="site_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nama Situs</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nama Toko Anda" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormDescription>
-                      Nama yang akan ditampilkan di header, footer, dan judul halaman. Jika kosong, akan menggunakan nama default.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <FormProvider {...form}> {/* Use FormProvider to pass form context */}
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Pengaturan Umum</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <GeneralSettingsForm isSubmitting={isSubmitting} />
+            </CardContent>
+          </Card>
 
-              <FormItem>
-                <FormLabel>Logo Situs</FormLabel>
-                <FormControl>
-                  <ImageUploader
-                    bucketName="app-assets"
-                    currentImageUrl={form.watch("site_logo_url") ?? null}
-                    onUploadSuccess={handleLogoUploadSuccess}
-                    onRemove={handleRemoveLogo}
-                    disabled={isSubmitting}
-                    aspectRatio="aspect-video"
-                    className="max-w-xs"
-                  />
-                </FormControl>
-                <FormDescription>
-                  Unggah logo utama situs Anda.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
+          <Card>
+            <CardHeader>
+              <CardTitle>Kontak & Media Sosial</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ContactSocialSettingsForm isSubmitting={isSubmitting} />
+            </CardContent>
+          </Card>
 
-              <h3 className="text-lg font-semibold mt-8">Informasi Kontak</h3>
-              <FormField
-                control={form.control}
-                name="contact_email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email Kontak</FormLabel>
-                    <FormControl>
-                      <Input placeholder="support@example.com" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="contact_phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nomor Telepon Kontak</FormLabel>
-                    <FormControl>
-                      <Input placeholder="+62 812 3456 7890" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="contact_address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Alamat Kontak</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Jl. Contoh No. 123, Kota, Negara" className="resize-y min-h-[80px]" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <Card>
+            <CardHeader>
+              <CardTitle>Pengaturan Header & Aplikasi</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <HeaderFooterSettingsForm isSubmitting={isSubmitting} />
+            </CardContent>
+          </Card>
 
-              <h3 className="text-lg font-semibold mt-8">Tautan Media Sosial</h3>
-              <FormField
-                control={form.control}
-                name="facebook_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL Facebook</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://facebook.com/yourpage" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="instagram_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL Instagram</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://instagram.com/yourpage" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="twitter_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL Twitter</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://twitter.com/yourpage" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="youtube_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL YouTube</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://youtube.com/yourchannel" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="linkedin_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL LinkedIn</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://linkedin.com/in/yourprofile" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <Card>
+            <CardHeader>
+              <CardTitle>Pengaturan Merek Unggulan</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FeaturedBrandsSettingsForm isSubmitting={isSubmitting} />
+            </CardContent>
+          </Card>
 
-              <h3 className="text-lg font-semibold mt-8">Pengaturan Header Bawah</h3>
-              <FormField
-                control={form.control}
-                name="scrolling_text_enabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Aktifkan Teks Berjalan</FormLabel>
-                      <FormDescription>
-                        Tampilkan teks yang bergerak di bagian kiri bawah header.
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {form.watch("scrolling_text_enabled") && (
-                <FormField
-                  control={form.control}
-                  name="scrolling_text_content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Konten Teks Berjalan</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Contoh: Promo Spesial Akhir Tahun! Diskon hingga 50%!" {...field} value={field.value ?? ""} />
-                      </FormControl>
-                      <FormDescription>
-                        Teks yang akan ditampilkan dan bergerak.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              <FormField
-                control={form.control}
-                name="right_header_text_enabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Aktifkan Teks Kanan Header</FormLabel>
-                      <FormDescription>
-                        Tampilkan teks atau tautan di bagian kanan bawah header.
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {form.watch("right_header_text_enabled") && (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="right_header_text_content"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Konten Teks Kanan Header</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Contoh: Cek Promo Terbaru!" {...field} value={field.value ?? ""} />
-                        </FormControl>
-                        <FormDescription>
-                          Teks yang akan ditampilkan di sisi kanan.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="right_header_text_link"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>URL Tautan Teks Kanan (Opsional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://cellkom.com/promo" {...field} value={field.value ?? ""} />
-                        </FormControl>
-                        <FormDescription>
-                          Jika diisi, teks akan menjadi tautan yang dapat diklik.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-
-              <h3 className="text-lg font-semibold mt-8">Pengaturan Aplikasi</h3>
-              <FormField
-                control={form.control}
-                name="download_app_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL Unduhan Aplikasi</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://play.google.com/store/apps/details?id=com.example.app" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormDescription>
-                      Tautan untuk mengunduh aplikasi seluler Anda (misalnya, dari Play Store atau App Store).
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {form.watch("download_app_url") && (
-                <FormField
-                  control={form.control}
-                  name="download_app_text"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Teks Unduhan Aplikasi</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Download Aplikasi Cellkom" {...field} value={field.value ?? ""} />
-                      </FormControl>
-                      <FormDescription>
-                        Teks yang akan ditampilkan untuk tautan unduhan aplikasi.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              <FormField
-                control={form.control}
-                name="featured_brands_title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Judul Merek Unggulan</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Brand Pilihan" {...field} value={field.value ?? ""} />
-                    </FormControl>
-                    <FormDescription>
-                      Judul yang akan ditampilkan di bagian merek unggulan pada halaman beranda.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Menyimpan...
-                  </>
-                ) : (
-                  "Simpan Pengaturan"
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Menyimpan...
+              </>
+            ) : (
+              "Simpan Pengaturan"
+            )}
+          </Button>
+        </form>
+      </FormProvider>
     </div>
   );
 }
