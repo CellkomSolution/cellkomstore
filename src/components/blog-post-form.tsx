@@ -29,7 +29,7 @@ const formSchema = z.object({
   slug: z.string().min(5, { message: "Slug minimal 5 karakter." }).max(200, { message: "Slug maksimal 200 karakter." }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: "Slug harus berupa huruf kecil, angka, dan tanda hubung (tanpa spasi)." }),
   content: z.string().min(50, { message: "Konten minimal 50 karakter." }),
   image_url: z.string().url({ message: "URL gambar tidak valid." }).nullable().optional(),
-  is_published: z.boolean().default(false).optional(),
+  is_published: z.boolean().default(false), // Removed .optional() as it has a default
 });
 
 export type BlogPostFormValues = z.infer<typeof formSchema>;
@@ -49,7 +49,7 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
     slug: initialData?.slug ?? "",
     content: initialData?.content ?? "",
     image_url: initialData?.image_url ?? null,
-    is_published: initialData?.is_published ?? false,
+    is_published: initialData?.is_published ?? false, // Ensure it's always boolean
   };
 
   const form = useForm<BlogPostFormValues>({

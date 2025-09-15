@@ -4,9 +4,9 @@ import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
-import { type EmblaCarouselType, type EmblaOptionsType, type EmblaPluginType } from "embla-carousel" // Corrected imports
-import ClassNames from "embla-carousel-class-names"
-import Autoplay from "embla-carousel-autoplay"
+import { type EmblaCarouselType, type EmblaOptionsType, type EmblaPluginType } from "embla-carousel" // Corrected imports for EmblaCarouselType, EmblaOptionsType, EmblaPluginType
+import ClassNames from "embla-carousel-class-names" // This module needs to be installed
+import Autoplay from "embla-carousel-autoplay" // This module needs to be installed
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -77,13 +77,13 @@ const Carousel = React.forwardRef<
     const onInit = React.useCallback((api: EmblaCarouselType) => {
       setCanScrollPrev(api.canScrollPrev())
       setCanScrollNext(api.canScrollNext())
-      setScrollSnaps(api.scrollSnapList()) // Corrected from api.scrollSnaps()
+      setScrollSnaps(api.scrollSnapList()) // Changed to scrollSnapList()
     }, [])
 
     const onReInit = React.useCallback((api: EmblaCarouselType) => {
       setCanScrollPrev(api.canScrollPrev())
       setCanScrollNext(api.canScrollNext())
-      setScrollSnaps(api.scrollSnapList()) // Corrected from api.scrollSnaps()
+      setScrollSnaps(api.scrollSnapList()) // Changed to scrollSnapList()
     }, [])
 
     const scrollPrev = React.useCallback(() => {

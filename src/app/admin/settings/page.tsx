@@ -22,7 +22,6 @@ import { Loader2 } from "lucide-react";
 import { getAppSettings, updateAppSettings, AppSettings } from "@/lib/supabase/app-settings";
 import { ImageUploader } from "@/components/image-uploader";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label"; // Import Label
 
 const formSchema = z.object({
   site_name: z.string().nullable().optional().or(z.literal("")),
@@ -35,9 +34,9 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().optional().or(z.literal("")),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().optional().or(z.literal("")),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().optional().or(z.literal("")),
-  scrolling_text_enabled: z.boolean().default(false),
+  scrolling_text_enabled: z.boolean().default(false), // Removed .optional()
   scrolling_text_content: z.string().nullable().optional().or(z.literal("")),
-  right_header_text_enabled: z.boolean().default(false),
+  right_header_text_enabled: z.boolean().default(false), // Removed .optional()
   right_header_text_content: z.string().nullable().optional().or(z.literal("")),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
   download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().optional().or(z.literal("")),
@@ -87,15 +86,15 @@ export default function AdminSettingsPage() {
       twitter_url: null,
       youtube_url: null,
       linkedin_url: null,
-      scrolling_text_enabled: false,
+      scrolling_text_enabled: false, // Ensure boolean
       scrolling_text_content: null,
-      right_header_text_enabled: false,
+      right_header_text_enabled: false, // Ensure boolean
       right_header_text_content: null,
       right_header_text_link: null,
       download_app_url: null,
       download_app_text: null,
       featured_brands_title: null,
-    } satisfies SettingsFormValues, // Use 'satisfies' here
+    },
   });
 
   React.useEffect(() => {
@@ -123,12 +122,12 @@ export default function AdminSettingsPage() {
           download_app_url: settings.download_app_url || null,
           download_app_text: settings.download_app_text || null,
           featured_brands_title: settings.featured_brands_title || null,
-        } satisfies SettingsFormValues); // Also use 'satisfies' here
+        });
       }
       setIsLoading(false);
     }
     fetchSettings();
-  }, []); // Removed 'form' from dependency array
+  }, [form]);
 
   const onSubmit: SubmitHandler<SettingsFormValues> = async (values) => { // Explicitly type onSubmit
     console.log("onSubmit called with values:", values);
@@ -303,7 +302,7 @@ export default function AdminSettingsPage() {
                 name="twitter_url"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>URL Twitter</FormLabel> {/* Fixed JSX closing tag */}
+                    <FormLabel>URL Twitter</FormLabel>
                     <FormControl>
                       <Input placeholder="https://twitter.com/yourpage" {...field} value={field.value ?? ""} />
                     </FormControl>
