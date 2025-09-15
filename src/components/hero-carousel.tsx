@@ -56,7 +56,7 @@ export function HeroCarousel() {
   }
 
   return (
-    <Carousel className="w-full aspect-[16/9] md:h-[300px] rounded-lg overflow-hidden"> {/* Added rounded-lg and adjusted height */}
+    <Carousel className="w-full aspect-[16/9] md:h-[300px] rounded-lg overflow-hidden">
       <CarouselContent>
         {slides.map((slide) => (
           <CarouselItem key={slide.id}>
@@ -113,7 +113,7 @@ export function HeroCarousel() {
               </Link>
             ) : (
               <Link href={slide.link_url || "#"} className="block h-full">
-                <div className="relative w-full h-full">
+                <div className="relative w-full h-full rounded-lg overflow-hidden">
                   <Image
                     src={slide.product_image_url || "/placeholder-image.jpg"}
                     alt={slide.alt}
@@ -122,6 +122,26 @@ export function HeroCarousel() {
                     priority
                     sizes="(max-width: 768px) 100vw, 100vw"
                   />
+                  {/* Overlay content for full display style */}
+                  <div className="absolute inset-0 bg-black/50 flex flex-col items-start justify-center p-6 md:p-12 text-white">
+                    {slide.alt && ( // Using alt for the main title
+                      <h3 className="text-2xl md:text-4xl font-bold mb-2">
+                        {slide.alt}
+                      </h3>
+                    )}
+                    {slide.hashtag && ( // Using hashtag for the description
+                      <p className="text-base md:text-lg mb-4 max-w-md">
+                        {slide.hashtag}
+                      </p>
+                    )}
+                    {slide.link_url && (
+                      <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-6 py-3 h-auto">
+                        <Link href={slide.link_url}>
+                          LAYANAN SERVIS
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </Link>
             )}
