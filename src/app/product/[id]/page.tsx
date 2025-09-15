@@ -18,11 +18,12 @@ import { useRouter } from "next/navigation";
 import { ChatWidget } from "@/components/chat-widget";
 
 interface ProductDetailPageProps {
-  params: { id: string }; // Changed to direct object
+  params: Promise<{ id: string }>; // Corrected: params is now a Promise
 }
 
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const { id } = params; // Access id directly
+  // Unwrap params using React.use()
+  const { id } = React.use(params);
 
   const { addItem } = useCart();
   const isMobile = useIsMobile();
