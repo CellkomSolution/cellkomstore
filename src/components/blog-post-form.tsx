@@ -32,14 +32,8 @@ const formSchema = z.object({
   is_published: z.boolean().default(false),
 });
 
-// Explicitly define the type to ensure non-optional fields are correctly typed
-export type BlogPostFormValues = {
-  title: string;
-  slug: string;
-  content: string;
-  image_url: string | null | undefined; // Can be string, null, or undefined
-  is_published: boolean; // Guaranteed boolean by .default(false)
-};
+// Derive the form values type directly from the schema
+export type BlogPostFormValues = z.infer<typeof formSchema>;
 
 interface BlogPostFormProps {
   initialData?: BlogPost | null;

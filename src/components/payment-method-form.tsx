@@ -37,14 +37,8 @@ const formSchema = z.object({
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
-// Explicitly define the type to ensure non-optional fields are correctly typed
-export type PaymentMethodFormValues = {
-  name: string;
-  type: 'bank_transfer' | 'e_wallet' | 'card' | 'other';
-  details: string | null | undefined; // Can be string, null, or undefined
-  is_active: boolean; // Guaranteed boolean by .default(true)
-  order: number; // Guaranteed number by .default(0)
-};
+// Derive the form values type directly from the schema
+export type PaymentMethodFormValues = z.infer<typeof formSchema>;
 
 interface PaymentMethodFormProps {
   initialData?: PaymentMethod | null;

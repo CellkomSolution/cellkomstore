@@ -57,27 +57,8 @@ const formSchema = z.object({
   }
 });
 
-// Explicitly define the type to ensure non-optional fields are correctly typed
-export type SettingsFormValues = {
-  site_name: string | null;
-  site_logo_url: string | null | undefined;
-  contact_email: string | null;
-  contact_phone: string | null;
-  contact_address: string | null;
-  facebook_url: string | null;
-  instagram_url: string | null;
-  twitter_url: string | null;
-  youtube_url: string | null;
-  linkedin_url: string | null;
-  scrolling_text_enabled: boolean; // Guaranteed boolean by .default(false)
-  scrolling_text_content: string | null;
-  right_header_text_enabled: boolean; // Guaranteed boolean by .default(false)
-  right_header_text_content: string | null;
-  right_header_text_link: string | null;
-  download_app_url: string | null;
-  download_app_text: string | null;
-  featured_brands_title: string | null;
-};
+// Derive the form values type directly from the schema
+export type SettingsFormValues = z.infer<typeof formSchema>;
 
 export default function AdminSettingsPage() {
   const [initialData, setInitialData] = React.useState<AppSettings | null>(null);

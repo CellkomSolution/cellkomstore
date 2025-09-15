@@ -25,12 +25,8 @@ const formSchema = z.object({
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
-// Explicitly define the type to ensure non-optional fields are correctly typed
-export type FeaturedBrandFormValues = {
-  image_url: string;
-  link_url: string | null | undefined; // Can be string, null, or undefined
-  order: number; // Guaranteed number by .default(0)
-};
+// Derive the form values type directly from the schema
+export type FeaturedBrandFormValues = z.infer<typeof formSchema>;
 
 interface FeaturedBrandFormProps {
   initialData?: FeaturedBrand | null;
