@@ -25,6 +25,7 @@ export function HeroCarousel() {
       try {
         const data = await getHeroCarouselSlides();
         console.log("Fetched hero carousel slides:", data);
+        console.log("Number of slides fetched:", data.length); // Log jumlah slide
         setSlides(data || []);
       } catch (error) {
         console.error("Error fetching hero carousel slides:", error);
@@ -46,6 +47,7 @@ export function HeroCarousel() {
   }
 
   if (slides.length === 0) {
+    console.log("No hero carousel slides to display. Current slides array is empty."); // Log jika array kosong
     return (
       <div className="relative w-full aspect-[16/9] md:h-[400px] rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
         Tidak ada slide carousel untuk ditampilkan.
