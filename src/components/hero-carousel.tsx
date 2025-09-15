@@ -40,7 +40,7 @@ export function HeroCarousel() {
 
   if (isLoading) {
     return (
-      <div className="relative w-full aspect-[16/9] md:h-[400px] rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+      <div className="relative w-full aspect-[16/9] md:h-[350px] rounded-lg overflow-hidden bg-muted flex items-center justify-center">
         <div className="h-full w-full bg-gray-200 animate-pulse" />
       </div>
     );
@@ -49,14 +49,14 @@ export function HeroCarousel() {
   if (slides.length === 0) {
     console.log("No hero carousel slides to display. Current slides array is empty."); // Log jika array kosong
     return (
-      <div className="relative w-full aspect-[16/9] md:h-[400px] rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
+      <div className="relative w-full aspect-[16/9] md:h-[350px] rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
         Tidak ada slide carousel untuk ditampilkan.
       </div>
     );
   }
 
   return (
-    <Carousel className="w-full aspect-[16/9] md:h-[400px]">
+    <Carousel className="w-full aspect-[16/9] md:h-[350px]">
       <CarouselContent>
         {slides.map((slide) => (
           <CarouselItem key={slide.id}>
