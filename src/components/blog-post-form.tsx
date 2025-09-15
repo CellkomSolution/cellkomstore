@@ -28,7 +28,7 @@ const formSchema = z.object({
   title: z.string().min(5, { message: "Judul minimal 5 karakter." }).max(200, { message: "Judul maksimal 200 karakter." }),
   slug: z.string().min(5, { message: "Slug minimal 5 karakter." }).max(200, { message: "Slug maksimal 200 karakter." }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: "Slug harus berupa huruf kecil, angka, dan tanda hubung (tanpa spasi)." }),
   content: z.string().min(50, { message: "Konten minimal 50 karakter." }),
-  image_url: z.string().url({ message: "URL gambar tidak valid." }).nullable().optional(),
+  image_url: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null), // Changed to default(null)
   is_published: z.boolean().default(false),
 });
 

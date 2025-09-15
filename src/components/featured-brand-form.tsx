@@ -21,7 +21,7 @@ import { FeaturedBrand } from "@/lib/supabase/featured-brands";
 
 const formSchema = z.object({
   image_url: z.string().url({ message: "URL gambar tidak valid." }).min(1, { message: "Gambar merek diperlukan." }),
-  link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
+  link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable().default(null), // Changed to default(null)
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 

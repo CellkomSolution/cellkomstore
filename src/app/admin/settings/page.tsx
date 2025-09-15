@@ -15,24 +15,24 @@ import { HeaderFooterSettingsForm } from "@/components/admin/settings/header-foo
 import { FeaturedBrandsSettingsForm } from "@/components/admin/settings/featured-brands-settings-form";
 
 const formSchema = z.object({
-  site_name: z.string().nullable().optional().or(z.literal("")),
-  site_logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().optional(),
-  contact_email: z.string().email({ message: "Email tidak valid." }).nullable().optional().or(z.literal("")),
-  contact_phone: z.string().nullable().optional().or(z.literal("")),
-  contact_address: z.string().nullable().optional().or(z.literal("")),
-  facebook_url: z.string().url({ message: "URL Facebook tidak valid." }).nullable().optional().or(z.literal("")),
-  instagram_url: z.string().url({ message: "URL Instagram tidak valid." }).nullable().optional().or(z.literal("")),
-  twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().optional().or(z.literal("")),
-  youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().optional().or(z.literal("")),
-  linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().optional().or(z.literal("")),
+  site_name: z.string().nullable().default(null),
+  site_logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().default(null),
+  contact_email: z.string().email({ message: "Email tidak valid." }).nullable().default(null),
+  contact_phone: z.string().nullable().default(null),
+  contact_address: z.string().nullable().default(null),
+  facebook_url: z.string().url({ message: "URL Facebook tidak valid." }).nullable().default(null),
+  instagram_url: z.string().url({ message: "URL Instagram tidak valid." }).nullable().default(null),
+  twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().default(null),
+  youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().default(null),
+  linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().default(null),
   scrolling_text_enabled: z.boolean().default(false),
-  scrolling_text_content: z.string().nullable().optional().or(z.literal("")),
+  scrolling_text_content: z.string().nullable().default(null),
   right_header_text_enabled: z.boolean().default(false),
-  right_header_text_content: z.string().nullable().optional().or(z.literal("")),
-  right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().optional().or(z.literal("")),
-  download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().optional().or(z.literal("")),
-  download_app_text: z.string().nullable().optional().or(z.literal("")),
-  featured_brands_title: z.string().nullable().optional().or(z.literal("")),
+  right_header_text_content: z.string().nullable().default(null),
+  right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().default(null),
+  download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().default(null),
+  download_app_text: z.string().nullable().default(null),
+  featured_brands_title: z.string().nullable().default(null),
 }).superRefine((data, ctx) => {
   if (data.scrolling_text_enabled && (!data.scrolling_text_content || data.scrolling_text_content.trim() === '')) {
     ctx.addIssue({
@@ -68,7 +68,7 @@ export default function AdminSettingsPage() {
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      site_name: "",
+      site_name: null,
       site_logo_url: null,
       contact_email: null,
       contact_phone: null,
@@ -96,7 +96,7 @@ export default function AdminSettingsPage() {
       if (settings) {
         setInitialData(settings);
         form.reset({
-          site_name: settings.site_name ?? "",
+          site_name: settings.site_name ?? null,
           site_logo_url: settings.site_logo_url ?? null,
           contact_email: settings.contact_email ?? null,
           contact_phone: settings.contact_phone ?? null,
@@ -107,18 +107,18 @@ export default function AdminSettingsPage() {
           youtube_url: settings.youtube_url ?? null,
           linkedin_url: settings.linkedin_url ?? null,
           scrolling_text_enabled: settings.scrolling_text_enabled ?? false,
-          scrolling_text_content: settings.scrolling_text_content || null,
+          scrolling_text_content: settings.scrolling_text_content ?? null,
           right_header_text_enabled: settings.right_header_text_enabled ?? false,
-          right_header_text_content: settings.right_header_text_content || null,
-          right_header_text_link: settings.right_header_text_link || null,
-          download_app_url: settings.download_app_url || null,
-          download_app_text: settings.download_app_text || null,
-          featured_brands_title: settings.featured_brands_title || null,
+          right_header_text_content: settings.right_header_text_content ?? null,
+          right_header_text_link: settings.right_header_text_link ?? null,
+          download_app_url: settings.download_app_url ?? null,
+          download_app_text: settings.download_app_text ?? null,
+          featured_brands_title: settings.featured_brands_title ?? null,
         });
       } else {
         // If no settings, ensure form is reset to schema defaults
         form.reset({
-          site_name: "",
+          site_name: null,
           site_logo_url: null,
           contact_email: null,
           contact_phone: null,
