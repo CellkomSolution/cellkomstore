@@ -65,28 +65,30 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
+  const defaultFormValues: SettingsFormValues = {
+    site_name: null,
+    site_logo_url: null,
+    contact_email: null,
+    contact_phone: null,
+    contact_address: null,
+    facebook_url: null,
+    instagram_url: null,
+    twitter_url: null,
+    youtube_url: null,
+    linkedin_url: null,
+    scrolling_text_enabled: false,
+    scrolling_text_content: null,
+    right_header_text_enabled: false,
+    right_header_text_content: null,
+    right_header_text_link: null,
+    download_app_url: null,
+    download_app_text: null,
+    featured_brands_title: null,
+  };
+
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      site_name: null,
-      site_logo_url: null,
-      contact_email: null,
-      contact_phone: null,
-      contact_address: null,
-      facebook_url: null,
-      instagram_url: null,
-      twitter_url: null,
-      youtube_url: null,
-      linkedin_url: null,
-      scrolling_text_enabled: false,
-      scrolling_text_content: null,
-      right_header_text_enabled: false,
-      right_header_text_content: null,
-      right_header_text_link: null,
-      download_app_url: null,
-      download_app_text: null,
-      featured_brands_title: null,
-    },
+    defaultValues: defaultFormValues, // Initialize with fully defined defaults
   });
 
   React.useEffect(() => {
@@ -116,32 +118,12 @@ export default function AdminSettingsPage() {
           featured_brands_title: settings.featured_brands_title ?? null,
         });
       } else {
-        // If no settings, ensure form is reset to schema defaults
-        form.reset({
-          site_name: null,
-          site_logo_url: null,
-          contact_email: null,
-          contact_phone: null,
-          contact_address: null,
-          facebook_url: null,
-          instagram_url: null,
-          twitter_url: null,
-          youtube_url: null,
-          linkedin_url: null,
-          scrolling_text_enabled: false,
-          scrolling_text_content: null,
-          right_header_text_enabled: false,
-          right_header_text_content: null,
-          right_header_text_link: null,
-          download_app_url: null,
-          download_app_text: null,
-          featured_brands_title: null,
-        });
+        form.reset(defaultFormValues); // Reset to the fully defined default
       }
       setIsLoading(false);
     }
     fetchSettings();
-  }, [form, initialData]);
+  }, [form]); // Added form to dependency array
 
   const onSubmit: SubmitHandler<SettingsFormValues> = async (values) => {
     console.log("onSubmit called with values:", values);
@@ -152,7 +134,7 @@ export default function AdminSettingsPage() {
           key,
           typeof value === 'string' && value.trim() === '' ? null : value,
         ])
-      ) as Partial<Omit<AppSettings, 'id' | 'created_at'>>;
+      ) as Partial<Omit<AppSettings, 'id' | 'created_at' | 'updated_at'>>;
 
       console.log("Submitting with processed values:", processedValues);
 
