@@ -32,7 +32,19 @@ import { PaymentMethod } from "@/lib/supabase/payment-methods";
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama metode pembayaran minimal 3 karakter." }).max(100, { message: "Nama metode pembayaran maksimal 100 karakter." }),
   type: z.enum(['bank_transfer', 'e_wallet', 'card', 'other'], { message: "Tipe metode pembayaran harus dipilih." }),
-  details: z.string().nullable().default(null),
+  details: z.string().nullable().default(null).superRefine((val, ctx) => {
+    if (val && val.trim() !== '') {
+      try {
+        JSON.parse(val);
+      } catch (e) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Detail instruksi harus berupa JSON yang valid.",
+          path: ['details'],
+        });
+      }
+    }
+  }),
   is_active: z.boolean().default(true),
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
@@ -52,7 +64,9 @@ export function PaymentMethodForm({ initialData, onSubmit, loading = false }: Pa
     defaultValues: initialData ? {
       name: initialData.name,
       type: initialData.type,
-      details: initialData.details ? JSON.stringify(initialData.details, null, 2) : null,
+      details: typeof initialData.details === 'object' && initialData.details !== null
+        ? JSON.stringify(initialData.details, null, 2)
+        : initialData.details, // If it's already a string or null, use it directly
       is_active: initialData.is_active,
       order: initialData.order,
     } : {
