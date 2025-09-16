@@ -45,15 +45,17 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
   const { user } = useSession();
   const router = useRouter();
 
+  const defaultValues: BlogPostFormValues = {
+    title: initialData?.title ?? "",
+    slug: initialData?.slug ?? "",
+    content: initialData?.content ?? "",
+    image_url: initialData?.image_url ?? null,
+    is_published: initialData?.is_published ?? false,
+  };
+
   const form = useForm<BlogPostFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: initialData?.title ?? "",
-      slug: initialData?.slug ?? "",
-      content: initialData?.content ?? "",
-      image_url: initialData?.image_url ?? null,
-      is_published: initialData?.is_published ?? false,
-    },
+    defaultValues,
   });
 
   const handleImageUploadSuccess = (newUrl: string) => {

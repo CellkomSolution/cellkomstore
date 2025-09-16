@@ -78,19 +78,21 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
     fetchCategories();
   }, []);
 
+  const defaultValues: z.infer<typeof formSchema> = {
+    name: initialData?.name ?? "",
+    price: initialData?.price ?? 0,
+    originalPrice: initialData?.originalPrice ?? 0,
+    category: initialData?.category ?? "",
+    location: initialData?.location ?? "",
+    description: initialData?.description ?? "",
+    isFlashSale: initialData?.isFlashSale ?? false,
+    mainImageUrl: initialData?.mainImageUrl ?? null, // Initialize with null
+    additionalImages: initialData?.additionalImages ?? [],
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: initialData?.name ?? "",
-      price: initialData?.price ?? 0,
-      originalPrice: initialData?.originalPrice ?? 0,
-      category: initialData?.category ?? "",
-      location: initialData?.location ?? "",
-      description: initialData?.description ?? "",
-      isFlashSale: initialData?.isFlashSale ?? false,
-      mainImageUrl: initialData?.mainImageUrl ?? null, // Initialize with null
-      additionalImages: initialData?.additionalImages ?? [],
-    },
+    defaultValues,
   });
 
   const handleMainImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -123,7 +123,7 @@ export default function AdminSettingsPage() {
       setIsLoading(false);
     }
     fetchSettings();
-  }, [form]); // Added form to dependency array
+  }, [form, defaultFormValues]); // Added defaultFormValues to dependency array
 
   const onSubmit: SubmitHandler<SettingsFormValues> = async (values) => {
     console.log("onSubmit called with values:", values);
