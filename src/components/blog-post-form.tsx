@@ -28,8 +28,8 @@ const formSchema = z.object({
   title: z.string().min(5, { message: "Judul minimal 5 karakter." }).max(200, { message: "Judul maksimal 200 karakter." }),
   slug: z.string().min(5, { message: "Slug minimal 5 karakter." }).max(200, { message: "Slug maksimal 200 karakter." }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: "Slug harus berupa huruf kecil, angka, dan tanda hubung (tanpa spasi)." }),
   content: z.string().min(50, { message: "Konten minimal 50 karakter." }),
-  image_url: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null),
-  is_published: z.boolean().default(false),
+  image_url: z.string().url({ message: "URL gambar tidak valid." }).nullish().default(null), // Changed to .nullish()
+  is_published: z.boolean().nullish().default(false), // Changed to .nullish()
 });
 
 // Derive the form values type directly from the schema

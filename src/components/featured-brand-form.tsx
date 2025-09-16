@@ -20,8 +20,8 @@ import { ImageUploader } from "@/components/image-uploader";
 import { FeaturedBrand } from "@/lib/supabase/featured-brands";
 
 const formSchema = z.object({
-  image_url: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null),
-  link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable().default(null),
+  image_url: z.string().url({ message: "URL gambar tidak valid." }).nullish().default(null), // Changed to .nullish()
+  link_url: z.string().url({ message: "URL tautan tidak valid." }).nullish().default(null), // Changed to .nullish()
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 

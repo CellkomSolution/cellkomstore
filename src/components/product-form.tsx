@@ -35,12 +35,12 @@ import { getCategories, Category } from "@/lib/supabase/categories"; // Import g
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama produk minimal 3 karakter." }),
   price: z.coerce.number().min(0, { message: "Harga tidak boleh negatif." }),
-  originalPrice: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).nullable().default(null),
+  originalPrice: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).nullish().default(null), // Changed to .nullish()
   category: z.string().min(1, { message: "Kategori harus dipilih." }),
   location: z.string().min(3, { message: "Lokasi minimal 3 karakter." }),
-  description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }),
-  isFlashSale: z.boolean().default(false),
-  imageUrl: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null),
+  description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }).nullish().default(null), // Changed to .nullish() and default(null)
+  isFlashSale: z.boolean().nullish().default(false), // Changed to .nullish()
+  imageUrl: z.string().url({ message: "URL gambar tidak valid." }).nullish().default(null), // Changed to .nullish()
   imageFile: z.any().optional(), // For file upload
 });
 
@@ -79,7 +79,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
       originalPrice: initialData?.originalPrice || null,
       category: initialData?.category || "",
       location: initialData?.location || "",
-      description: initialData?.description || "",
+      description: initialData?.description || null,
       isFlashSale: initialData?.isFlashSale || false,
       imageUrl: initialData?.imageUrl || null,
       imageFile: undefined,

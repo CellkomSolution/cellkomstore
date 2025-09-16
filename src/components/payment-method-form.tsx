@@ -32,8 +32,8 @@ import { PaymentMethod } from "@/lib/supabase/payment-methods";
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama metode pembayaran minimal 3 karakter." }).max(100, { message: "Nama metode pembayaran maksimal 100 karakter." }),
   type: z.enum(['bank_transfer', 'e_wallet', 'card', 'other'], { message: "Tipe metode pembayaran harus dipilih." }),
-  details: z.string().nullable().default(null),
-  is_active: z.boolean().default(true),
+  details: z.string().nullish().default(null), // Changed to .nullish()
+  is_active: z.boolean().nullish().default(true), // Changed to .nullish()
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
