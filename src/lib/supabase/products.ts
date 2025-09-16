@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface ProductImage {
   id: string;
   product_id: string;
-  imageUrl: string; // Renamed from image_url for consistency
+  imageUrl: string | null; // Changed to allow null
   order: number;
 }
 
@@ -12,8 +12,8 @@ export interface Product {
   name: string;
   price: number;
   originalPrice?: number | null;
-  mainImageUrl: string; // Renamed from imageUrl
-  additionalImages: ProductImage[]; // New field
+  mainImageUrl: string | null; // Changed to allow null
+  additionalImages: ProductImage[];
   location: string;
   rating: number;
   soldCount: string;
@@ -43,13 +43,13 @@ const mapProductData = (item: any): Product => ({
   name: item.name,
   price: item.price,
   originalPrice: item.original_price,
-  mainImageUrl: item.main_image_url, // Mapped from main_image_url
+  mainImageUrl: item.main_image_url || null, // Ensure null if empty
   additionalImages: item.product_images ? item.product_images.map((img: any) => ({
     id: img.id,
     product_id: img.product_id,
-    imageUrl: img.image_url,
+    imageUrl: img.image_url || null, // Ensure null if empty
     order: img.order,
-  })).sort((a: ProductImage, b: ProductImage) => a.order - b.order) : [], // Map additional images and sort them
+  })).sort((a: ProductImage, b: ProductImage) => (a.order ?? 0) - (b.order ?? 0)) : [], // Map additional images and sort them
   location: item.location,
   rating: item.rating,
   soldCount: item.sold_count,
@@ -172,7 +172,7 @@ export async function getTotalProductsCount(): Promise<number> {
 }
 
 // New function to create a product
-export async function createProduct(productData: Omit<Product, 'id' | 'rating' | 'soldCount' | 'additionalImages'>, additionalImageUrls: string[] = []): Promise<Product | null> {
+export async function createProduct(productData: Omit<Product, 'id' | 'rating' | 'soldCount' | 'additionalImages'>, additionalImageUrls: (string | null)[] = []): Promise<Product | null> {
   const { name, price, originalPrice, mainImageUrl, location, category, isFlashSale, description } = productData;
   const { data, error } = await supabase
     .from("products")
@@ -198,7 +198,7 @@ export async function createProduct(productData: Omit<Product, 'id' | 'rating' |
   }
 
   if (data && additionalImageUrls.length > 0) {
-    const imagesToInsert = additionalImageUrls.map((url, index) => ({
+    const imagesToInsert = additionalImageUrls.filter(Boolean).map((url, index) => ({ // Filter out nulls
       product_id: data.id,
       image_url: url,
       order: index + 1, // Start order from 1 for additional images
@@ -215,7 +215,7 @@ export async function createProduct(productData: Omit<Product, 'id' | 'rating' |
 }
 
 // New function to update a product
-export async function updateProduct(id: string, productData: Partial<Omit<Product, 'id' | 'created_at' | 'rating' | 'soldCount' | 'additionalImages'>>, additionalImageUpdates: { id?: string; imageUrl: string; order: number; _delete?: boolean }[] = []): Promise<Product | null> {
+export async function updateProduct(id: string, productData: Partial<Omit<Product, 'id' | 'created_at' | 'rating' | 'soldCount' | 'additionalImages'>>, additionalImageUpdates: { id?: string; imageUrl: string | null; order: number; _delete?: boolean }[] = []): Promise<Product | null> {
   const updatePayload: Record<string, any> = {
     updated_at: new Date().toISOString(),
   };
@@ -243,12 +243,12 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
 
   // Handle additional image updates
   if (additionalImageUpdates.length > 0) {
-    const inserts = additionalImageUpdates.filter(img => !img.id && !img._delete).map((img, index) => ({
+    const inserts = additionalImageUpdates.filter(img => !img.id && img.imageUrl && !img._delete).map((img, index) => ({
       product_id: id,
       image_url: img.imageUrl,
       order: img.order,
     }));
-    const updates = additionalImageUpdates.filter(img => img.id && !img._delete).map(img => ({
+    const updates = additionalImageUpdates.filter(img => img.id && img.imageUrl && !img._delete).map(img => ({ // Only update if imageUrl is not null
       id: img.id,
       image_url: img.imageUrl,
       order: img.order,
@@ -276,7 +276,7 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
       if (fetchImagesError) {
         console.warn("Failed to fetch images for deletion from storage:", fetchImagesError.message);
       } else if (imagesToDelete) {
-        const fileNames = imagesToDelete.map(img => img.image_url.split('/').pop()!).filter(Boolean);
+        const fileNames = imagesToDelete.map(img => img.image_url?.split('/').pop()!).filter(Boolean); // Handle null image_url
         if (fileNames.length > 0) {
           const { error: storageError } = await supabase.storage.from('product-images').remove(fileNames);
           if (storageError) console.warn("Failed to delete product images from storage:", storageError.message);
@@ -293,7 +293,8 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
 }
 
 // New functions for managing individual product images
-export async function createProductImage(productId: string, imageUrl: string, order: number): Promise<ProductImage | null> {
+export async function createProductImage(productId: string, imageUrl: string | null, order: number): Promise<ProductImage | null> {
+  if (!imageUrl) return null; // Don't create if imageUrl is null
   const { data, error } = await supabase
     .from("product_images")
     .insert({ product_id: productId, image_url: imageUrl, order })
@@ -311,7 +312,12 @@ export async function createProductImage(productId: string, imageUrl: string, or
   };
 }
 
-export async function updateProductImage(imageId: string, imageUrl: string, order: number): Promise<ProductImage | null> {
+export async function updateProductImage(imageId: string, imageUrl: string | null, order: number): Promise<ProductImage | null> {
+  if (!imageUrl) {
+    // If imageUrl is null, consider deleting the image or handling it as an error
+    console.warn(`Attempted to update product image ${imageId} with null URL. Consider deleting instead.`);
+    return null;
+  }
   const { data, error } = await supabase
     .from("product_images")
     .update({ image_url: imageUrl, order, updated_at: new Date().toISOString() })

@@ -41,14 +41,20 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={`/product/${product.id}`} className="block flex flex-col flex-grow">
         <CardContent className="p-0 flex flex-col flex-grow">
           <div className="relative">
-            <Image
-              src={product.mainImageUrl}
-              alt={product.name}
-              width={160}
-              height={192}
-              className="w-full h-48 object-cover"
-              priority
-            />
+            {product.mainImageUrl ? (
+              <Image
+                src={product.mainImageUrl}
+                alt={product.name}
+                width={160}
+                height={192}
+                className="w-full h-48 object-cover"
+                priority
+              />
+            ) : (
+              <div className="w-full h-48 bg-muted flex items-center justify-center text-muted-foreground">
+                No Image
+              </div>
+            )}
              <Button 
                 size="sm" 
                 className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"

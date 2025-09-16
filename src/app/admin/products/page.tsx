@@ -61,7 +61,7 @@ export default function AdminProductsPage() {
 
       // Delete additional images from storage
       if (productToDelete.additionalImages && productToDelete.additionalImages.length > 0) {
-        const fileNamesToDelete = productToDelete.additionalImages.map(img => img.imageUrl.split('/').pop()!).filter(Boolean);
+        const fileNamesToDelete = productToDelete.additionalImages.map(img => img.imageUrl?.split('/').pop()!).filter(Boolean); // Handle null imageUrl
         if (fileNamesToDelete.length > 0) {
           const { error: storageError } = await supabase.storage
             .from('product-images')
@@ -160,13 +160,19 @@ export default function AdminProductsPage() {
                   products.map((product) => (
                     <TableRow key={product.id}>
                       <TableCell>
-                        <Image
-                          src={product.mainImageUrl}
-                          alt={product.name}
-                          width={48}
-                          height={48}
-                          className="rounded-md object-cover"
-                        />
+                        {product.mainImageUrl ? (
+                          <Image
+                            src={product.mainImageUrl}
+                            alt={product.name}
+                            width={48}
+                            height={48}
+                            className="rounded-md object-cover"
+                          />
+                        ) : (
+                          <div className="h-12 w-12 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                            No Img
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell className="font-medium">{product.name}</TableCell>
                       <TableCell>{product.category}</TableCell>

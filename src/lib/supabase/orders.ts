@@ -9,7 +9,7 @@ interface RawProductData {
   name: string;
   price: number;
   original_price: number | null;
-  main_image_url: string; // Changed from image_url
+  main_image_url: string | null; // Changed to allow null
   location: string;
   rating: number;
   sold_count: string;
@@ -28,7 +28,7 @@ interface RawOrderItemData {
   quantity: number;
   price_at_purchase: number;
   product_name_at_purchase: string;
-  product_image_url_at_purchase: string; // Raw product image URL
+  product_image_url_at_purchase: string | null; // Changed to allow null
   created_at: string;
   products: RawProductData | null; // Raw product data before mapping
 }
@@ -40,7 +40,7 @@ export interface OrderItem {
   quantity: number;
   price_at_purchase: number;
   product_name_at_purchase: string;
-  product_image_url_at_purchase: string;
+  product_image_url_at_purchase: string | null; // Changed to allow null
   created_at: string;
   product?: Product; // Joined product data
 }
@@ -102,7 +102,7 @@ export async function createOrder(
     quantity: item.quantity,
     price_at_purchase: item.price,
     product_name_at_purchase: item.name,
-    product_image_url_at_purchase: item.mainImageUrl, // Changed from imageUrl
+    product_image_url_at_purchase: item.mainImageUrl || null, // Ensure null if empty
   }));
 
   const { error: orderItemsError } = await supabase

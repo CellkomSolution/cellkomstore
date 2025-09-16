@@ -98,7 +98,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         {/* Product Image Gallery */}
         <div>
           <div className="aspect-square rounded-lg overflow-hidden border mb-4">
-            {selectedImage && (
+            {selectedImage ? (
               <Image
                 src={selectedImage}
                 alt={product.name}
@@ -107,26 +107,32 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 className="w-full h-full object-contain"
                 priority
               />
+            ) : (
+              <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
+                No Image
+              </div>
             )}
           </div>
           {allImages.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-2">
               {allImages.map((imgUrl, index) => (
-                <div
-                  key={index}
-                  className={`relative w-20 h-20 flex-shrink-0 rounded-md border cursor-pointer overflow-hidden ${
-                    selectedImage === imgUrl ? "border-primary ring-2 ring-primary" : ""
-                  }`}
-                  onClick={() => setSelectedImage(imgUrl)}
-                >
-                  <Image
-                    src={imgUrl}
-                    alt={`${product.name} thumbnail ${index + 1}`}
-                    fill
-                    style={{ objectFit: "cover" }}
-                    sizes="80px"
-                  />
-                </div>
+                imgUrl ? ( // Conditionally render thumbnail if imgUrl is not null
+                  <div
+                    key={index}
+                    className={`relative w-20 h-20 flex-shrink-0 rounded-md border cursor-pointer overflow-hidden ${
+                      selectedImage === imgUrl ? "border-primary ring-2 ring-primary" : ""
+                    }`}
+                    onClick={() => setSelectedImage(imgUrl)}
+                  >
+                    <Image
+                      src={imgUrl}
+                      alt={`${product.name} thumbnail ${index + 1}`}
+                      fill
+                      style={{ objectFit: "cover" }}
+                      sizes="80px"
+                    />
+                  </div>
+                ) : null
               ))}
             </div>
           )}

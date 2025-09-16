@@ -32,7 +32,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     fetchProduct();
   }, [id, router]);
 
-  const onSubmit = async (values: any, additionalImageUpdates: { id?: string; imageUrl: string; order: number; _delete?: boolean }[]) => {
+  const onSubmit = async (values: any, additionalImageUpdates: { id?: string; imageUrl: string | null; order: number; _delete?: boolean }[]) => {
     setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -46,7 +46,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
         name: values.name,
         price: values.price,
         originalPrice: values.originalPrice,
-        mainImageUrl: values.mainImageUrl, // Renamed
+        mainImageUrl: values.mainImageUrl,
         location: values.location,
         category: values.category,
         isFlashSale: values.isFlashSale,

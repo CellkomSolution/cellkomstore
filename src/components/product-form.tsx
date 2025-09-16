@@ -41,25 +41,25 @@ const formSchema = z.object({
   location: z.string().min(3, { message: "Lokasi minimal 3 karakter." }),
   description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }),
   isFlashSale: z.boolean().default(false).optional(),
-  mainImageUrl: z.string().url({ message: "URL gambar utama tidak valid." }).min(1, { message: "Gambar utama produk diperlukan." }), // Renamed
-  additionalImages: z.array(z.object({ // New field
+  mainImageUrl: z.string().url({ message: "URL gambar utama tidak valid." }).nullable().default(null), // Allow null
+  additionalImages: z.array(z.object({
     id: z.string(),
-    imageUrl: z.string().url({ message: "URL gambar tambahan tidak valid." }).min(1, { message: "Gambar tambahan tidak boleh kosong." }),
+    imageUrl: z.string().url({ message: "URL gambar tambahan tidak valid." }).nullable().default(null), // Allow null
     order: z.number().min(0),
   })).optional().default([]),
 });
 
 interface ProductFormProps {
   initialData?: Product | null;
-  onSubmit: (values: z.infer<typeof formSchema>, additionalImageUpdates: { id?: string; imageUrl: string; order: number; _delete?: boolean }[]) => Promise<void>; // Updated onSubmit signature
+  onSubmit: (values: z.infer<typeof formSchema>, additionalImageUpdates: { id?: string; imageUrl: string | null; order: number; _delete?: boolean }[]) => Promise<void>; // Updated onSubmit signature
   loading?: boolean;
 }
 
 export function ProductForm({ initialData, onSubmit, loading = false }: ProductFormProps) {
   const router = useRouter();
-  const [mainImagePreview, setMainImagePreview] = React.useState<string | null>(initialData?.mainImageUrl || null); // Renamed
-  const [isUploadingMainImage, setIsUploadingMainImage] = React.useState(false); // Renamed
-  const mainFileInputRef = React.useRef<HTMLInputElement>(null); // Renamed
+  const [mainImagePreview, setMainImagePreview] = React.useState<string | null>(initialData?.mainImageUrl || null);
+  const [isUploadingMainImage, setIsUploadingMainImage] = React.useState(false);
+  const mainFileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = React.useState(true);
@@ -88,12 +88,12 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
       location: initialData?.location || "",
       description: initialData?.description || "",
       isFlashSale: initialData?.isFlashSale || false,
-      mainImageUrl: initialData?.mainImageUrl || "", // Renamed
-      additionalImages: initialData?.additionalImages || [], // Initialize additional images
+      mainImageUrl: initialData?.mainImageUrl || null, // Initialize with null
+      additionalImages: initialData?.additionalImages || [],
     },
   });
 
-  const handleMainImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => { // Renamed
+  const handleMainImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) {
       toast.error("Anda harus memilih gambar untuk diunggah.");
       return;
@@ -104,7 +104,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
     const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
 
-    setIsUploadingMainImage(true); // Renamed
+    setIsUploadingMainImage(true);
     try {
       const { data, error: uploadError } = await supabase.storage
         .from("product-images")
@@ -122,21 +122,21 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
         throw new Error("Tidak bisa mendapatkan URL publik untuk gambar.");
       }
 
-      setMainImagePreview(publicUrlData.publicUrl); // Renamed
-      form.setValue("mainImageUrl", publicUrlData.publicUrl, { shouldValidate: true }); // Renamed
+      setMainImagePreview(publicUrlData.publicUrl);
+      form.setValue("mainImageUrl", publicUrlData.publicUrl, { shouldValidate: true });
       toast.success("Gambar utama berhasil diunggah!");
     } catch (error: any) {
       toast.error("Gagal mengunggah gambar: " + error.message);
-      setMainImagePreview(null); // Renamed
-      form.setValue("mainImageUrl", ""); // Renamed
+      setMainImagePreview(null);
+      form.setValue("mainImageUrl", null); // Set to null
     } finally {
-      setIsUploadingMainImage(false); // Renamed
+      setIsUploadingMainImage(false);
     }
   };
 
-  const removeMainImage = () => { // Renamed
-    setMainImagePreview(null); // Renamed
-    form.setValue("mainImageUrl", "", { shouldValidate: true }); // Renamed
+  const removeMainImage = () => {
+    setMainImagePreview(null);
+    form.setValue("mainImageUrl", null, { shouldValidate: true }); // Set to null
   };
 
   const handleAdditionalImagesChange = (newImages: ProductImage[]) => {
@@ -295,13 +295,13 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
           )}
         />
         <FormItem>
-          <FormLabel>Gambar Utama Produk</FormLabel> {/* Renamed label */}
+          <FormLabel>Gambar Utama Produk</FormLabel>
           <FormControl>
             <div>
-              {mainImagePreview ? ( // Renamed
+              {mainImagePreview ? (
                 <div className="relative h-48 w-full max-w-md">
                   <Image
-                    src={mainImagePreview} // Renamed
+                    src={mainImagePreview}
                     alt="Product Preview"
                     fill
                     style={{ objectFit: "contain" }}
@@ -312,8 +312,8 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
                     variant="destructive"
                     size="icon"
                     className="absolute top-2 right-2 rounded-full h-6 w-6"
-                    onClick={removeMainImage} // Renamed
-                    disabled={loading || isUploadingMainImage} // Renamed
+                    onClick={removeMainImage}
+                    disabled={loading || isUploadingMainImage}
                   >
                     <XCircle className="h-4 w-4" />
                     <span className="sr-only">Hapus Gambar</span>
@@ -322,17 +322,17 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
               ) : (
                 <div
                   className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 hover:bg-muted/30"
-                  onClick={() => mainFileInputRef.current?.click()} // Renamed
+                  onClick={() => mainFileInputRef.current?.click()}
                 >
                   <Input
-                    ref={mainFileInputRef} // Renamed
+                    ref={mainFileInputRef}
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={handleMainImageUpload} // Renamed
-                    disabled={loading || isUploadingMainImage} // Renamed
+                    onChange={handleMainImageUpload}
+                    disabled={loading || isUploadingMainImage}
                   />
-                  {isUploadingMainImage ? ( // Renamed
+                  {isUploadingMainImage ? (
                     <>
                       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                       <p className="mt-2 text-sm text-muted-foreground">Mengunggah...</p>

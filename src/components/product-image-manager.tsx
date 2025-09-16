@@ -18,7 +18,7 @@ interface ProductImageManagerProps {
 
 interface DraggableImageProps {
   image: ProductImage;
-  onUpdate: (id: string, newUrl: string) => void;
+  onUpdate: (id: string, newUrl: string | null) => void; // Allow null
   onRemove: (id: string) => void;
   disabled: boolean;
 }
@@ -82,7 +82,7 @@ export function ProductImageManager({ initialImages, onImagesChange, disabled = 
 
   React.useEffect(() => {
     // Ensure images are ordered correctly when initialImages change
-    const sortedInitialImages = [...initialImages].sort((a, b) => a.order - b.order);
+    const sortedInitialImages = [...initialImages].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     setImages(sortedInitialImages);
   }, [initialImages]);
 
@@ -95,14 +95,14 @@ export function ProductImageManager({ initialImages, onImagesChange, disabled = 
     const newImage: ProductImage = {
       id: `new-${Date.now()}-${Math.random()}`, // Temporary ID for new images
       product_id: '', // Will be set on save
-      imageUrl: '',
-      order: images.length > 0 ? Math.max(...images.map(img => img.order)) + 1 : 0,
+      imageUrl: null, // Initialize with null
+      order: images.length > 0 ? Math.max(...images.map(img => img.order ?? 0)) + 1 : 0,
     };
     setImages((prev) => [...prev, newImage]);
     onImagesChange([...images, newImage]);
   };
 
-  const handleUpdateImage = (id: string, newUrl: string) => {
+  const handleUpdateImage = (id: string, newUrl: string | null) => {
     const updatedImages = images.map((img) =>
       img.id === id ? { ...img, imageUrl: newUrl } : img
     );
