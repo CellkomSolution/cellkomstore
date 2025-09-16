@@ -46,13 +46,9 @@ export async function getPaymentMethodById(id: string): Promise<PaymentMethod | 
 }
 
 export async function createPaymentMethod(methodData: Omit<PaymentMethod, 'id' | 'created_at' | 'updated_at'>): Promise<PaymentMethod | null> {
-  const payload = {
-    ...methodData,
-    details: methodData.details ? JSON.parse(methodData.details) : null, // Parse JSON string here
-  };
   const { data, error } = await supabase
     .from("payment_methods")
-    .insert(payload)
+    .insert(methodData)
     .select()
     .single();
 
@@ -64,19 +60,9 @@ export async function createPaymentMethod(methodData: Omit<PaymentMethod, 'id' |
 }
 
 export async function updatePaymentMethod(id: string, methodData: Partial<Omit<PaymentMethod, 'id' | 'created_at'>>): Promise<PaymentMethod | null> {
-  const payload: Record<string, any> = {
-    ...methodData,
-    updated_at: new Date().toISOString(),
-  };
-
-  // Only parse and update 'details' if it's explicitly provided in methodData
-  if (methodData.details !== undefined) {
-    payload.details = methodData.details ? JSON.parse(methodData.details) : null;
-  }
-
   const { data, error } = await supabase
     .from("payment_methods")
-    .update(payload)
+    .update({ ...methodData, updated_at: new Date().toISOString() })
     .eq("id", id)
     .select()
     .single();

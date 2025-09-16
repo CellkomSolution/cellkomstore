@@ -45,34 +45,21 @@ export default function AdminProductsPage() {
 
     setIsDeleting(true);
     try {
-      // Delete main image from storage first
-      if (productToDelete.mainImageUrl) {
-        const imageUrlParts = productToDelete.mainImageUrl.split('/');
+      // Delete image from storage first
+      if (productToDelete.imageUrl) {
+        const imageUrlParts = productToDelete.imageUrl.split('/');
         const fileName = imageUrlParts[imageUrlParts.length - 1];
         const { error: storageError } = await supabase.storage
           .from('product-images')
           .remove([fileName]);
 
         if (storageError) {
-          console.warn("Failed to delete product main image from storage:", storageError.message);
+          console.warn("Failed to delete product image from storage:", storageError.message);
           // Don't throw error here, proceed with product deletion even if image deletion fails
         }
       }
 
-      // Delete additional images from storage
-      if (productToDelete.additionalImages && productToDelete.additionalImages.length > 0) {
-        const fileNamesToDelete = productToDelete.additionalImages.map(img => img.imageUrl?.split('/').pop()!).filter(Boolean); // Handle null imageUrl
-        if (fileNamesToDelete.length > 0) {
-          const { error: storageError } = await supabase.storage
-            .from('product-images')
-            .remove(fileNamesToDelete);
-          if (storageError) {
-            console.warn("Failed to delete additional product images from storage:", storageError.message);
-          }
-        }
-      }
-
-      // Delete product from database (this will cascade delete product_images due to ON DELETE CASCADE)
+      // Delete product from database
       const { error: dbError } = await supabase
         .from("products")
         .delete()
@@ -160,19 +147,13 @@ export default function AdminProductsPage() {
                   products.map((product) => (
                     <TableRow key={product.id}>
                       <TableCell>
-                        {product.mainImageUrl ? (
-                          <Image
-                            src={product.mainImageUrl}
-                            alt={product.name}
-                            width={48}
-                            height={48}
-                            className="rounded-md object-cover"
-                          />
-                        ) : (
-                          <div className="h-12 w-12 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
-                            No Img
-                          </div>
-                        )}
+                        <Image
+                          src={product.imageUrl}
+                          alt={product.name}
+                          width={48}
+                          height={48}
+                          className="rounded-md object-cover"
+                        />
                       </TableCell>
                       <TableCell className="font-medium">{product.name}</TableCell>
                       <TableCell>{product.category}</TableCell>

@@ -32,7 +32,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     fetchProduct();
   }, [id, router]);
 
-  const onSubmit = async (values: any, additionalImageUpdates: { id?: string; imageUrl: string | null; order: number; _delete?: boolean }[]) => {
+  const onSubmit = async (values: any) => {
     setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -42,16 +42,17 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
         return;
       }
 
+      // Use the new updateProduct utility function
       await updateProduct(id, {
         name: values.name,
         price: values.price,
         originalPrice: values.originalPrice,
-        mainImageUrl: values.mainImageUrl,
+        imageUrl: values.imageUrl,
         location: values.location,
         category: values.category,
         isFlashSale: values.isFlashSale,
         description: values.description,
-      }, additionalImageUpdates); // Pass all additional image updates
+      });
 
       toast.success("Produk berhasil diperbarui!");
       router.push("/admin/products");

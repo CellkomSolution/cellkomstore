@@ -21,11 +21,11 @@ import { Label } from "@/components/ui/label";
 import { useCart } from "@/context/cart-context"; // Import useCart to clear cart
 
 interface UserOrderDetailPageProps {
-  params: Promise<{ orderId: string }>; // Changed to direct object
+  params: { orderId: string }; // Changed to direct object
 }
 
 export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps) {
-  const { orderId } = React.use(params); // Access orderId directly
+  const { orderId } = params; // Access orderId directly
   const router = useRouter();
   const { user, isLoading: isSessionLoading } = useSession();
   const { clearCart } = useCart(); // Get clearCart from context
@@ -152,7 +152,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
                       {order.order_items?.map((item) => (
                         <li key={item.id} className="flex items-center gap-4">
                           <Image
-                            src={item.product_image_url_at_purchase || "/placeholder-image.jpg"} // Fallback image
+                            src={item.product_image_url_at_purchase}
                             alt={item.product_name_at_purchase}
                             width={64}
                             height={64}

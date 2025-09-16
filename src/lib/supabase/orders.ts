@@ -9,7 +9,7 @@ interface RawProductData {
   name: string;
   price: number;
   original_price: number | null;
-  main_image_url: string | null; // Changed to allow null
+  image_url: string;
   location: string;
   rating: number;
   sold_count: string;
@@ -28,7 +28,7 @@ interface RawOrderItemData {
   quantity: number;
   price_at_purchase: number;
   product_name_at_purchase: string;
-  product_image_url_at_purchase: string | null; // Changed to allow null
+  product_image_url_at_purchase: string;
   created_at: string;
   products: RawProductData | null; // Raw product data before mapping
 }
@@ -40,7 +40,7 @@ export interface OrderItem {
   quantity: number;
   price_at_purchase: number;
   product_name_at_purchase: string;
-  product_image_url_at_purchase: string | null; // Changed to allow null
+  product_image_url_at_purchase: string;
   created_at: string;
   product?: Product; // Joined product data
 }
@@ -102,7 +102,7 @@ export async function createOrder(
     quantity: item.quantity,
     price_at_purchase: item.price,
     product_name_at_purchase: item.name,
-    product_image_url_at_purchase: item.mainImageUrl || null, // Ensure null if empty
+    product_image_url_at_purchase: item.imageUrl,
   }));
 
   const { error: orderItemsError } = await supabase
@@ -125,7 +125,7 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
     .select(`
       *,
       user_profile:profiles!user_id(id, first_name, last_name, avatar_url, email),
-      order_items:order_items_order_id_fkey(*, products:products!order_items_product_id_fkey(id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description)),
+      order_items:order_items_order_id_fkey(*, products:products!order_items_product_id_fkey(id, name, price, original_price, image_url, location, rating, sold_count, category, is_flash_sale, description)),
       payment_method:payment_methods!orders_payment_method_id_fkey(id, name, type, details)
     `)
     .eq("id", orderId)

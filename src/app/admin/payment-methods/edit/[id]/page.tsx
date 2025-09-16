@@ -8,12 +8,8 @@ import { toast } from "sonner";
 import { getPaymentMethodById, updatePaymentMethod, PaymentMethod } from "@/lib/supabase/payment-methods";
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Reusing skeleton
 
-interface EditPaymentMethodPageProps {
-  params: Promise<{ id: string }>; // Corrected: params is now a Promise
-}
-
-export default function EditPaymentMethodPage({ params }: EditPaymentMethodPageProps) {
-  const { id } = React.use(params); // Mengakses id langsung dari params
+export default function EditPaymentMethodPage({ params }: { params: { id: string } }) {
+  const { id } = params; // Mengakses id langsung dari params
   const router = useRouter();
 
   const [initialData, setInitialData] = React.useState<PaymentMethod | null>(null);
@@ -46,7 +42,7 @@ export default function EditPaymentMethodPage({ params }: EditPaymentMethodPageP
       const methodData = {
         name: values.name,
         type: values.type,
-        details: values.details, // Pass directly, parsing handled in supabase utility
+        details: values.details ? JSON.parse(values.details) : null, // Parse JSON string to object
         is_active: values.is_active,
         order: values.order,
       };
@@ -57,7 +53,7 @@ export default function EditPaymentMethodPage({ params }: EditPaymentMethodPageP
       router.push("/admin/payment-methods");
     } catch (error: any) {
       console.error("Error updating payment method:", error);
-      toast.error("Gagal memperbarui metode pembayaran: " + (error.message || "Terjadi kesalahan."));
+      toast.error("Gagal memperbarui metode pembayaran: " + (error.message || "Format detail JSON tidak valid."));
     } finally {
       setIsSubmitting(false);
     }

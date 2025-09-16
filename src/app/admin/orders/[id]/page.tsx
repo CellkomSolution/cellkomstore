@@ -23,11 +23,11 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AdminOrderDetailPageProps {
-  params: Promise<{ id: string }>; // Corrected: params is now a Promise
+  params: { id: string }; // Changed to direct object
 }
 
 export default function AdminOrderDetailPage({ params }: AdminOrderDetailPageProps) {
-  const { id: orderId } = React.use(params); // Access orderId directly
+  const { id: orderId } = params; // Access orderId directly
   const router = useRouter();
 
   const [order, setOrder] = React.useState<Order | null>(null);
@@ -115,7 +115,7 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
                   {order.order_items?.map((item) => (
                     <li key={item.id} className="flex items-center gap-4">
                       <Image
-                        src={item.product_image_url_at_purchase || "/placeholder-image.jpg"} // Fallback image
+                        src={item.product_image_url_at_purchase}
                         alt={item.product_name_at_purchase}
                         width={64}
                         height={64}

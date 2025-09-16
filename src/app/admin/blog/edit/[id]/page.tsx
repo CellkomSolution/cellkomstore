@@ -10,11 +10,11 @@ import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skel
 import { useSession } from "@/context/session-context";
 
 interface EditBlogPostPageProps {
-  params: Promise<{ id: string }>; // Corrected: params is now a Promise
+  params: { id: string }; // Mengubah tipe params menjadi objek langsung
 }
 
 export default function EditBlogPostPage({ params }: EditBlogPostPageProps) {
-  const { id } = React.use(params); // Mengakses id langsung dari params
+  const { id } = params; // Mengakses id langsung dari params
   const router = useRouter();
   const { user } = useSession();
 

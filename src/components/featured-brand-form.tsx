@@ -21,7 +21,7 @@ import { FeaturedBrand } from "@/lib/supabase/featured-brands";
 
 const formSchema = z.object({
   image_url: z.string().url({ message: "URL gambar tidak valid." }).min(1, { message: "Gambar merek diperlukan." }),
-  link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable().default(null),
+  link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable().default(null), // Changed to default(null)
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
@@ -35,15 +35,13 @@ interface FeaturedBrandFormProps {
 }
 
 export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: FeaturedBrandFormProps) {
-  const defaultValues: FeaturedBrandFormValues = {
-    image_url: initialData?.image_url ?? "",
-    link_url: initialData?.link_url ?? null,
-    order: initialData?.order ?? 0,
-  };
-
   const form = useForm<FeaturedBrandFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: {
+      image_url: initialData?.image_url || "",
+      link_url: initialData?.link_url ?? null, // Ensure null if undefined
+      order: initialData?.order ?? 0, // Ensure number
+    },
   });
 
   const handleImageUploadSuccess = (newUrl: string) => {

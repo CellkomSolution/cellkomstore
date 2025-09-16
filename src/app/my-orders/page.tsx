@@ -113,7 +113,7 @@ export default function MyOrdersPage() {
                         {order.order_items?.map((item) => (
                           <li key={item.id} className="flex items-center gap-3">
                             <Image
-                              src={item.product_image_url_at_purchase || "/placeholder-image.jpg"} // Fallback image
+                              src={item.product_image_url_at_purchase}
                               alt={item.product_name_at_purchase}
                               width={40}
                               height={40}

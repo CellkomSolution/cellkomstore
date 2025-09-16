@@ -27,11 +27,11 @@ import {
 } from "@/components/ui/drawer";
 
 interface AdminChatDetailPageProps {
-  params: Promise<{ userId: string }>; // Corrected: params is now a Promise
+  params: { userId: string }; // Changed to direct object
 }
 
 export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps) {
-  const { userId } = React.use(params); // Unwrap params using React.use()
+  const { userId } = params; // Access userId directly
 
   const router = useRouter();
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();
@@ -123,7 +123,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
             event: "INSERT",
             schema: "public",
             table: "chats",
-            filter: `or(sender_id.eq.${userId},receiver_id.eq.${adminId})`, // Corrected filter to include admin as receiver
+            filter: `or(sender_id.eq.${userId},receiver_id.eq.${userId})`,
           },
           (payload) => {
             const newMsg = payload.new as ChatMessage;
@@ -160,7 +160,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
-      products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description)
+      products (id, name, price, original_price, image_url, location, rating, sold_count, category, is_flash_sale, description)
     `).single();
 
     if (error) {
@@ -227,7 +227,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                       <div className="w-full text-center text-muted-foreground text-sm my-2">
                         {msg.products?.[0] && (
                           <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
-                            <Image src={msg.products[0].mainImageUrl || "/placeholder-image.jpg"} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                            <Image src={msg.products[0].imageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
                             <span>
                               Percakapan tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
                             </span>
@@ -255,7 +255,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                           <p className="text-sm">{msg.message}</p>
                           {msg.product_id && msg.products?.[0] && (
                             <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
-                              <Image src={msg.products[0].mainImageUrl || "/placeholder-image.jpg"} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                              <Image src={msg.products[0].imageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
                               <span className="text-xs text-muted-foreground line-clamp-1">
                                 Tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
                               </span>

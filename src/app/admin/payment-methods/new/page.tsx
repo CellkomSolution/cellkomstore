@@ -17,7 +17,7 @@ export default function NewPaymentMethodPage() {
       const methodData = {
         name: values.name,
         type: values.type,
-        details: values.details, // Pass directly, parsing handled in supabase utility
+        details: values.details ? JSON.parse(values.details) : null, // Parse JSON string to object
         is_active: values.is_active,
         order: values.order,
       };
@@ -28,7 +28,7 @@ export default function NewPaymentMethodPage() {
       router.push("/admin/payment-methods");
     } catch (error: any) {
       console.error("Error creating payment method:", error);
-      toast.error("Gagal menambah metode pembayaran: " + (error.message || "Terjadi kesalahan."));
+      toast.error("Gagal menambah metode pembayaran: " + (error.message || "Format detail JSON tidak valid."));
     } finally {
       setLoading(false);
     }

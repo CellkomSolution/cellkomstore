@@ -32,19 +32,7 @@ import { PaymentMethod } from "@/lib/supabase/payment-methods";
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama metode pembayaran minimal 3 karakter." }).max(100, { message: "Nama metode pembayaran maksimal 100 karakter." }),
   type: z.enum(['bank_transfer', 'e_wallet', 'card', 'other'], { message: "Tipe metode pembayaran harus dipilih." }),
-  details: z.string().nullable().default(null).superRefine((val, ctx) => {
-    if (val && val.trim() !== '') {
-      try {
-        JSON.parse(val);
-      } catch (e) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Detail instruksi harus berupa JSON yang valid.",
-          path: ['details'],
-        });
-      }
-    }
-  }),
+  details: z.string().nullable().default(null), // Changed to default(null)
   is_active: z.boolean().default(true),
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
@@ -59,19 +47,15 @@ interface PaymentMethodFormProps {
 }
 
 export function PaymentMethodForm({ initialData, onSubmit, loading = false }: PaymentMethodFormProps) {
-  const defaultValues: PaymentMethodFormValues = {
-    name: initialData?.name ?? "",
-    type: initialData?.type ?? 'bank_transfer',
-    details: typeof initialData?.details === 'object' && initialData?.details !== null
-      ? JSON.stringify(initialData.details, null, 2)
-      : initialData?.details ?? null, // If it's already a string or null, use it directly
-    is_active: initialData?.is_active ?? true,
-    order: initialData?.order ?? 0,
-  };
-
   const form = useForm<PaymentMethodFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: {
+      name: initialData?.name ?? "",
+      type: initialData?.type ?? 'bank_transfer',
+      details: initialData?.details ? JSON.stringify(initialData.details, null, 2) : null, // Ensure null if undefined
+      is_active: initialData?.is_active ?? true, // Ensure boolean
+      order: initialData?.order ?? 0, // Ensure number
+    },
   });
 
   return (
