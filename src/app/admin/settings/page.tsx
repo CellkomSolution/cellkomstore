@@ -65,7 +65,7 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const form = useForm<SettingsFormValues>({ // Explicitly set generic type
+  const form = useForm<SettingsFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       site_name: null,
@@ -96,24 +96,24 @@ export default function AdminSettingsPage() {
       if (settings) {
         setInitialData(settings);
         form.reset({
-          site_name: settings.site_name ?? null,
-          site_logo_url: settings.site_logo_url ?? null,
-          contact_email: settings.contact_email ?? null,
-          contact_phone: settings.contact_phone ?? null,
-          contact_address: settings.contact_address ?? null,
-          facebook_url: settings.facebook_url ?? null,
-          instagram_url: settings.instagram_url ?? null,
-          twitter_url: settings.twitter_url ?? null,
-          youtube_url: settings.youtube_url ?? null,
-          linkedin_url: settings.linkedin_url ?? null,
-          scrolling_text_enabled: settings.scrolling_text_enabled ?? false,
-          scrolling_text_content: settings.scrolling_text_content ?? null,
-          right_header_text_enabled: settings.right_header_text_enabled ?? false,
-          right_header_text_content: settings.right_header_text_content ?? null,
-          right_header_text_link: settings.right_header_text_link ?? null,
-          download_app_url: settings.download_app_url ?? null,
-          download_app_text: settings.download_app_text ?? null,
-          featured_brands_title: settings.featured_brands_title ?? null,
+          site_name: settings.site_name || null,
+          site_logo_url: settings.site_logo_url || null,
+          contact_email: settings.contact_email || null,
+          contact_phone: settings.contact_phone || null,
+          contact_address: settings.contact_address || null,
+          facebook_url: settings.facebook_url || null,
+          instagram_url: settings.instagram_url || null,
+          twitter_url: settings.twitter_url || null,
+          youtube_url: settings.youtube_url || null,
+          linkedin_url: settings.linkedin_url || null,
+          scrolling_text_enabled: settings.scrolling_text_enabled || false,
+          scrolling_text_content: settings.scrolling_text_content || null,
+          right_header_text_enabled: settings.right_header_text_enabled || false,
+          right_header_text_content: settings.right_header_text_content || null,
+          right_header_text_link: settings.right_header_text_link || null,
+          download_app_url: settings.download_app_url || null,
+          download_app_text: settings.download_app_text || null,
+          featured_brands_title: settings.featured_brands_title || null,
         });
       } else {
         // If no settings, ensure form is reset to schema defaults
@@ -141,7 +141,7 @@ export default function AdminSettingsPage() {
       setIsLoading(false);
     }
     fetchSettings();
-  }, [form, initialData]);
+  }, [form]);
 
   const onSubmit: SubmitHandler<SettingsFormValues> = async (values) => {
     console.log("onSubmit called with values:", values);
