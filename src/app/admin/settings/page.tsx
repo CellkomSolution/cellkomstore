@@ -25,9 +25,9 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().default(null),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().default(null),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().default(null),
-  scrolling_text_enabled: z.boolean().nullable().default(false), // Changed to .nullable()
+  scrolling_text_enabled: z.boolean().nullable().default(false), // Changed to nullable().default(false)
   scrolling_text_content: z.string().nullable().default(null),
-  right_header_text_enabled: z.boolean().nullable().default(false), // Changed to .nullable()
+  right_header_text_enabled: z.boolean().nullable().default(false), // Changed to nullable().default(false)
   right_header_text_content: z.string().nullable().default(null),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().default(null),
   download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().default(null),

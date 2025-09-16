@@ -38,8 +38,8 @@ const formSchema = z.object({
   originalPrice: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).nullable().default(null),
   category: z.string().min(1, { message: "Kategori harus dipilih." }),
   location: z.string().min(3, { message: "Lokasi minimal 3 karakter." }),
-  description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }).nullable().default(null), // Changed to .nullable()
-  isFlashSale: z.boolean().default(false), // Changed to strictly boolean with default
+  description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }).nullable().default(null),
+  isFlashSale: z.boolean().nullable().default(false), // Changed to nullable().default(false)
   imageUrl: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null),
   imageFile: z.any().optional(), // For file upload
 });
@@ -248,7 +248,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
               </div>
               <FormControl>
                 <Switch
-                  checked={field.value} // field.value is now strictly boolean
+                  checked={!!field.value} // Ensure boolean
                   onCheckedChange={field.onChange}
                   disabled={loading || isUploadingImage}
                 />

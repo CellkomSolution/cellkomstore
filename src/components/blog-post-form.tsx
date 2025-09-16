@@ -29,7 +29,7 @@ const formSchema = z.object({
   slug: z.string().min(5, { message: "Slug minimal 5 karakter." }).max(200, { message: "Slug maksimal 200 karakter." }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: "Slug harus berupa huruf kecil, angka, dan tanda hubung (tanpa spasi)." }),
   content: z.string().min(50, { message: "Konten minimal 50 karakter." }),
   image_url: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null),
-  is_published: z.boolean().default(false), // Changed to strictly boolean with default
+  is_published: z.boolean().nullable().default(false), // Changed to nullable().default(false)
 });
 
 // Derive the form values type directly from the schema
@@ -147,7 +147,7 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
               </div>
               <FormControl>
                 <Switch
-                  checked={field.value} // field.value is now strictly boolean
+                  checked={!!field.value} // Ensure boolean
                   onCheckedChange={field.onChange}
                   disabled={loading}
                 />
