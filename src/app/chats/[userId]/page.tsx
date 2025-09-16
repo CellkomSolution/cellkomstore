@@ -123,7 +123,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
             event: "INSERT",
             schema: "public",
             table: "chats",
-            filter: `or(sender_id.eq.${userId},receiver_id.eq.${userId})`,
+            filter: `or(sender_id.eq.${userId},receiver_id.eq.${adminId})`, // Corrected filter to include admin as receiver
           },
           (payload) => {
             const newMsg = payload.new as ChatMessage;
@@ -225,16 +225,15 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                   >
                     {msg.type === 'system' ? (
                       <div className="w-full text-center text-muted-foreground text-sm my-2">
-                        {msg.products?.[0] && msg.products[0].mainImageUrl ? (
+                        {msg.products?.[0] && (
                           <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
-                            <Image src={msg.products[0].mainImageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                            <Image src={msg.products[0].mainImageUrl || "/placeholder-image.jpg"} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
                             <span>
                               Percakapan tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
                             </span>
                           </div>
-                        ) : (
-                          msg.message
                         )}
+                        {!msg.products?.[0] && msg.message}
                       </div>
                     ) : (
                       <>
@@ -254,9 +253,9 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                           }`}
                         >
                           <p className="text-sm">{msg.message}</p>
-                          {msg.product_id && msg.products?.[0] && msg.products[0].mainImageUrl && (
+                          {msg.product_id && msg.products?.[0] && (
                             <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
-                              <Image src={msg.products[0].mainImageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                              <Image src={msg.products[0].mainImageUrl || "/placeholder-image.jpg"} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
                               <span className="text-xs text-muted-foreground line-clamp-1">
                                 Tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
                               </span>

@@ -106,7 +106,7 @@ export async function getProductsByCategory(categorySlug: string, sort: SortOpti
   
   query = applySorting(query, sort);
 
-  const { data, error } = await dbQuery;
+  const { data, error } = await query;
 
   if (error) {
     console.error(`Error fetching products for category ${categorySlug}:`, error.message || error);
@@ -250,7 +250,7 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
     }));
     const updates = additionalImageUpdates.filter(img => img.id && img.imageUrl && !img._delete).map(img => ({ // Only update if imageUrl is not null
       id: img.id,
-      image_url: img.imageUrl, // Corrected: Use image_url for DB interaction
+      image_url: img.imageUrl, // Corrected: Use image_url for DB column
       order: img.order,
     }));
     const deletes = additionalImageUpdates.filter(img => img.id && img._delete).map(img => img.id!);
@@ -263,7 +263,7 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
       // Perform individual updates for each image to handle `eq('id', ...)`
       for (const img of updates) {
         const { error: updateError } = await supabase.from("product_images").update({
-          image_url: img.image_url, // Corrected: Use image_url for DB interaction
+          image_url: img.image_url, // Corrected: Use image_url for DB column
           order: img.order,
           updated_at: new Date().toISOString(),
         }).eq("id", img.id);

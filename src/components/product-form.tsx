@@ -36,7 +36,7 @@ import { ProductImageManager } from "@/components/product-image-manager"; // New
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama produk minimal 3 karakter." }),
   price: z.coerce.number().min(0, { message: "Harga tidak boleh negatif." }),
-  originalPrice: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).nullable().default(null),
+  originalPrice: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).optional().or(z.literal(0)),
   category: z.string().min(1, { message: "Kategori harus dipilih." }),
   location: z.string().min(3, { message: "Lokasi minimal 3 karakter." }),
   description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }),
@@ -46,7 +46,7 @@ const formSchema = z.object({
     id: z.string(),
     imageUrl: z.string().url({ message: "URL gambar tambahan tidak valid." }).nullable().default(null), // Allow null
     order: z.number().min(0),
-  })).default([]),
+  })).default([]), // Ensure default is an empty array
 });
 
 interface ProductFormProps {
@@ -83,7 +83,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
     defaultValues: {
       name: initialData?.name ?? "",
       price: initialData?.price ?? 0,
-      originalPrice: initialData?.originalPrice ?? null,
+      originalPrice: initialData?.originalPrice ?? 0,
       category: initialData?.category ?? "",
       location: initialData?.location ?? "",
       description: initialData?.description ?? "",
@@ -209,7 +209,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
               <FormItem>
                 <FormLabel>Harga Asli (Opsional)</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="0" {...field} value={field.value ?? ""} onChange={e => field.onChange(e.target.value === '' ? null : +e.target.value)} />
+                  <Input type="number" placeholder="0" {...field} />
                 </FormControl>
                 <FormDescription>
                   Isi jika ada diskon.

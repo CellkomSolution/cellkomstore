@@ -64,7 +64,7 @@ export function PaymentMethodForm({ initialData, onSubmit, loading = false }: Pa
     defaultValues: {
       name: initialData?.name ?? "",
       type: initialData?.type ?? 'bank_transfer',
-      details: typeof initialData?.details === 'object' && initialData.details !== null
+      details: typeof initialData?.details === 'object' && initialData?.details !== null
         ? JSON.stringify(initialData.details, null, 2)
         : initialData?.details ?? null, // If it's already a string or null, use it directly
       is_active: initialData?.is_active ?? true,
