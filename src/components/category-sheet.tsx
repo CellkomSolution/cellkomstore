@@ -7,17 +7,14 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import { LayoutGrid, Loader2, Tag, X } from "lucide-react";
+import { LayoutGrid, Loader2, Tag } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getCategoriesWithLatestProductImage, Category } from "@/lib/supabase/categories";
 import * as LucideIcons from "lucide-react";
@@ -30,12 +27,11 @@ function CategoryIcon({ name }: { name: string | null }) {
 }
 
 interface CategorySheetProps {
-  children: React.ReactNode; // The trigger element
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function CategorySheet({ children, open, onOpenChange }: CategorySheetProps) {
+export function CategorySheet({ open, onOpenChange }: CategorySheetProps) {
   const isMobile = useIsMobile();
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -110,9 +106,6 @@ export function CategorySheet({ children, open, onOpenChange }: CategorySheetPro
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerTrigger asChild>
-          {children}
-        </DrawerTrigger>
         <DrawerContent className="h-[80vh] flex flex-col">
           {Content}
         </DrawerContent>
@@ -122,9 +115,6 @@ export function CategorySheet({ children, open, onOpenChange }: CategorySheetPro
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetTrigger asChild>
-        {children}
-      </SheetTrigger>
       <SheetContent side="left" className="flex flex-col w-full sm:max-w-md p-0">
         {Content}
       </SheetContent>

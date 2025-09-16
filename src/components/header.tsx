@@ -8,7 +8,7 @@ import { MainNav } from "./main-nav";
 import { MobileNav } from "./mobile-nav";
 import { UserNav } from "./user-nav";
 import { useAuth } from "@/hooks/use-auth";
-import { useEffect, useState } from "react"; // Baris ini diperbaiki
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSettings } from "@/lib/supabase/app-settings";
 import { useCart } from "@/context/cart-context";
@@ -18,6 +18,7 @@ import { useAdmin } from "@/hooks/use-admin";
 import { useRouter } from "next/navigation";
 import { CartSheet } from "./cart-sheet";
 import { ChatWidget } from "./chat-widget";
+import { CategorySheet } from "./category-sheet"; // Import CategorySheet
 
 export function Header() {
   const { session, isLoading: isAuthLoading, user } = useAuth();
@@ -27,6 +28,8 @@ export function Header() {
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isGeneralChatOpen, setIsGeneralChatOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false); // State for MobileNav
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false); // State for CategorySheet
   const router = useRouter();
 
   useEffect(() => {
@@ -55,6 +58,11 @@ export function Header() {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
     }
+  };
+
+  const handleOpenCategorySheet = () => {
+    setIsMobileNavOpen(false); // Close MobileNav first
+    setIsCategorySheetOpen(true); // Then open CategorySheet
   };
 
   return (
@@ -113,7 +121,11 @@ export function Header() {
         <div className="flex w-full md:w-auto items-center justify-between md:justify-start gap-4">
           {/* Left side: MobileNav (always visible on mobile), DesktopNav (hidden on mobile) */}
           <div className="flex items-center gap-4">
-            <MobileNav /> {/* Mobile menu button */}
+            <MobileNav 
+              open={isMobileNavOpen} 
+              onOpenChange={setIsMobileNavOpen} 
+              onOpenCategorySheet={handleOpenCategorySheet} 
+            /> {/* Mobile menu button */}
             <Link href="/" className="hidden md:flex items-center space-x-2">
               {/* Desktop Logo */}
               {appSettings?.site_logo_url ? (
@@ -187,6 +199,8 @@ export function Header() {
           </div>
         </div>
       )}
+      {/* Render CategorySheet here, controlled by Header's state */}
+      <CategorySheet open={isCategorySheetOpen} onOpenChange={setIsCategorySheetOpen} />
     </header>
   );
 }

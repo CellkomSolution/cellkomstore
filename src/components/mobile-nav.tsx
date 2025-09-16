@@ -23,8 +23,13 @@ function CategoryIcon({ name }: { name: string | null }) {
   return <Icon className="h-5 w-5 text-muted-foreground" />;
 }
 
-export function MobileNav() {
-  const [open, setOpen] = useState(false);
+interface MobileNavProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onOpenCategorySheet: () => void; // New prop to handle opening CategorySheet
+}
+
+export function MobileNav({ open, onOpenChange, onOpenCategorySheet }: MobileNavProps) {
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -60,7 +65,7 @@ export function MobileNav() {
   }, []);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
         <Button
           variant="ghost"
@@ -85,7 +90,7 @@ export function MobileNav() {
         </SheetHeader>
         <ScrollArea className="flex-1 py-4">
           <div className="flex flex-col space-y-1 pr-4">
-            <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+            <Button variant="ghost" className="justify-start" asChild onClick={() => onOpenChange(false)}>
               <Link href="/">Beranda</Link>
             </Button>
             <h3 className="text-sm font-semibold text-muted-foreground px-4 pt-2">Kategori</h3>
@@ -98,7 +103,7 @@ export function MobileNav() {
             ) : (
               <>
                 {categories.slice(0, 5).map((category) => (
-                  <Button key={category.id} variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+                  <Button key={category.id} variant="ghost" className="justify-start" asChild onClick={() => onOpenChange(false)}>
                     <Link href={`/category/${category.slug}`} className="flex items-center gap-2">
                       {category.latest_product_image_url ? (
                         <div className="relative h-5 w-5 rounded-sm overflow-hidden">
@@ -112,22 +117,21 @@ export function MobileNav() {
                   </Button>
                 ))}
                 {categories.length > 0 && (
-                  <CategorySheet open={open} onOpenChange={setOpen}>
-                    <Button variant="ghost" className="justify-start">
-                      <LayoutGrid className="mr-2 h-4 w-4" />
-                      <span>Semua Kategori</span>
-                    </Button>
-                  </CategorySheet>
+                  // This button now calls the handler from Header
+                  <Button variant="ghost" className="justify-start" onClick={onOpenCategorySheet}>
+                    <LayoutGrid className="mr-2 h-4 w-4" />
+                    <span>Semua Kategori</span>
+                  </Button>
                 )}
               </>
             )}
-            <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+            <Button variant="ghost" className="justify-start" asChild onClick={() => onOpenChange(false)}>
               <Link href="/blog">Blog</Link>
             </Button>
-            <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+            <Button variant="ghost" className="justify-start" asChild onClick={() => onOpenChange(false)}>
               <Link href="/services">Layanan Servis</Link>
             </Button>
-            <Button variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+            <Button variant="ghost" className="justify-start" asChild onClick={() => onOpenChange(false)}>
               <Link href="/contact">Kontak</Link>
             </Button>
 
@@ -137,7 +141,7 @@ export function MobileNav() {
                 <Separator className="my-4" />
                 <h3 className="text-sm font-semibold text-muted-foreground px-4 pt-2">Dasbor Admin</h3>
                 {adminNavItems.map((item) => (
-                  <Button key={item.href} variant="ghost" className="justify-start" asChild onClick={() => setOpen(false)}>
+                  <Button key={item.href} variant="ghost" className="justify-start" asChild onClick={() => onOpenChange(false)}>
                     <Link href={item.href}>
                       <item.icon className="mr-2 h-4 w-4" />
                       {item.title}
