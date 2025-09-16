@@ -35,18 +35,20 @@ import { getCategories, Category } from "@/lib/supabase/categories"; // Import g
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama produk minimal 3 karakter." }),
   price: z.coerce.number().min(0, { message: "Harga tidak boleh negatif." }),
-  originalPrice: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).optional().or(z.literal(0)),
+  originalPrice: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).nullable().default(null), // Changed to nullable and default(null)
   category: z.string().min(1, { message: "Kategori harus dipilih." }),
   location: z.string().min(3, { message: "Lokasi minimal 3 karakter." }),
   description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }),
-  isFlashSale: z.boolean().default(false).optional(),
+  isFlashSale: z.boolean().default(false), // Removed optional, added default
   imageUrl: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null), // Changed to nullable and default(null)
   imageFile: z.any().optional(), // For file upload
 });
 
+type ProductFormValues = z.infer<typeof formSchema>;
+
 interface ProductFormProps {
   initialData?: Product | null;
-  onSubmit: (values: z.infer<typeof formSchema>) => Promise<void>;
+  onSubmit: (values: ProductFormValues) => Promise<void>; // Explicitly type onSubmit
   loading?: boolean;
 }
 
@@ -69,17 +71,18 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
     fetchCategories();
   }, []);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<ProductFormValues>({ // Explicitly set generic type
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || "",
       price: initialData?.price || 0,
-      originalPrice: initialData?.originalPrice || 0,
+      originalPrice: initialData?.originalPrice ?? null, // Ensure null
       category: initialData?.category || "",
       location: initialData?.location || "",
       description: initialData?.description || "",
-      isFlashSale: initialData?.isFlashSale || false,
+      isFlashSale: initialData?.isFlashSale ?? false, // Ensure boolean
       imageUrl: initialData?.imageUrl ?? null, // Ensure null if undefined
+      imageFile: undefined, // Explicitly set to undefined
     },
   });
 
@@ -167,7 +170,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
               <FormItem>
                 <FormLabel>Harga Asli (Opsional)</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="0" {...field} />
+                  <Input type="number" placeholder="0" {...field} value={field.value ?? ""} />
                 </FormControl>
                 <FormDescription>
                   Isi jika ada diskon.

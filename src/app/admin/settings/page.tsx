@@ -65,7 +65,7 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const form = useForm<SettingsFormValues>({
+  const form = useForm<SettingsFormValues>({ // Explicitly set generic type
     resolver: zodResolver(formSchema),
     defaultValues: {
       site_name: null,

@@ -57,13 +57,19 @@ export function CartSheet() {
               <ul className="divide-y">
                 {items.map((item) => (
                   <li key={item.id} className="flex py-4">
-                    <Image
-                      src={item.imageUrl}
-                      alt={item.name}
-                      width={64}
-                      height={64}
-                      className="rounded-md object-cover"
-                    />
+                    {item.imageUrl ? (
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.name}
+                        width={64}
+                        height={64}
+                        className="rounded-md object-cover"
+                      />
+                    ) : (
+                      <div className="h-16 w-16 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                        No Img
+                      </div>
+                    )}
                     <div className="ml-4 flex flex-1 flex-col justify-between">
                       <div>
                         <p className="font-medium text-sm line-clamp-2">{item.name}</p>

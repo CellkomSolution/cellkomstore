@@ -47,7 +47,7 @@ interface PaymentMethodFormProps {
 }
 
 export function PaymentMethodForm({ initialData, onSubmit, loading = false }: PaymentMethodFormProps) {
-  const form = useForm<PaymentMethodFormValues>({
+  const form = useForm<PaymentMethodFormValues>({ // Explicitly set generic type
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name ?? "",

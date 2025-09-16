@@ -147,13 +147,19 @@ export default function AdminProductsPage() {
                   products.map((product) => (
                     <TableRow key={product.id}>
                       <TableCell>
-                        <Image
-                          src={product.imageUrl}
-                          alt={product.name}
-                          width={48}
-                          height={48}
-                          className="rounded-md object-cover"
-                        />
+                        {product.imageUrl ? (
+                          <Image
+                            src={product.imageUrl}
+                            alt={product.name}
+                            width={48}
+                            height={48}
+                            className="rounded-md object-cover"
+                          />
+                        ) : (
+                          <div className="h-12 w-12 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                            No Img
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell className="font-medium">{product.name}</TableCell>
                       <TableCell>{product.category}</TableCell>

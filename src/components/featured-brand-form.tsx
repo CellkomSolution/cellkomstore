@@ -35,7 +35,7 @@ interface FeaturedBrandFormProps {
 }
 
 export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: FeaturedBrandFormProps) {
-  const form = useForm<FeaturedBrandFormValues>({
+  const form = useForm<FeaturedBrandFormValues>({ // Explicitly set generic type
     resolver: zodResolver(formSchema),
     defaultValues: {
       image_url: initialData?.image_url ?? null, // Ensure null if undefined

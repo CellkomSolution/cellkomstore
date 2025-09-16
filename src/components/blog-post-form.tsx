@@ -45,7 +45,7 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
   const { user } = useSession();
   const router = useRouter();
 
-  const form = useForm<BlogPostFormValues>({
+  const form = useForm<BlogPostFormValues>({ // Explicitly set generic type
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: initialData?.title ?? "",

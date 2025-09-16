@@ -169,7 +169,7 @@ export default function FeaturedBrandsAdminPage() {
         </CardHeader>
         <CardContent>
           {brands.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">Belum ada merek unggulan. Tambahkan satu di atas!</p>
+            <p className="col-span-full text-center text-muted-foreground">Belum ada merek unggulan. Tambahkan satu di atas!</p>
           ) : (
             <Table>
               <TableHeader>
@@ -183,7 +183,13 @@ export default function FeaturedBrandsAdminPage() {
                 {brands.map((brand) => (
                   <TableRow key={brand.id}>
                     <TableCell>
-                      <img src={brand.image_url} alt="Brand" className="w-16 h-16 object-contain rounded" />
+                      {brand.image_url ? (
+                        <img src={brand.image_url} alt="Brand" className="w-16 h-16 object-contain rounded" />
+                      ) : (
+                        <div className="w-16 h-16 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
+                          No Img
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <a href={brand.link_url || "#"} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
