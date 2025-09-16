@@ -112,13 +112,19 @@ export default function MyOrdersPage() {
                       <ul className="space-y-2">
                         {order.order_items?.map((item) => (
                           <li key={item.id} className="flex items-center gap-3">
-                            <Image
-                              src={item.product_image_url_at_purchase}
-                              alt={item.product_name_at_purchase}
-                              width={40}
-                              height={40}
-                              className="rounded-md object-cover"
-                            />
+                            {item.product_image_url_at_purchase ? (
+                              <Image
+                                src={item.product_image_url_at_purchase}
+                                alt={item.product_name_at_purchase}
+                                width={40}
+                                height={40}
+                                className="rounded-md object-cover"
+                              />
+                            ) : (
+                              <div className="h-10 w-10 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                                No Img
+                              </div>
+                            )}
                             <div className="flex-1">
                               <p className="text-sm line-clamp-1">{item.product_name_at_purchase}</p>
                               <p className="text-xs text-muted-foreground">

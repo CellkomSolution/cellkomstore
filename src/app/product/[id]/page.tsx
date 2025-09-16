@@ -16,6 +16,7 @@ import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ChatWidget } from "@/components/chat-widget";
+import Image from "next/image"; // Import Image
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>; // Corrected: params is now a Promise
@@ -85,11 +86,19 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         <div>
           <div className="aspect-square rounded-lg overflow-hidden border">
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
+            {product.imageUrl ? (
+              <Image
+                src={product.imageUrl}
+                alt={product.name}
+                fill
+                style={{ objectFit: "cover" }}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-lg">
+                No Image
+              </div>
+            )}
           </div>
         </div>
 

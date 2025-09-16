@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface FeaturedBrand {
   id: string;
-  image_url: string;
+  image_url: string | null; // Changed to allow null
   link_url: string | null;
   order: number;
   created_at: string;
@@ -40,7 +40,10 @@ export async function getFeaturedBrandById(id: string): Promise<FeaturedBrand | 
 export async function createFeaturedBrand(brandData: Omit<FeaturedBrand, 'id' | 'created_at' | 'updated_at'>): Promise<FeaturedBrand | null> {
   const { data, error } = await supabase
     .from("featured_brands")
-    .insert(brandData)
+    .insert({
+      ...brandData,
+      image_url: brandData.image_url ?? null, // Convert empty string to null
+    })
     .select()
     .single();
 
@@ -52,9 +55,19 @@ export async function createFeaturedBrand(brandData: Omit<FeaturedBrand, 'id' | 
 }
 
 export async function updateFeaturedBrand(id: string, brandData: Partial<Omit<FeaturedBrand, 'id' | 'created_at'>>): Promise<FeaturedBrand | null> {
+  const updatePayload: Partial<Omit<FeaturedBrand, 'id' | 'created_at'>> = {
+    ...brandData,
+    updated_at: new Date().toISOString(),
+  };
+
+  // Ensure image_url is null if it's an empty string
+  if (updatePayload.image_url === "") {
+    updatePayload.image_url = null;
+  }
+
   const { data, error } = await supabase
     .from("featured_brands")
-    .update({ ...brandData, updated_at: new Date().toISOString() })
+    .update(updatePayload)
     .eq("id", id)
     .select()
     .single();

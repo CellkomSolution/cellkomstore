@@ -31,7 +31,7 @@ export async function getChatMessages(user1Id: string, user2Id: string): Promise
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
-      products (id, name, price, original_price, image_url, location, rating, sold_count, category, is_flash_sale, description)
+      products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description)
     `)
     .or(`and(sender_id.eq.${user1Id},receiver_id.eq.${user2Id}),and(sender_id.eq.${user2Id},receiver_id.eq.${user1Id})`)
     .order("created_at", { ascending: true });
@@ -43,8 +43,8 @@ export async function getChatMessages(user1Id: string, user2Id: string): Promise
 
   return data.map(chat => ({
     ...chat,
-    // Jika chat.products ada (berarti ada product_id), map objek tunggal tersebut dan bungkus dalam array.
-    // Jika tidak ada, gunakan array kosong.
+    // If chat.products exists (meaning there's a product_id), map that single object and wrap in an array.
+    // If not, use an empty array.
     products: chat.products ? [mapProductData(chat.products)] : [],
   })) as ChatMessage[];
 }

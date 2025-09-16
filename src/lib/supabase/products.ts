@@ -5,7 +5,7 @@ export interface Product {
   name: string;
   price: number;
   originalPrice?: number | null; // Changed to allow null
-  imageUrl: string;
+  imageUrl: string | null; // Changed to allow null
   location: string;
   rating: number;
   soldCount: string;
@@ -35,7 +35,7 @@ const mapProductData = (item: any): Product => ({
   name: item.name,
   price: item.price,
   originalPrice: item.original_price,
-  imageUrl: item.image_url,
+  imageUrl: item.main_image_url, // Corrected to main_image_url
   location: item.location,
   rating: item.rating,
   soldCount: item.sold_count,
@@ -149,7 +149,7 @@ export async function createProduct(productData: Omit<Product, 'id' | 'rating' |
       name,
       price,
       original_price: originalPrice === 0 ? null : originalPrice,
-      image_url: imageUrl, // Mapped to snake_case
+      main_image_url: imageUrl || null, // Corrected to main_image_url and convert empty string to null
       location,
       category,
       is_flash_sale: isFlashSale, // Mapped to snake_case
@@ -177,7 +177,7 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
   if (productData.name !== undefined) updatePayload.name = productData.name;
   if (productData.price !== undefined) updatePayload.price = productData.price;
   if (productData.originalPrice !== undefined) updatePayload.original_price = productData.originalPrice === 0 ? null : productData.originalPrice;
-  if (productData.imageUrl !== undefined) updatePayload.image_url = productData.imageUrl; // Mapped to snake_case
+  if (productData.imageUrl !== undefined) updatePayload.main_image_url = productData.imageUrl === "" ? null : productData.imageUrl; // Corrected to main_image_url and convert empty string to null
   if (productData.location !== undefined) updatePayload.location = productData.location;
   if (productData.category !== undefined) updatePayload.category = productData.category;
   if (productData.isFlashSale !== undefined) updatePayload.is_flash_sale = productData.isFlashSale; // Mapped to snake_case

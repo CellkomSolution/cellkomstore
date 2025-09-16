@@ -40,7 +40,7 @@ const formSchema = z.object({
   location: z.string().min(3, { message: "Lokasi minimal 3 karakter." }),
   description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }),
   isFlashSale: z.boolean().default(false).optional(),
-  imageUrl: z.string().url({ message: "URL gambar tidak valid." }).optional().or(z.literal("")),
+  imageUrl: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null), // Changed to nullable and default(null)
   imageFile: z.any().optional(), // For file upload
 });
 
@@ -52,7 +52,7 @@ interface ProductFormProps {
 
 export function ProductForm({ initialData, onSubmit, loading = false }: ProductFormProps) {
   const router = useRouter();
-  const [imagePreview, setImagePreview] = React.useState<string | null>(initialData?.imageUrl || null);
+  const [imagePreview, setImagePreview] = React.useState<string | null>(initialData?.imageUrl ?? null);
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -79,7 +79,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
       location: initialData?.location || "",
       description: initialData?.description || "",
       isFlashSale: initialData?.isFlashSale || false,
-      imageUrl: initialData?.imageUrl || "",
+      imageUrl: initialData?.imageUrl ?? null, // Ensure null if undefined
     },
   });
 
@@ -118,7 +118,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
     } catch (error: any) {
       toast.error("Gagal mengunggah gambar: " + error.message);
       setImagePreview(null);
-      form.setValue("imageUrl", "");
+      form.setValue("imageUrl", null); // Set to null on error
     } finally {
       setIsUploadingImage(false);
     }
@@ -126,7 +126,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
 
   const removeImage = () => {
     setImagePreview(null);
-    form.setValue("imageUrl", "");
+    form.setValue("imageUrl", null); // Set to null
     form.setValue("imageFile", undefined);
   };
 

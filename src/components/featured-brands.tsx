@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client"; // Masih perlu untuk 
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getFeaturedBrands, FeaturedBrand } from "@/lib/supabase/featured-brands"; // Import dari utilitas baru
+import Image from "next/image"; // Import Image component
 
 export const FeaturedBrands = () => {
   const [brands, setBrands] = useState<FeaturedBrand[]>([]);
@@ -63,7 +64,19 @@ export const FeaturedBrands = () => {
           brands.map((brand) => (
             <Link href={brand.link_url || "#"} key={brand.id} target="_blank" rel="noopener noreferrer">
               <Card className="flex items-center justify-center p-2 h-24 hover:shadow-md transition-shadow">
-                <img src={brand.image_url} alt="Brand Logo" className="max-h-full max-w-full object-contain" />
+                {brand.image_url ? (
+                  <Image 
+                    src={brand.image_url} 
+                    alt="Brand Logo" 
+                    width={96} // Adjust as needed
+                    height={96} // Adjust as needed
+                    className="max-h-full max-w-full object-contain" 
+                  />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm">
+                    No Logo
+                  </div>
+                )}
               </Card>
             </Link>
           ))

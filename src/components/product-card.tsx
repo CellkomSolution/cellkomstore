@@ -32,14 +32,20 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={`/product/${product.id}`} className="block flex flex-col flex-grow">
         <CardContent className="p-0 flex flex-col flex-grow">
           <div className="relative">
-            <Image
-              src={product.imageUrl}
-              alt={product.name}
-              width={160} // Lebar default, sesuaikan jika perlu
-              height={192} // Tinggi default (h-48), sesuaikan jika perlu
-              className="w-full h-48 object-cover"
-              priority // Tambahkan priority jika gambar ini penting untuk LCP
-            />
+            {product.imageUrl ? (
+              <Image
+                src={product.imageUrl}
+                alt={product.name}
+                width={160} // Lebar default, sesuaikan jika perlu
+                height={192} // Tinggi default (h-48), sesuaikan jika perlu
+                className="w-full h-48 object-cover"
+                priority // Tambahkan priority jika gambar ini penting untuk LCP
+              />
+            ) : (
+              <div className="w-full h-48 bg-muted flex items-center justify-center text-muted-foreground text-sm">
+                No Image
+              </div>
+            )}
              <Button 
                 size="sm" 
                 className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"

@@ -20,7 +20,7 @@ import { ImageUploader } from "@/components/image-uploader";
 import { FeaturedBrand } from "@/lib/supabase/featured-brands";
 
 const formSchema = z.object({
-  image_url: z.string().url({ message: "URL gambar tidak valid." }).min(1, { message: "Gambar merek diperlukan." }),
+  image_url: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null), // Changed to nullable and default(null)
   link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable().default(null), // Changed to default(null)
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
@@ -38,7 +38,7 @@ export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: Fe
   const form = useForm<FeaturedBrandFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      image_url: initialData?.image_url || "",
+      image_url: initialData?.image_url ?? null, // Ensure null if undefined
       link_url: initialData?.link_url ?? null, // Ensure null if undefined
       order: initialData?.order ?? 0, // Ensure number
     },
@@ -49,7 +49,7 @@ export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: Fe
   };
 
   const handleRemoveImage = () => {
-    form.setValue("image_url", "", { shouldValidate: true });
+    form.setValue("image_url", null, { shouldValidate: true }); // Set to null
   };
 
   return (
