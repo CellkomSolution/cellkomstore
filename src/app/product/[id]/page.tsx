@@ -97,15 +97,15 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         {/* Product Image Gallery */}
         <div>
-          <div className="aspect-square rounded-lg overflow-hidden border mb-4">
+          <div className="relative aspect-square rounded-lg overflow-hidden border mb-4">
             {selectedImage ? (
               <Image
                 src={selectedImage}
                 alt={product.name}
-                width={600}
-                height={600}
-                className="w-full h-full object-contain"
+                fill // Use fill
+                className="object-contain" // object-contain is fine
                 priority
+                sizes="(max-width: 768px) 100vw, 50vw" // Adjust sizes for product detail page
               />
             ) : (
               <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">

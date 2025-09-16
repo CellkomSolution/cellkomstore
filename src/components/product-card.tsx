@@ -40,18 +40,18 @@ export function ProductCard({ product }: ProductCardProps) {
     <Card className="overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 h-full flex flex-col group">
       <Link href={`/product/${product.id}`} className="block flex flex-col flex-grow">
         <CardContent className="p-0 flex flex-col flex-grow">
-          <div className="relative">
+          <div className="relative w-full h-48"> {/* Define dimensions on parent */}
             {product.mainImageUrl ? (
               <Image
                 src={product.mainImageUrl}
                 alt={product.name}
-                width={160}
-                height={192}
-                className="w-full h-48 object-cover"
+                fill // Use fill
+                className="object-cover" // object-cover is fine
                 priority
+                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16.6vw" // Add sizes for fill
               />
             ) : (
-              <div className="w-full h-48 bg-muted flex items-center justify-center text-muted-foreground">
+              <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
                 No Image
               </div>
             )}
