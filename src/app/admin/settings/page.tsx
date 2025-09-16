@@ -15,24 +15,24 @@ import { HeaderFooterSettingsForm } from "@/components/admin/settings/header-foo
 import { FeaturedBrandsSettingsForm } from "@/components/admin/settings/featured-brands-settings-form";
 
 const formSchema = z.object({
-  site_name: z.string().nullish().default(null), // Changed to .nullish()
-  site_logo_url: z.string().url({ message: "URL logo tidak valid." }).nullish().default(null), // Changed to .nullish()
-  contact_email: z.string().email({ message: "Email tidak valid." }).nullish().default(null), // Changed to .nullish()
-  contact_phone: z.string().nullish().default(null), // Changed to .nullish()
-  contact_address: z.string().nullish().default(null), // Changed to .nullish()
-  facebook_url: z.string().url({ message: "URL Facebook tidak valid." }).nullish().default(null), // Changed to .nullish()
-  instagram_url: z.string().url({ message: "URL Instagram tidak valid." }).nullish().default(null), // Changed to .nullish()
-  twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullish().default(null), // Changed to .nullish()
-  youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullish().default(null), // Changed to .nullish()
-  linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullish().default(null), // Changed to .nullish()
-  scrolling_text_enabled: z.boolean().nullish().default(false), // Changed to .nullish()
-  scrolling_text_content: z.string().nullish().default(null), // Changed to .nullish()
-  right_header_text_enabled: z.boolean().nullish().default(false), // Changed to .nullish()
-  right_header_text_content: z.string().nullish().default(null), // Changed to .nullish()
-  right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullish().default(null), // Changed to .nullish()
-  download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullish().default(null), // Changed to .nullish()
-  download_app_text: z.string().nullish().default(null), // Changed to .nullish()
-  featured_brands_title: z.string().nullish().default(null), // Changed to .nullish()
+  site_name: z.string().nullable().default(null),
+  site_logo_url: z.string().url({ message: "URL logo tidak valid." }).nullable().default(null),
+  contact_email: z.string().email({ message: "Email tidak valid." }).nullable().default(null),
+  contact_phone: z.string().nullable().default(null),
+  contact_address: z.string().nullable().default(null),
+  facebook_url: z.string().url({ message: "URL Facebook tidak valid." }).nullable().default(null),
+  instagram_url: z.string().url({ message: "URL Instagram tidak valid." }).nullable().default(null),
+  twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().default(null),
+  youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().default(null),
+  linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().default(null),
+  scrolling_text_enabled: z.boolean().nullable().default(false), // Changed to .nullable()
+  scrolling_text_content: z.string().nullable().default(null),
+  right_header_text_enabled: z.boolean().nullable().default(false), // Changed to .nullable()
+  right_header_text_content: z.string().nullable().default(null),
+  right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().default(null),
+  download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().default(null),
+  download_app_text: z.string().nullable().default(null),
+  featured_brands_title: z.string().nullable().default(null),
 }).superRefine((data, ctx) => {
   if (data.scrolling_text_enabled && (!data.scrolling_text_content || data.scrolling_text_content.trim() === '')) {
     ctx.addIssue({

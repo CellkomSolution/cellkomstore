@@ -35,12 +35,12 @@ import { getCategories, Category } from "@/lib/supabase/categories"; // Import g
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama produk minimal 3 karakter." }),
   price: z.coerce.number().min(0, { message: "Harga tidak boleh negatif." }),
-  originalPrice: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).nullish().default(null), // Changed to .nullish()
+  originalPrice: z.coerce.number().min(0, { message: "Harga asli tidak boleh negatif." }).nullable().default(null),
   category: z.string().min(1, { message: "Kategori harus dipilih." }),
   location: z.string().min(3, { message: "Lokasi minimal 3 karakter." }),
-  description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }).nullish().default(null), // Changed to .nullish() and default(null)
-  isFlashSale: z.boolean().nullish().default(false), // Changed to .nullish()
-  imageUrl: z.string().url({ message: "URL gambar tidak valid." }).nullish().default(null), // Changed to .nullish()
+  description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }).nullable().default(null), // Changed to .nullable()
+  isFlashSale: z.boolean().default(false), // Changed to strictly boolean with default
+  imageUrl: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null),
   imageFile: z.any().optional(), // For file upload
 });
 
@@ -80,7 +80,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
       category: initialData?.category || "",
       location: initialData?.location || "",
       description: initialData?.description || null,
-      isFlashSale: initialData?.isFlashSale || false,
+      isFlashSale: initialData?.isFlashSale || false, // Ensure boolean
       imageUrl: initialData?.imageUrl || null,
       imageFile: undefined,
     },
@@ -228,6 +228,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
                   placeholder="Tulis deskripsi lengkap produk di sini..."
                   className="resize-y min-h-[120px]"
                   {...field}
+                  value={field.value ?? ""} // Ensure value is string or empty string
                 />
               </FormControl>
               <FormMessage />
@@ -247,7 +248,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
               </div>
               <FormControl>
                 <Switch
-                  checked={field.value}
+                  checked={field.value} // field.value is now strictly boolean
                   onCheckedChange={field.onChange}
                   disabled={loading || isUploadingImage}
                 />

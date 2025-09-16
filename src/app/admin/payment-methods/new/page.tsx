@@ -18,7 +18,7 @@ export default function NewPaymentMethodPage() {
         name: values.name,
         type: values.type,
         details: values.details ? JSON.parse(values.details) : null, // Parse JSON string to object
-        is_active: values.is_active,
+        is_active: values.is_active || false, // Ensure it's boolean
         order: values.order,
       };
 
