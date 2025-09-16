@@ -9,18 +9,27 @@ import { Button } from "./ui/button";
 import { useCart } from "@/context/cart-context";
 import Image from "next/image";
 import { formatRupiah } from "@/lib/utils";
+import React from "react"; // Import React
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addItem } = useCart();
+  const [isMounted, setIsMounted] = React.useState(false);
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Conditionally call useCart only after mounting on the client
+  const { addItem } = isMounted ? useCart() : { addItem: () => {} }; // Provide a no-op addItem for SSR
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product);
+    if (isMounted) { // Ensure addItem is only called on client
+      addItem(product);
+    }
   };
 
   const discountPercentage = product.originalPrice
@@ -44,6 +53,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 size="sm" 
                 className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={handleAddToCart}
+                disabled={!isMounted} // Disable button during SSR
             >
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Add
