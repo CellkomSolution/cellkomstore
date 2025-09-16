@@ -8,8 +8,12 @@ import { toast } from "sonner";
 import { getHeroCarouselSlideById, updateHeroCarouselSlide, HeroCarouselSlide } from "@/lib/supabase/hero-carousel"; // Import dari modul hero-carousel
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton";
 
-export default function EditHeroCarouselSlidePage({ params }: { params: { id: string } }) {
-  const { id } = params; // Mengakses id langsung dari params
+interface EditHeroCarouselSlidePageProps {
+  params: Promise<{ id: string }>; // Corrected: params is now a Promise
+}
+
+export default function EditHeroCarouselSlidePage({ params }: EditHeroCarouselSlidePageProps) {
+  const { id } = React.use(params); // Mengakses id langsung dari params
   const router = useRouter();
 
   const [initialData, setInitialData] = React.useState<HeroCarouselSlide | null>(null);

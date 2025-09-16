@@ -8,8 +8,12 @@ import { toast } from "sonner";
 import { getPaymentMethodById, updatePaymentMethod, PaymentMethod } from "@/lib/supabase/payment-methods";
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Reusing skeleton
 
-export default function EditPaymentMethodPage({ params }: { params: { id: string } }) {
-  const { id } = params; // Mengakses id langsung dari params
+interface EditPaymentMethodPageProps {
+  params: Promise<{ id: string }>; // Corrected: params is now a Promise
+}
+
+export default function EditPaymentMethodPage({ params }: EditPaymentMethodPageProps) {
+  const { id } = React.use(params); // Mengakses id langsung dari params
   const router = useRouter();
 
   const [initialData, setInitialData] = React.useState<PaymentMethod | null>(null);
