@@ -3,13 +3,13 @@
 import { Star, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import type { Product } from "@/lib/supabase/products"; // Import Product interface dari modul yang benar
+import type { Product } from "@/lib/supabase/products";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useCart } from "@/context/cart-context";
 import Image from "next/image";
 import { formatRupiah } from "@/lib/utils";
-import React from "react"; // Import React
+import React from "react";
 
 interface ProductCardProps {
   product: Product;
@@ -21,8 +21,8 @@ export function ProductCard({ product }: ProductCardProps) {
     setIsMounted(true);
   }, []);
 
-  // Conditionally call useCart only after mounting on the client
-  const { addItem } = isMounted ? useCart() : { addItem: () => {} }; // Provide a no-op addItem for SSR
+  // Call useCart unconditionally at the top level
+  const { addItem } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -44,10 +44,10 @@ export function ProductCard({ product }: ProductCardProps) {
             <Image
               src={product.imageUrl}
               alt={product.name}
-              width={160} // Lebar default, sesuaikan jika perlu
-              height={192} // Tinggi default (h-48), sesuaikan jika perlu
+              width={160}
+              height={192}
               className="w-full h-48 object-cover"
-              priority // Tambahkan priority jika gambar ini penting untuk LCP
+              priority
             />
              <Button 
                 size="sm" 
