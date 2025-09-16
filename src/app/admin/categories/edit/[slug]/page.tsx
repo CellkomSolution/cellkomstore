@@ -8,8 +8,8 @@ import { toast } from "sonner";
 import { getCategoryBySlug, updateCategory, Category } from "@/lib/supabase/categories"; // Import dari modul categories
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton";
 
-export default function EditCategoryPage({ params }: { params: { slug: string } }) {
-  const { slug } = params; // Mengakses slug langsung dari params
+export default function EditCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = React.use(params); // Mengakses slug langsung dari params menggunakan React.use()
   const router = useRouter();
 
   const [initialData, setInitialData] = React.useState<Category | null>(null);
