@@ -47,18 +47,12 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
 
   const form = useForm<BlogPostFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData ? {
-      title: initialData.title,
-      slug: initialData.slug,
-      content: initialData.content,
-      image_url: initialData.image_url,
-      is_published: initialData.is_published,
-    } : {
-      title: "",
-      slug: "",
-      content: "",
-      image_url: null,
-      is_published: false,
+    defaultValues: {
+      title: initialData?.title ?? "",
+      slug: initialData?.slug ?? "",
+      content: initialData?.content ?? "",
+      image_url: initialData?.image_url ?? null,
+      is_published: initialData?.is_published ?? false,
     },
   });
 

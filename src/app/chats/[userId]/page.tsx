@@ -160,7 +160,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
-      products (id, name, price, original_price, image_url, location, rating, sold_count, category, is_flash_sale, description)
+      products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description)
     `).single();
 
     if (error) {
@@ -225,15 +225,16 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                   >
                     {msg.type === 'system' ? (
                       <div className="w-full text-center text-muted-foreground text-sm my-2">
-                        {msg.products?.[0] && (
+                        {msg.products?.[0] && msg.products[0].mainImageUrl ? (
                           <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
-                            <Image src={msg.products[0].imageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                            <Image src={msg.products[0].mainImageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
                             <span>
                               Percakapan tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
                             </span>
                           </div>
+                        ) : (
+                          msg.message
                         )}
-                        {!msg.products?.[0] && msg.message}
                       </div>
                     ) : (
                       <>
@@ -253,9 +254,9 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                           }`}
                         >
                           <p className="text-sm">{msg.message}</p>
-                          {msg.product_id && msg.products?.[0] && (
+                          {msg.product_id && msg.products?.[0] && msg.products[0].mainImageUrl && (
                             <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
-                              <Image src={msg.products[0].imageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                              <Image src={msg.products[0].mainImageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
                               <span className="text-xs text-muted-foreground line-clamp-1">
                                 Tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
                               </span>

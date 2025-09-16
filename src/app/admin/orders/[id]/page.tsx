@@ -114,13 +114,19 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
                 <ul className="space-y-4">
                   {order.order_items?.map((item) => (
                     <li key={item.id} className="flex items-center gap-4">
-                      <Image
-                        src={item.product_image_url_at_purchase}
-                        alt={item.product_name_at_purchase}
-                        width={64}
-                        height={64}
-                        className="rounded-md object-cover"
-                      />
+                      {item.product_image_url_at_purchase ? (
+                        <Image
+                          src={item.product_image_url_at_purchase}
+                          alt={item.product_name_at_purchase}
+                          width={64}
+                          height={64}
+                          className="rounded-md object-cover"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                          No Img
+                        </div>
+                      )}
                       <div className="flex-1">
                         <p className="font-medium line-clamp-2">{item.product_name_at_purchase}</p>
                         <p className="text-sm text-muted-foreground">

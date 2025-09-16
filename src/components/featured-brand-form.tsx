@@ -37,14 +37,10 @@ interface FeaturedBrandFormProps {
 export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: FeaturedBrandFormProps) {
   const form = useForm<FeaturedBrandFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData ? {
-      image_url: initialData.image_url,
-      link_url: initialData.link_url,
-      order: initialData.order,
-    } : {
-      image_url: "",
-      link_url: null,
-      order: 0,
+    defaultValues: {
+      image_url: initialData?.image_url ?? "",
+      link_url: initialData?.link_url ?? null,
+      order: initialData?.order ?? 0,
     },
   });
 

@@ -61,20 +61,14 @@ interface PaymentMethodFormProps {
 export function PaymentMethodForm({ initialData, onSubmit, loading = false }: PaymentMethodFormProps) {
   const form = useForm<PaymentMethodFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData ? {
-      name: initialData.name,
-      type: initialData.type,
-      details: typeof initialData.details === 'object' && initialData.details !== null
+    defaultValues: {
+      name: initialData?.name ?? "",
+      type: initialData?.type ?? 'bank_transfer',
+      details: typeof initialData?.details === 'object' && initialData.details !== null
         ? JSON.stringify(initialData.details, null, 2)
-        : initialData.details, // If it's already a string or null, use it directly
-      is_active: initialData.is_active,
-      order: initialData.order,
-    } : {
-      name: "",
-      type: 'bank_transfer',
-      details: null,
-      is_active: true,
-      order: 0,
+        : initialData?.details ?? null, // If it's already a string or null, use it directly
+      is_active: initialData?.is_active ?? true,
+      order: initialData?.order ?? 0,
     },
   });
 
