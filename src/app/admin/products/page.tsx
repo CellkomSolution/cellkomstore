@@ -45,21 +45,34 @@ export default function AdminProductsPage() {
 
     setIsDeleting(true);
     try {
-      // Delete image from storage first
-      if (productToDelete.imageUrl) {
-        const imageUrlParts = productToDelete.imageUrl.split('/');
+      // Delete main image from storage first
+      if (productToDelete.mainImageUrl) {
+        const imageUrlParts = productToDelete.mainImageUrl.split('/');
         const fileName = imageUrlParts[imageUrlParts.length - 1];
         const { error: storageError } = await supabase.storage
           .from('product-images')
           .remove([fileName]);
 
         if (storageError) {
-          console.warn("Failed to delete product image from storage:", storageError.message);
+          console.warn("Failed to delete product main image from storage:", storageError.message);
           // Don't throw error here, proceed with product deletion even if image deletion fails
         }
       }
 
-      // Delete product from database
+      // Delete additional images from storage
+      if (productToDelete.additionalImages && productToDelete.additionalImages.length > 0) {
+        const fileNamesToDelete = productToDelete.additionalImages.map(img => img.imageUrl.split('/').pop()!).filter(Boolean);
+        if (fileNamesToDelete.length > 0) {
+          const { error: storageError } = await supabase.storage
+            .from('product-images')
+            .remove(fileNamesToDelete);
+          if (storageError) {
+            console.warn("Failed to delete additional product images from storage:", storageError.message);
+          }
+        }
+      }
+
+      // Delete product from database (this will cascade delete product_images due to ON DELETE CASCADE)
       const { error: dbError } = await supabase
         .from("products")
         .delete()
@@ -148,7 +161,7 @@ export default function AdminProductsPage() {
                     <TableRow key={product.id}>
                       <TableCell>
                         <Image
-                          src={product.imageUrl}
+                          src={product.mainImageUrl}
                           alt={product.name}
                           width={48}
                           height={48}

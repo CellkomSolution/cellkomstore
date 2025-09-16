@@ -58,7 +58,7 @@ export function CartSheet() {
                 {items.map((item) => (
                   <li key={item.id} className="flex py-4">
                     <Image
-                      src={item.imageUrl}
+                      src={item.mainImageUrl}
                       alt={item.name}
                       width={64}
                       height={64}

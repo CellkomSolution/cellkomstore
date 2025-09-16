@@ -13,7 +13,7 @@ export default function NewProductPage() {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: any, additionalImageUpdates: { id?: string; imageUrl: string; order: number; _delete?: boolean }[]) => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -23,17 +23,22 @@ export default function NewProductPage() {
         return;
       }
 
-      // Use the new createProduct utility function
+      // Extract only new image URLs for creation
+      const newAdditionalImageUrls = additionalImageUpdates
+        .filter(img => !img.id && img.imageUrl && !img._delete)
+        .sort((a, b) => a.order - b.order)
+        .map(img => img.imageUrl);
+
       await createProduct({
         name: values.name,
         price: values.price,
         originalPrice: values.originalPrice,
-        imageUrl: values.imageUrl,
+        mainImageUrl: values.mainImageUrl, // Renamed
         location: values.location,
         category: values.category,
         isFlashSale: values.isFlashSale,
         description: values.description,
-      });
+      }, newAdditionalImageUrls); // Pass new additional image URLs
 
       toast.success("Produk berhasil ditambahkan!");
       router.push("/admin/products");

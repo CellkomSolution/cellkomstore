@@ -16,13 +16,21 @@ import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ChatWidget } from "@/components/chat-widget";
+import Image from "next/image"; // Ensure Image is imported
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"; // Import Carousel components
+import Autoplay from "embla-carousel-autoplay"; // Import Autoplay plugin
 
 interface ProductDetailPageProps {
-  params: Promise<{ id: string }>; // Corrected: params is now a Promise
+  params: Promise<{ id: string }>;
 }
 
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
-  // Unwrap params using React.use()
   const { id } = React.use(params);
 
   const { addItem } = useCart();
@@ -35,6 +43,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const [relatedProducts, setRelatedProducts] = React.useState<Product[]>([]);
   const [isLoadingRelatedProducts, setIsLoadingRelatedProducts] = React.useState(true);
   const [isChatOpen, setIsChatOpen] = React.useState(false);
+  const [selectedImage, setSelectedImage] = React.useState<string | null>(null); // For thumbnail selection
 
   React.useEffect(() => {
     async function fetchProductAndRelated() {
@@ -42,6 +51,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       const fetchedProduct = await getProductById(id);
       if (fetchedProduct) {
         setProduct(fetchedProduct);
+        setSelectedImage(fetchedProduct.mainImageUrl); // Set main image as initial selected
         setIsLoadingRelatedProducts(true);
         const fetchedRelatedProducts = await getProductsByCategory(fetchedProduct.category);
         setRelatedProducts(fetchedRelatedProducts.filter(p => p.id !== fetchedProduct.id));
@@ -80,19 +90,49 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
+  const allImages = [product.mainImageUrl, ...product.additionalImages.map(img => img.imageUrl)].filter(Boolean);
+
   return (
     <div className="container mx-auto px-4 py-8 pb-24">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+        {/* Product Image Gallery */}
         <div>
-          <div className="aspect-square rounded-lg overflow-hidden border">
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
+          <div className="aspect-square rounded-lg overflow-hidden border mb-4">
+            {selectedImage && (
+              <Image
+                src={selectedImage}
+                alt={product.name}
+                width={600}
+                height={600}
+                className="w-full h-full object-contain"
+                priority
+              />
+            )}
           </div>
+          {allImages.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {allImages.map((imgUrl, index) => (
+                <div
+                  key={index}
+                  className={`relative w-20 h-20 flex-shrink-0 rounded-md border cursor-pointer overflow-hidden ${
+                    selectedImage === imgUrl ? "border-primary ring-2 ring-primary" : ""
+                  }`}
+                  onClick={() => setSelectedImage(imgUrl)}
+                >
+                  <Image
+                    src={imgUrl}
+                    alt={`${product.name} thumbnail ${index + 1}`}
+                    fill
+                    style={{ objectFit: "cover" }}
+                    sizes="80px"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
+        {/* Product Details */}
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold mb-2">{product.name}</h1>
           <div className="flex items-center gap-4 mb-4">

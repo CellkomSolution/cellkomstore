@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -29,8 +29,9 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Image from "next/image";
 import { Loader2, UploadCloud, XCircle } from "lucide-react";
-import { Product } from "@/lib/supabase/products"; // Import Product dari modul products
-import { getCategories, Category } from "@/lib/supabase/categories"; // Import getCategories, Category dari modul categories
+import { Product, ProductImage } from "@/lib/supabase/products"; // Import ProductImage
+import { getCategories, Category } from "@/lib/supabase/categories";
+import { ProductImageManager } from "@/components/product-image-manager"; // New import
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama produk minimal 3 karakter." }),
@@ -40,24 +41,32 @@ const formSchema = z.object({
   location: z.string().min(3, { message: "Lokasi minimal 3 karakter." }),
   description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }),
   isFlashSale: z.boolean().default(false).optional(),
-  imageUrl: z.string().url({ message: "URL gambar tidak valid." }).optional().or(z.literal("")),
-  imageFile: z.any().optional(), // For file upload
+  mainImageUrl: z.string().url({ message: "URL gambar utama tidak valid." }).min(1, { message: "Gambar utama produk diperlukan." }), // Renamed
+  additionalImages: z.array(z.object({ // New field
+    id: z.string(),
+    imageUrl: z.string().url({ message: "URL gambar tambahan tidak valid." }).min(1, { message: "Gambar tambahan tidak boleh kosong." }),
+    order: z.number().min(0),
+  })).optional().default([]),
 });
 
 interface ProductFormProps {
   initialData?: Product | null;
-  onSubmit: (values: z.infer<typeof formSchema>) => Promise<void>;
+  onSubmit: (values: z.infer<typeof formSchema>, additionalImageUpdates: { id?: string; imageUrl: string; order: number; _delete?: boolean }[]) => Promise<void>; // Updated onSubmit signature
   loading?: boolean;
 }
 
 export function ProductForm({ initialData, onSubmit, loading = false }: ProductFormProps) {
   const router = useRouter();
-  const [imagePreview, setImagePreview] = React.useState<string | null>(initialData?.imageUrl || null);
-  const [isUploadingImage, setIsUploadingImage] = React.useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [mainImagePreview, setMainImagePreview] = React.useState<string | null>(initialData?.mainImageUrl || null); // Renamed
+  const [isUploadingMainImage, setIsUploadingMainImage] = React.useState(false); // Renamed
+  const mainFileInputRef = React.useRef<HTMLInputElement>(null); // Renamed
 
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = React.useState(true);
+
+  const [currentAdditionalImages, setCurrentAdditionalImages] = React.useState<ProductImage[]>(
+    initialData?.additionalImages || []
+  );
 
   React.useEffect(() => {
     async function fetchCategories() {
@@ -79,11 +88,12 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
       location: initialData?.location || "",
       description: initialData?.description || "",
       isFlashSale: initialData?.isFlashSale || false,
-      imageUrl: initialData?.imageUrl || "",
+      mainImageUrl: initialData?.mainImageUrl || "", // Renamed
+      additionalImages: initialData?.additionalImages || [], // Initialize additional images
     },
   });
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMainImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => { // Renamed
     if (!event.target.files || event.target.files.length === 0) {
       toast.error("Anda harus memilih gambar untuk diunggah.");
       return;
@@ -94,7 +104,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
     const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
 
-    setIsUploadingImage(true);
+    setIsUploadingMainImage(true); // Renamed
     try {
       const { data, error: uploadError } = await supabase.storage
         .from("product-images")
@@ -112,27 +122,59 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
         throw new Error("Tidak bisa mendapatkan URL publik untuk gambar.");
       }
 
-      setImagePreview(publicUrlData.publicUrl);
-      form.setValue("imageUrl", publicUrlData.publicUrl, { shouldValidate: true });
-      toast.success("Gambar berhasil diunggah!");
+      setMainImagePreview(publicUrlData.publicUrl); // Renamed
+      form.setValue("mainImageUrl", publicUrlData.publicUrl, { shouldValidate: true }); // Renamed
+      toast.success("Gambar utama berhasil diunggah!");
     } catch (error: any) {
       toast.error("Gagal mengunggah gambar: " + error.message);
-      setImagePreview(null);
-      form.setValue("imageUrl", "");
+      setMainImagePreview(null); // Renamed
+      form.setValue("mainImageUrl", ""); // Renamed
     } finally {
-      setIsUploadingImage(false);
+      setIsUploadingMainImage(false); // Renamed
     }
   };
 
-  const removeImage = () => {
-    setImagePreview(null);
-    form.setValue("imageUrl", "");
-    form.setValue("imageFile", undefined);
+  const removeMainImage = () => { // Renamed
+    setMainImagePreview(null); // Renamed
+    form.setValue("mainImageUrl", "", { shouldValidate: true }); // Renamed
+  };
+
+  const handleAdditionalImagesChange = (newImages: ProductImage[]) => {
+    // Filter out images with empty imageUrl before setting form value
+    const validImages = newImages.filter(img => img.imageUrl && img.imageUrl.trim() !== '');
+    form.setValue("additionalImages", validImages, { shouldValidate: true });
+    setCurrentAdditionalImages(newImages); // Keep all images in local state for UI
+  };
+
+  const handleSubmitWithImages: SubmitHandler<z.infer<typeof formSchema>> = async (values) => {
+    // Prepare additional image updates for the utility function
+    const additionalImageUpdates = currentAdditionalImages.map(img => {
+      // If it's a new image (temporary ID), don't include 'id'
+      const isNew = img.id.startsWith('new-');
+      return {
+        ...(isNew ? {} : { id: img.id }),
+        imageUrl: img.imageUrl,
+        order: img.order,
+        _delete: !values.additionalImages?.some(validImg => validImg.id === img.id), // Mark for deletion if not in final valid images
+      };
+    });
+
+    // Filter out images that were marked for deletion from the `additionalImageUpdates` array
+    const finalAdditionalImageUpdates = additionalImageUpdates.filter(update => {
+      // If it's a new image with no URL, don't include it at all
+      if (!update.id && !update.imageUrl) return false;
+      // If it's an existing image marked for deletion, include it
+      if (update.id && update._delete) return true;
+      // Otherwise, include it if it's not marked for deletion
+      return !update._delete;
+    });
+
+    await onSubmit(values, finalAdditionalImageUpdates);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleSubmitWithImages)} className="space-y-8">
         <FormField
           control={form.control}
           name="name"
@@ -246,20 +288,20 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
                 <Switch
                   checked={field.value}
                   onCheckedChange={field.onChange}
-                  disabled={loading || isUploadingImage}
+                  disabled={loading || isUploadingMainImage}
                 />
               </FormControl>
             </FormItem>
           )}
         />
         <FormItem>
-          <FormLabel>Gambar Produk</FormLabel>
+          <FormLabel>Gambar Utama Produk</FormLabel> {/* Renamed label */}
           <FormControl>
             <div>
-              {imagePreview ? (
+              {mainImagePreview ? ( // Renamed
                 <div className="relative h-48 w-full max-w-md">
                   <Image
-                    src={imagePreview}
+                    src={mainImagePreview} // Renamed
                     alt="Product Preview"
                     fill
                     style={{ objectFit: "contain" }}
@@ -270,8 +312,8 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
                     variant="destructive"
                     size="icon"
                     className="absolute top-2 right-2 rounded-full h-6 w-6"
-                    onClick={removeImage}
-                    disabled={loading || isUploadingImage}
+                    onClick={removeMainImage} // Renamed
+                    disabled={loading || isUploadingMainImage} // Renamed
                   >
                     <XCircle className="h-4 w-4" />
                     <span className="sr-only">Hapus Gambar</span>
@@ -280,17 +322,17 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
               ) : (
                 <div
                   className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/20 hover:bg-muted/30"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => mainFileInputRef.current?.click()} // Renamed
                 >
                   <Input
-                    ref={fileInputRef}
+                    ref={mainFileInputRef} // Renamed
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={handleImageUpload}
-                    disabled={loading || isUploadingImage}
+                    onChange={handleMainImageUpload} // Renamed
+                    disabled={loading || isUploadingMainImage} // Renamed
                   />
-                  {isUploadingImage ? (
+                  {isUploadingMainImage ? ( // Renamed
                     <>
                       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                       <p className="mt-2 text-sm text-muted-foreground">Mengunggah...</p>
@@ -314,7 +356,22 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
           <FormMessage />
         </FormItem>
 
-        <Button type="submit" disabled={loading || isUploadingImage}>
+        <FormItem>
+          <FormLabel>Gambar Produk Tambahan (Opsional)</FormLabel>
+          <FormControl>
+            <ProductImageManager
+              initialImages={currentAdditionalImages}
+              onImagesChange={handleAdditionalImagesChange}
+              disabled={loading}
+            />
+          </FormControl>
+          <FormDescription>
+            Tambahkan gambar lain untuk produk ini. Anda bisa menyeret untuk mengubah urutan.
+          </FormDescription>
+          <FormMessage />
+        </FormItem>
+
+        <Button type="submit" disabled={loading || isUploadingMainImage}>
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

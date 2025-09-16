@@ -42,7 +42,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <CardContent className="p-0 flex flex-col flex-grow">
           <div className="relative">
             <Image
-              src={product.imageUrl}
+              src={product.mainImageUrl}
               alt={product.name}
               width={160}
               height={192}
