@@ -9,27 +9,26 @@ import { Button } from "./ui/button";
 import { useCart } from "@/context/cart-context";
 import Image from "next/image";
 import { formatRupiah } from "@/lib/utils";
-import React from "react";
+// import React from "react"; // Tidak lagi diperlukan karena isMounted dihapus
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const [isMounted, setIsMounted] = React.useState(false);
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  // const [isMounted, setIsMounted] = React.useState(false); // Dihapus
+  // React.useEffect(() => { // Dihapus
+  //   setIsMounted(true); // Dihapus
+  // }, []); // Dihapus
 
-  // Call useCart unconditionally at the top level
   const { addItem } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isMounted) { // Ensure addItem is only called on client
+    // if (isMounted) { // Pemeriksaan kondisional dihapus
       addItem(product);
-    }
+    // }
   };
 
   const discountPercentage = product.originalPrice
@@ -40,26 +39,26 @@ export function ProductCard({ product }: ProductCardProps) {
     <Card className="overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 h-full flex flex-col group">
       <Link href={`/product/${product.id}`} className="block flex flex-col flex-grow">
         <CardContent className="p-0 flex flex-col flex-grow">
-          <div className="relative w-full h-48"> {/* Define dimensions on parent */}
+          <div className="relative w-full h-48">
             {product.mainImageUrl ? (
               <Image
                 src={product.mainImageUrl}
                 alt={product.name}
-                fill // Use fill
-                className="object-cover" // object-cover is fine
+                fill
+                className="object-cover"
                 priority
-                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16.6vw" // Add sizes for fill
+                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16.6vw"
               />
             ) : (
               <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
                 No Image
               </div>
             )}
-             <Button 
-                size="sm" 
+             <Button
+                size="sm"
                 className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={handleAddToCart}
-                disabled={!isMounted} // Disable button during SSR
+                // disabled={!isMounted} // Properti disabled dihapus
             >
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Add
