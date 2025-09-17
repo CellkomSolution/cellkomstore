@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getFeaturedBrands, FeaturedBrand } from "@/lib/supabase/featured-brands";
 import Image from "next/image";
-import { CardCarousel } from "@/components/ui/card-carousel"; // Import CardCarousel
+import { ImageCarousel } from "@/components/ui/image-carousel"; // Import ImageCarousel
 
 export const FeaturedBrands = () => {
   const [brands, setBrands] = useState<FeaturedBrand[]>([]);
@@ -71,11 +71,9 @@ export const FeaturedBrands = () => {
       ) : carouselImages.length === 0 ? (
         <p className="col-span-full text-center text-muted-foreground">Belum ada merek unggulan untuk ditampilkan.</p>
       ) : (
-        <CardCarousel
+        <ImageCarousel
           images={carouselImages}
-          autoplayDelay={2500} // Adjust delay as needed
-          showPagination={false} // Hide pagination for a cleaner look
-          showNavigation={true}
+          columnCount={3} // Menampilkan 3 kolom logo
         />
       )}
     </section>
