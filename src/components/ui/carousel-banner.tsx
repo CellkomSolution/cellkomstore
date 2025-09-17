@@ -93,14 +93,14 @@ export function CarouselBanner({ images, alt, interval = 5000 }: CarouselBannerP
 
   if (images.length === 0) {
     return (
-      <div className="flex items-center justify-center w-full h-48 rounded-lg border-2 border-dashed text-muted-foreground">
+      <div className="flex items-center justify-center w-full h-52 rounded-lg border-2 border-dashed text-muted-foreground">
         Tidak ada gambar banner.
       </div>
     );
   }
 
   return (
-    <div className="w-full h-48 relative rounded-lg overflow-hidden border"> {/* Direct styling for h-48 */}
+    <div className="w-full h-52 relative rounded-lg overflow-hidden border"> {/* Direct styling for h-52 */}
       <AnimatePresence mode="wait">
         <MotionAnimatedImage
           key={currentImageIndex}
