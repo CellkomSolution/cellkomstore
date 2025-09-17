@@ -20,16 +20,16 @@ export function FlashSale({ initialProducts }: FlashSaleProps) {
   }, []);
 
   return (
-    <section className="bg-card p-4 rounded-lg border">
+    <section className="bg-gray-900 p-4 rounded-lg border border-gray-800"> {/* Changed background to bg-gray-900 and border */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
-          <h2 className="text-xl font-bold text-red-600 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-red-500 flex items-center gap-2"> {/* Adjusted red shade slightly for contrast */}
             <Zap className="h-6 w-6" />
             Flash Sale
           </h2>
           <CountdownTimer targetDate={saleEndDate} />
         </div>
-        <a href="#" className="text-sm font-semibold text-blue-600 hover:underline flex items-center">
+        <a href="#" className="text-sm font-semibold text-blue-400 hover:underline flex items-center"> {/* Changed text color to blue-400 */}
           Lihat Semua <ChevronRight className="h-4 w-4" />
         </a>
       </div>
