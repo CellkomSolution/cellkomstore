@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { adminNavItems } from "@/config/admin-nav"; // Import adminNavItems
+import { adminNavItems } from "@/config/admin-nav";
+import { LayoutDashboard } from "lucide-react"; // Import LayoutDashboard for fallback
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -53,11 +54,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 asChild
               >
                 <Link href={item.href}>
-                  <item.icon className="mr-2 h-4 w-4" />
+                  {item.icon ? <item.icon className="mr-2 h-4 w-4" /> : <LayoutDashboard className="mr-2 h-4 w-4" />}
                   {item.title}
                 </Link>
               </Button>
-              {item.title === "Metode Pembayaran" && <Separator className="my-4" />} {/* Add separator after Payment Methods */}
+              {item.title === "Metode Pembayaran" && <Separator className="my-4" />}
             </React.Fragment>
           ))}
         </nav>
