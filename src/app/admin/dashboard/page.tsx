@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, DollarSign, ShoppingBag, LayoutGrid, Image as ImageIcon, CreditCard, Settings, BookOpen, MessageSquare, ImageStack } from "lucide-react"; // Import additional icons
+import { Package, Users, DollarSign, ShoppingBag, LayoutGrid, Image as ImageIcon, CreditCard, Settings, BookOpen, MessageSquare, ImageStack, LayoutDashboard } from "lucide-react"; // Import additional icons, ensure LayoutDashboard is here
 import { getTotalProductsCount } from "@/lib/supabase/products";
 import { getTotalUsersCount } from "@/lib/supabase/profiles";
 import { getTotalOrdersCount } from "@/lib/supabase/orders"; // Import getTotalOrdersCount
@@ -101,7 +101,7 @@ export default function AdminDashboardPage() {
             </li>
             <li>
               <Link href="/admin/hero-carousel" className="flex items-center gap-2 hover:text-primary">
-                <ImageStack className="h-4 w-4" /> Manajemen Hero Carousel
+                {ImageStack ? <ImageStack className="h-4 w-4" /> : <LayoutDashboard className="h-4 w-4" />} Manajemen Hero Carousel
               </Link>
             </li>
             <li>
