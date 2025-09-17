@@ -45,10 +45,10 @@ export const FeaturedBrands = () => {
     }));
 
   return (
-    <section className="bg-card p-4 rounded-lg border">
+    <section className="bg-gray-900 p-4 rounded-lg border border-gray-800"> {/* Changed background and added border */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">{title}</h2>
-        <Link href="/brands" className="text-sm font-semibold text-primary hover:underline flex items-center">
+        <h2 className="text-xl font-bold text-white">{title}</h2> {/* Changed text color to white */}
+        <Link href="/brands" className="text-sm font-semibold text-blue-400 hover:underline flex items-center"> {/* Changed text color to blue-400 */}
           Lihat Semua
           <svg
             xmlns="http://www.w3.org/2000/svg"
