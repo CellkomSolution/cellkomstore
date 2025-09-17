@@ -97,14 +97,12 @@ const steps: readonly Step[] = [
   },
   {
     id: "3",
-    name: "Step 3",
-    title: "Collaborative Workspace",
+    name: "Collaborative Workspace",
     description: "Work together in real-time. Share, comment, and edit with your team from anywhere in the world.",
   },
   {
     id: "4",
-    name: "Step 4",
-    title: "Automated Workflows",
+    name: "Automated Workflows",
     description: "Put your tasks on autopilot. Create custom automations to save time and reduce manual work.",
   },
 ]
@@ -235,42 +233,10 @@ function FeatureCard({ children, step }: { children: React.ReactNode; step: numb
       style={{ "--x": useMotionTemplate`${mouseX}px`, "--y": useMotionTemplate`${mouseY}px` } as WrapperStyle}
     >
       <div className="relative w-full overflow-hidden rounded-3xl border border-neutral-200 bg-white transition-colors duration-300 dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="m-10 min-h-[450px] w-full">
+        {/* Changed min-h-[450px] to aspect-video for responsive height */}
+        <div className="m-10 aspect-video w-full relative"> 
           <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              className="flex w-full flex-col gap-4 md:w-3/5"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <motion.div
-                className="text-sm font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-500"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.05, duration: 0.3, ease: [0.22, 1, 0.36, 1]}}
-              >
-                  {steps[step].name}
-              </motion.div>
-              <motion.h2
-                className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 md:text-3xl"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1, duration: 0.3, ease: [0.22, 1, 0.36, 1]}}
-              >
-                {steps[step].title}
-              </motion.h2>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.15, duration: 0.3, ease: [0.22, 1, 0.36, 1]}}
-              >
-                <p className="text-base leading-relaxed text-neutral-700 dark:text-neutral-400">
-                  {steps[step].description}
-                </p>
-              </motion.div>
-            </motion.div>
+            {/* Removed text content (steps[step].name, title, description) */}
           </AnimatePresence>
           {children}
         </div>
@@ -336,7 +302,7 @@ export function FeatureCarousel({
   image,
   step1img1Class = defaultClasses.step1img1,
   step1img2Class = defaultClasses.step1img2,
-  step2img1Class = defaultClasses.step1img1,
+  step2img1Class = defaultClasses.step2img1,
   step2img2Class = defaultClasses.step2img2,
   step3imgClass = defaultClasses.step3img,
   step4imgClass = defaultClasses.step4img,
@@ -367,7 +333,7 @@ export function FeatureCarousel({
     }
   }
   return (
-    <div className="flex flex-col gap-12 w-full max-w-4xl mx-auto p-4">
+    <div className="flex flex-col gap-12 w-full"> {/* Removed max-w-4xl mx-auto p-4 */}
         <FeatureCard {...props} step={step}>
             <AnimatePresence mode="wait">
                 <motion.div key={step} {...ANIMATION_PRESETS.fadeInScale} className="w-full h-full absolute">
