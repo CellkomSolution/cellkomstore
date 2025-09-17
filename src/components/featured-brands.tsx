@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { supabase } from "@/integrations/supabase/client"; // Masih perlu untuk app_settings
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getFeaturedBrands, FeaturedBrand } from "@/lib/supabase/featured-brands"; // Import dari utilitas baru
-import Image from "next/image"; // Import Image component
+import { getFeaturedBrands, FeaturedBrand } from "@/lib/supabase/featured-brands";
+import Image from "next/image";
+import { CardCarousel } from "@/components/ui/card-carousel"; // Import CardCarousel
 
 export const FeaturedBrands = () => {
   const [brands, setBrands] = useState<FeaturedBrand[]>([]);
@@ -16,7 +17,7 @@ export const FeaturedBrands = () => {
   useEffect(() => {
     const fetchFeaturedBrandsAndTitle = async () => {
       setLoading(true);
-      const brandsData = await getFeaturedBrands(); // Menggunakan fungsi utilitas baru
+      const brandsData = await getFeaturedBrands();
       setBrands(brandsData);
 
       const { data: settingsData, error: settingsError } = await supabase
@@ -34,6 +35,14 @@ export const FeaturedBrands = () => {
 
     fetchFeaturedBrandsAndTitle();
   }, []);
+
+  const carouselImages = brands
+    .filter(brand => brand.image_url) // Only include brands with an image
+    .map(brand => ({
+      src: brand.image_url!, // Non-null assertion as we filtered
+      alt: `Brand ${brand.id}`, // Generic alt text, could be improved with brand name if available
+      link: brand.link_url || "#", // Add link for navigation
+    }));
 
   return (
     <section className="bg-card p-4 rounded-lg border">
@@ -53,35 +62,22 @@ export const FeaturedBrands = () => {
           </svg>
         </Link>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {loading ? (
-          Array.from({ length: 6 }).map((_, i) => (
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="w-full h-24 rounded-lg" />
-          ))
-        ) : brands.length === 0 ? (
-          <p className="col-span-full text-center text-muted-foreground">Belum ada merek unggulan untuk ditampilkan.</p>
-        ) : (
-          brands.map((brand) => (
-            <Link href={brand.link_url || "#"} key={brand.id} target="_blank" rel="noopener noreferrer">
-              <Card className="flex items-center justify-center p-2 h-24 hover:shadow-md transition-shadow">
-                {brand.image_url ? (
-                  <Image 
-                    src={brand.image_url} 
-                    alt="Brand Logo" 
-                    width={96} // Adjust as needed
-                    height={96} // Adjust as needed
-                    className="max-h-full max-w-full object-contain" 
-                  />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center text-muted-foreground text-sm">
-                    No Logo
-                  </div>
-                )}
-              </Card>
-            </Link>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      ) : carouselImages.length === 0 ? (
+        <p className="col-span-full text-center text-muted-foreground">Belum ada merek unggulan untuk ditampilkan.</p>
+      ) : (
+        <CardCarousel
+          images={carouselImages}
+          autoplayDelay={2500} // Adjust delay as needed
+          showPagination={false} // Hide pagination for a cleaner look
+          showNavigation={true}
+        />
+      )}
     </section>
   );
 };
