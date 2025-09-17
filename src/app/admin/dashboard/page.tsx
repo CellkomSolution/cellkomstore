@@ -99,11 +99,11 @@ export default function AdminDashboardPage() {
                 <Package className="h-4 w-4" /> Manajemen Produk
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link href="/admin/hero-carousel" className="flex items-center gap-2 hover:text-primary">
                 <ImageIcon className="h-4 w-4" /> Manajemen Hero Carousel
               </Link>
-            </li>
+            </li> */}
             <li>
               <Link href="/admin/categories" className="flex items-center gap-2 hover:text-primary">
                 <LayoutGrid className="h-4 w-4" /> Manajemen Kategori

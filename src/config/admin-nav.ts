@@ -27,11 +27,11 @@ export const adminNavItems = [
     href: "/admin/products",
     icon: Package,
   },
-  {
-    title: "Hero Carousel",
-    href: "/admin/hero-carousel",
-    icon: ImageIcon,
-  },
+  // {
+  //   title: "Hero Carousel",
+  //   href: "/admin/hero-carousel",
+  //   icon: ImageIcon,
+  // },
   {
     title: "Kategori",
     href: "/admin/categories",
