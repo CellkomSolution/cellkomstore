@@ -49,9 +49,9 @@ export default function FooterSectionUI({
               src={logoSrc}
               alt={logoAlt}
               title={logoAlt}
-              width={100}
-              height={100}
-              className="h-auto w-12 mx-auto lg:mx-0 mb-4"
+              width={150} // Diperbesar
+              height={150} // Diperbesar
+              className="h-auto w-24 mx-auto lg:mx-0 mb-4" // Menyesuaikan lebar CSS
             />
             <div>
               <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
