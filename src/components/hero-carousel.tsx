@@ -23,8 +23,11 @@ export function HeroCarousel() {
         return <Skeleton className="w-full h-48 md:h-72 rounded-lg" />;
     }
 
+    // Filter out banners without a valid image_url
+    const validBanners = banners.filter(banner => banner.image_url && banner.image_url.trim() !== '');
+
     // Add conditional rendering: Only render CarouselBanner if there are actual banners
-    if (banners.length === 0) {
+    if (validBanners.length === 0) {
         return (
             <div className="w-full h-48 md:h-72 flex items-center justify-center rounded-lg border bg-muted text-muted-foreground">
                 Tidak ada banner untuk ditampilkan.
@@ -33,8 +36,8 @@ export function HeroCarousel() {
     }
 
     // Extract image_urls, titles, descriptions, and link_urls for the CarouselBanner component
-    const images = banners.map(banner => banner.image_url);
-    const bannerData = banners.map(banner => ({
+    const images = validBanners.map(banner => banner.image_url!); // Use non-null assertion after filtering
+    const bannerData = validBanners.map(banner => ({
         title: banner.title,
         description: banner.description,
         link_url: banner.link_url,

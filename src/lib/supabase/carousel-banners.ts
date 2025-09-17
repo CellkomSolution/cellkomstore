@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface CarouselBanner {
   id: string;
-  image_url: string;
+  image_url: string | null; // Changed to allow null
   title: string | null;
   description: string | null;
   link_url: string | null;
@@ -44,6 +44,7 @@ export async function createCarouselBanner(bannerData: Omit<CarouselBanner, 'id'
     .from("carousel_banners")
     .insert({
       ...bannerData,
+      image_url: bannerData.image_url || null, // Ensure empty string becomes null
       title: bannerData.title || null,
       description: bannerData.description || null,
       link_url: bannerData.link_url || null,
@@ -65,6 +66,7 @@ export async function updateCarouselBanner(id: string, bannerData: Partial<Omit<
   };
 
   // Ensure optional fields are null if empty strings are passed
+  if (updatePayload.image_url === "") updatePayload.image_url = null; // Ensure empty string becomes null
   if (updatePayload.title === "") updatePayload.title = null;
   if (updatePayload.description === "") updatePayload.description = null;
   if (updatePayload.link_url === "") updatePayload.link_url = null;

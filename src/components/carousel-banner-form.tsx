@@ -21,7 +21,7 @@ import { ImageUploader } from "@/components/image-uploader";
 import { CarouselBanner } from "@/lib/supabase/carousel-banners";
 
 const formSchema = z.object({
-  image_url: z.string().url({ message: "URL gambar tidak valid." }),
+  image_url: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null), // Allow null
   title: z.string().max(100, { message: "Judul maksimal 100 karakter." }).nullable().default(null),
   description: z.string().max(250, { message: "Deskripsi maksimal 250 karakter." }).nullable().default(null),
   link_url: z.string().url({ message: "URL tautan tidak valid." }).nullable().default(null),
@@ -41,7 +41,7 @@ export const CarouselBannerForm = React.forwardRef<any, CarouselBannerFormProps>
     const form = useForm<CarouselBannerFormValues>({
       resolver: zodResolver(formSchema),
       defaultValues: {
-        image_url: initialData?.image_url ?? "",
+        image_url: initialData?.image_url ?? null, // Use null
         title: initialData?.title ?? null,
         description: initialData?.description ?? null,
         link_url: initialData?.link_url ?? null,
@@ -57,7 +57,7 @@ export const CarouselBannerForm = React.forwardRef<any, CarouselBannerFormProps>
     React.useEffect(() => {
       // Reset form when initialData changes (e.g., when editing a different banner)
       form.reset({
-        image_url: initialData?.image_url ?? "",
+        image_url: initialData?.image_url ?? null, // Use null
         title: initialData?.title ?? null,
         description: initialData?.description ?? null,
         link_url: initialData?.link_url ?? null,
@@ -70,7 +70,7 @@ export const CarouselBannerForm = React.forwardRef<any, CarouselBannerFormProps>
     };
 
     const handleRemoveImage = () => {
-      form.setValue("image_url", "", { shouldValidate: true }); // Set to empty string for validation
+      form.setValue("image_url", null, { shouldValidate: true }); // Set to null
     };
 
     return (
