@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-// EmblaCarouselType is no longer needed as we're not manually managing emblaApi state
+import { EmblaCarouselType } from "embla-carousel"; // Import EmblaCarouselType
 
 interface CarouselBannerProps {
   images: string[];
@@ -25,10 +25,8 @@ interface CarouselBannerProps {
 }
 
 export function CarouselBanner({ images, alt, bannerData }: CarouselBannerProps) {
-  // Initialize Autoplay plugin directly
-  const plugin = React.useRef(
-    Autoplay({ delay: 5000, stopOnInteraction: true })
-  );
+  const [emblaApi, setEmblaApi] = React.useState<EmblaCarouselType | null>(null);
+  const autoplayPlugin = React.useRef<ReturnType<typeof Autoplay> | null>(null); // Ref for Autoplay instance
 
   // If no images, return a fallback or null
   if (images.length === 0) {
@@ -39,15 +37,43 @@ export function CarouselBanner({ images, alt, bannerData }: CarouselBannerProps)
     );
   }
 
-  // No need for useEffect to manually init/destroy or setEmblaApi state
-  // The Carousel component handles plugin lifecycle when passed via 'plugins' prop
+  React.useEffect(() => {
+    if (!emblaApi) return;
+
+    // Initialize Autoplay plugin with options
+    autoplayPlugin.current = Autoplay({ delay: 5000, stopOnInteraction: true });
+    autoplayPlugin.current.init(emblaApi); // Manually initialize with emblaApi
+
+    // Start autoplay
+    autoplayPlugin.current.play();
+
+    // Clean up on unmount
+    return () => {
+      if (autoplayPlugin.current) {
+        autoplayPlugin.current.destroy();
+      }
+    };
+  }, [emblaApi]); // Dependency on emblaApi ensures it runs when API is available
+
+  const handleMouseEnter = React.useCallback(() => {
+    if (autoplayPlugin.current) {
+      autoplayPlugin.current.stop();
+    }
+  }, []);
+
+  const handleMouseLeave = React.useCallback(() => {
+    if (autoplayPlugin.current) {
+      autoplayPlugin.current.play();
+    }
+  }, []);
 
   return (
     <Carousel
-      plugins={[plugin.current]} // Pass the plugin here
+      setApi={setEmblaApi} // Pass the setter to get the Embla API instance
+      // IMPORTANT: Do NOT pass plugins prop here, as we are managing Autoplay manually
       className="w-full"
-      onMouseEnter={plugin.current.stop} // Directly call stop/play on the plugin ref
-      onMouseLeave={plugin.current.play}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <CarouselContent>
         {images.map((image, index) => (
