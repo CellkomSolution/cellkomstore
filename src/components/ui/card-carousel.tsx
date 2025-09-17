@@ -2,14 +2,13 @@
 
 import React from "react"
 import Image from "next/image"
-import Link from "next/link" // Import Link
+import Link from "next/link"
 import { Swiper, SwiperSlide } from "swiper/react"
 
 import "swiper/css"
 import "swiper/css/effect-coverflow"
 import "swiper/css/pagination"
 import "swiper/css/navigation"
-// Removed SparklesIcon import
 import {
   Autoplay,
   EffectCoverflow,
@@ -17,10 +16,8 @@ import {
   Pagination,
 } from "swiper/modules"
 
-// Removed Badge import
-
 interface CarouselProps {
-  images: { src: string; alt: string; link?: string }[] // Added link property
+  images: { src: string; alt: string; link?: string }[]
   autoplayDelay?: number
   showPagination?: boolean
   showNavigation?: boolean
@@ -46,13 +43,14 @@ export const CardCarousel: React.FC<CarouselProps> = ({
     display: flex; /* To center content if needed */
     justify-content: center;
     align-items: center;
+    background-color: hsl(var(--background)); /* Ensure white background for each slide */
   }
   
   .swiper-slide img {
     display: block;
     width: 100%;
     height: 100%; /* Ensure image fills the slide */
-    object-fit: cover; /* Ensure image covers the area without distortion */
+    object-fit: contain; /* Changed to contain to show full logo, adjust if crop is preferred */
   }
   
   .swiper-3d .swiper-slide-shadow-left {
@@ -92,7 +90,7 @@ export const CardCarousel: React.FC<CarouselProps> = ({
       <style>{css}</style>
       <div className="relative w-full">
         <Swiper
-          spaceBetween={10} // Reduced spaceBetween for tighter packing
+          spaceBetween={20} // Increased spaceBetween for more separation
           autoplay={{
             delay: autoplayDelay,
             disableOnInteraction: false,
@@ -122,12 +120,12 @@ export const CardCarousel: React.FC<CarouselProps> = ({
         >
           {images.map((image, index) => (
             <SwiperSlide key={index}>
-              <Link href={image.link || "#"} target="_blank" rel="noopener noreferrer" className="block size-full rounded-xl overflow-hidden border">
+              <Link href={image.link || "#"} target="_blank" rel="noopener noreferrer" className="block size-full rounded-xl overflow-hidden border p-2"> {/* Added p-2 for padding inside border */}
                 <Image
                   src={image.src}
                   width={192} // Match slide width
                   height={192} // Match slide height
-                  className="size-full object-cover"
+                  className="size-full object-contain" // Changed to object-contain
                   alt={image.alt}
                 />
               </Link>
