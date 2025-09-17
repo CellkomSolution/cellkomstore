@@ -28,6 +28,15 @@ export function CarouselBanner({ images, alt, bannerData }: CarouselBannerProps)
     Autoplay({ delay: 5000, stopOnInteraction: true })
   );
 
+  // Add this check: If no images, return a fallback or null
+  if (images.length === 0) {
+    return (
+      <div className="w-full h-48 md:h-72 flex items-center justify-center rounded-lg border bg-muted text-muted-foreground">
+        Tidak ada banner untuk ditampilkan.
+      </div>
+    );
+  }
+
   return (
     <Carousel
       plugins={[plugin.current]}
@@ -44,7 +53,6 @@ export function CarouselBanner({ images, alt, bannerData }: CarouselBannerProps)
                 alt={`${alt} ${index + 1}`}
                 fill
                 style={{ objectFit: "cover" }}
-                // className="w-full h-full" // Removed: redundant with fill
                 priority={index === 0} // Prioritize the first image for LCP
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 100vw" // Added responsive sizes
               />
