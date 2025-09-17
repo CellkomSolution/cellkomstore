@@ -18,7 +18,7 @@ const cn = (...classes: (string | boolean | undefined)[]) => {
 }
 
 const placeholderImage = (text = "Image") =>
-  `https://placehold.co/1200x352/1a1a1a/ffffff?text=${text}` // Updated placeholder size for h-88 (352px)
+  `https://placehold.co/1200x192/1a1a1a/ffffff?text=${text}` // Updated placeholder size
 
 // --- Types ---
 type StaticImageData = string;
@@ -93,14 +93,14 @@ export function CarouselBanner({ images, alt, interval = 5000 }: CarouselBannerP
 
   if (images.length === 0) {
     return (
-      <div className="flex items-center justify-center w-full h-88 rounded-lg border-2 border-dashed text-muted-foreground">
+      <div className="flex items-center justify-center w-full h-48 rounded-lg border-2 border-dashed text-muted-foreground">
         Tidak ada gambar banner.
       </div>
     );
   }
 
   return (
-    <div className="w-full h-88 relative rounded-lg overflow-hidden border"> {/* Direct styling for h-88 */}
+    <div className="w-full h-48 relative rounded-lg overflow-hidden border"> {/* Direct styling for h-48 */}
       <AnimatePresence mode="wait">
         <MotionAnimatedImage
           key={currentImageIndex}
