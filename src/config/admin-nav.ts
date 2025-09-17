@@ -9,6 +9,7 @@ import {
   CreditCard,
   BookOpen,
   MessageSquare,
+  ImageStack, // New icon for carousel
 } from "lucide-react";
 
 export const adminNavItems = [
@@ -27,11 +28,11 @@ export const adminNavItems = [
     href: "/admin/products",
     icon: Package,
   },
-  // {
-  //   title: "Hero Carousel",
-  //   href: "/admin/hero-carousel",
-  //   icon: ImageIcon,
-  // },
+  {
+    title: "Hero Carousel",
+    href: "/admin/hero-carousel",
+    icon: ImageStack, // Using ImageStack icon for carousel
+  },
   {
     title: "Kategori",
     href: "/admin/categories",
