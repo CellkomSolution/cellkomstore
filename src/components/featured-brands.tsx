@@ -73,7 +73,7 @@ export const FeaturedBrands = () => {
       ) : (
         <ImageCarousel
           images={carouselImages}
-          columnCount={3} // Menampilkan 3 kolom logo
+          columnCount={4} // Mengurangi jumlah kolom untuk tampilan yang lebih ringkas
         />
       )}
     </section>
