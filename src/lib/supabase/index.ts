@@ -7,4 +7,4 @@ export * from './orders';
 export * from './payment-methods';
 export * from './featured-brands';
 export * from './blog-posts';
-export * from './carousel-banners';
+// export * from './carousel-banners'; // Removed
