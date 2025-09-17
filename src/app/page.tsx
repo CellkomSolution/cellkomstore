@@ -3,6 +3,7 @@ import { FlashSale } from "@/components/flash-sale";
 import { ProductGrid } from "@/components/product-grid";
 import { FeatureBadges } from "@/components/feature-badges";
 import { FeaturedBrands } from "@/components/featured-brands";
+import { HeroCarousel } from "@/components/hero-carousel"; // Import HeroCarousel
 import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase/products"; // Import dari modul products
 
 export default async function Home() {
@@ -12,7 +13,7 @@ export default async function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      {/* <HeroCarousel /> */}
+      <HeroCarousel /> {/* Add HeroCarousel here */}
       <FeatureBadges />
       <CategoryIcons />
       <FlashSale initialProducts={flashSaleProducts} />
