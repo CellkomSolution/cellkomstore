@@ -32,6 +32,8 @@ export default function AdminHeroCarouselPage() {
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [bannerToDelete, setBannerToDelete] = React.useState<CarouselBanner | null>(null);
 
+  const formRef = React.useRef<{ reset: () => void }>(null); // Correctly type the ref
+
   React.useEffect(() => {
     fetchBanners();
   }, []);
@@ -60,7 +62,7 @@ export default function AdminHeroCarouselPage() {
           toast.success("Banner berhasil ditambahkan.");
         }
       }
-      form.reset(); // Reset form after successful submission
+      formRef.current?.reset(); // Call reset through the ref
     } catch (error: any) {
       toast.error("Gagal menyimpan banner: " + error.message);
     } finally {
@@ -84,13 +86,11 @@ export default function AdminHeroCarouselPage() {
     }
   };
 
-  const form = React.useRef<any>(null); // Ref to access form methods
-
   return (
     <div className="space-y-6 py-8">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Manajemen Hero Carousel</h2>
-        <Button onClick={() => { setEditingBanner(null); form.current?.reset(); }}>
+        <Button onClick={() => { setEditingBanner(null); formRef.current?.reset(); }}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Tambah Banner Baru
         </Button>
@@ -105,10 +105,10 @@ export default function AdminHeroCarouselPage() {
             initialData={editingBanner}
             onSubmit={handleFormSubmit}
             loading={isSubmittingForm}
-            ref={form}
+            ref={formRef} // Pass the ref to the form component
           />
           {editingBanner && (
-            <Button variant="outline" onClick={() => { setEditingBanner(null); form.current?.reset(); }} className="mt-4">
+            <Button variant="outline" onClick={() => { setEditingBanner(null); formRef.current?.reset(); }} className="mt-4">
               Batal Edit
             </Button>
           )}

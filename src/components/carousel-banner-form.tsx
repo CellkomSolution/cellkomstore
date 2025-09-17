@@ -36,132 +36,150 @@ interface CarouselBannerFormProps {
   loading?: boolean;
 }
 
-export function CarouselBannerForm({ initialData, onSubmit, loading = false }: CarouselBannerFormProps) {
-  const form = useForm<CarouselBannerFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      image_url: initialData?.image_url ?? "",
-      title: initialData?.title ?? null,
-      description: initialData?.description ?? null,
-      link_url: initialData?.link_url ?? null,
-      order: initialData?.order ?? 0,
-    },
-  });
+export const CarouselBannerForm = React.forwardRef<any, CarouselBannerFormProps>(
+  ({ initialData, onSubmit, loading = false }, ref) => {
+    const form = useForm<CarouselBannerFormValues>({
+      resolver: zodResolver(formSchema),
+      defaultValues: {
+        image_url: initialData?.image_url ?? "",
+        title: initialData?.title ?? null,
+        description: initialData?.description ?? null,
+        link_url: initialData?.link_url ?? null,
+        order: initialData?.order ?? 0,
+      },
+    });
 
-  const handleImageUploadSuccess = (newUrl: string) => {
-    form.setValue("image_url", newUrl, { shouldValidate: true });
-  };
+    // Expose the form's reset method to the parent component
+    React.useImperativeHandle(ref, () => ({
+      reset: form.reset,
+    }));
 
-  const handleRemoveImage = () => {
-    form.setValue("image_url", "", { shouldValidate: true }); // Set to empty string for validation
-  };
+    React.useEffect(() => {
+      // Reset form when initialData changes (e.g., when editing a different banner)
+      form.reset({
+        image_url: initialData?.image_url ?? "",
+        title: initialData?.title ?? null,
+        description: initialData?.description ?? null,
+        link_url: initialData?.link_url ?? null,
+        order: initialData?.order ?? 0,
+      });
+    }, [initialData, form]);
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormItem>
-          <FormLabel>Gambar Banner</FormLabel>
-          <FormControl>
-            <ImageUploader
-              bucketName="carousel-banner-images"
-              currentImageUrl={form.watch("image_url")}
-              onUploadSuccess={handleImageUploadSuccess}
-              onRemove={handleRemoveImage}
-              disabled={loading}
-              aspectRatio="aspect-video"
-              className="max-w-lg"
-            />
-          </FormControl>
-          <FormDescription>
-            Unggah gambar utama untuk banner carousel. Ukuran yang disarankan: 1200x480px (rasio 5:2).
-          </FormDescription>
-          <FormMessage />
-        </FormItem>
+    const handleImageUploadSuccess = (newUrl: string) => {
+      form.setValue("image_url", newUrl, { shouldValidate: true });
+    };
 
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Judul Banner (Opsional)</FormLabel>
-              <FormControl>
-                <Input placeholder="Judul menarik" {...field} value={field.value ?? ""} />
-              </FormControl>
-              <FormDescription>
-                Teks utama yang akan ditampilkan di banner.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    const handleRemoveImage = () => {
+      form.setValue("image_url", "", { shouldValidate: true }); // Set to empty string for validation
+    };
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Deskripsi Banner (Opsional)</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Deskripsi singkat tentang promosi atau produk"
-                  className="resize-y min-h-[80px]"
-                  {...field}
-                  value={field.value ?? ""}
-                />
-              </FormControl>
-              <FormDescription>
-                Deskripsi tambahan yang akan ditampilkan di banner.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormItem>
+            <FormLabel>Gambar Banner</FormLabel>
+            <FormControl>
+              <ImageUploader
+                bucketName="carousel-banner-images"
+                currentImageUrl={form.watch("image_url")}
+                onUploadSuccess={handleImageUploadSuccess}
+                onRemove={handleRemoveImage}
+                disabled={loading}
+                aspectRatio="aspect-video"
+                className="max-w-lg"
+              />
+            </FormControl>
+            <FormDescription>
+              Unggah gambar utama untuk banner carousel. Ukuran yang disarankan: 1200x480px (rasio 5:2).
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
 
-        <FormField
-          control={form.control}
-          name="link_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL Tautan (Opsional)</FormLabel>
-              <FormControl>
-                <Input placeholder="https://cellkom.com/promo-spesial" {...field} value={field.value ?? ""} />
-              </FormControl>
-              <FormDescription>
-                Tautan yang akan dituju saat banner atau tombol diklik.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Judul Banner (Opsional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="Judul menarik" {...field} value={field.value ?? ""} />
+                </FormControl>
+                <FormDescription>
+                  Teks utama yang akan ditampilkan di banner.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="order"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Urutan Tampilan</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
-              </FormControl>
-              <FormDescription>
-                Angka yang lebih rendah akan muncul lebih dulu.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Deskripsi Banner (Opsional)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Deskripsi singkat tentang promosi atau produk"
+                    className="resize-y min-h-[80px]"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Deskripsi tambahan yang akan ditampilkan di banner.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Button type="submit" disabled={loading}>
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Menyimpan...
-            </>
-          ) : (
-            initialData ? "Simpan Perubahan" : "Buat Banner"
-          )}
-        </Button>
-      </form>
-    </Form>
-  );
-}
+          <FormField
+            control={form.control}
+            name="link_url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL Tautan (Opsional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://cellkom.com/promo-spesial" {...field} value={field.value ?? ""} />
+                </FormControl>
+                <FormDescription>
+                  Tautan yang akan dituju saat banner atau tombol diklik.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="order"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Urutan Tampilan</FormLabel>
+                <FormControl>
+                  <Input type="number" placeholder="0" {...field} value={field.value ?? 0} />
+                </FormControl>
+                <FormDescription>
+                  Angka yang lebih rendah akan muncul lebih dulu.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Menyimpan...
+              </>
+            ) : (
+              initialData ? "Simpan Perubahan" : "Buat Banner"
+            )}
+          </Button>
+        </form>
+      </Form>
+    );
+  }
+);
