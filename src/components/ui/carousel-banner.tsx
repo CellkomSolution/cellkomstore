@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { EmblaCarouselType } from "embla-carousel";
 
 interface CarouselBannerProps {
   images: string[];
@@ -24,11 +25,10 @@ interface CarouselBannerProps {
 }
 
 export function CarouselBanner({ images, alt, bannerData }: CarouselBannerProps) {
-  const plugin = React.useRef(
-    Autoplay({ delay: 5000, stopOnInteraction: true })
-  );
+  const [emblaApi, setEmblaApi] = React.useState<EmblaCarouselType | null>(null);
+  const autoplayPlugin = React.useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
 
-  // Add this check: If no images, return a fallback or null
+  // If no images, return a fallback or null
   if (images.length === 0) {
     return (
       <div className="w-full h-48 md:h-72 flex items-center justify-center rounded-lg border bg-muted text-muted-foreground">
@@ -37,12 +37,40 @@ export function CarouselBanner({ images, alt, bannerData }: CarouselBannerProps)
     );
   }
 
+  React.useEffect(() => {
+    if (!emblaApi) return;
+
+    // Manually initialize the autoplay plugin with the emblaApi instance
+    autoplayPlugin.current.init(emblaApi);
+
+    // Start autoplay when component mounts and API is ready
+    autoplayPlugin.current.play();
+
+    // Clean up on unmount
+    return () => {
+      autoplayPlugin.current.destroy();
+    };
+  }, [emblaApi]); // Dependency on emblaApi ensures it runs when API is available
+
+  const handleMouseEnter = React.useCallback(() => {
+    if (emblaApi) {
+      autoplayPlugin.current.stop();
+    }
+  }, [emblaApi]);
+
+  const handleMouseLeave = React.useCallback(() => {
+    if (emblaApi) {
+      autoplayPlugin.current.play();
+    }
+  }, [emblaApi]);
+
   return (
     <Carousel
-      plugins={[plugin.current]}
+      setApi={setEmblaApi} // Pass the setter to get the Embla API instance
+      // IMPORTANT: Do NOT pass plugins prop here, as we are managing Autoplay manually
       className="w-full"
-      onMouseEnter={plugin.current.stop}
-      onMouseLeave={plugin.current.play}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <CarouselContent>
         {images.map((image, index) => (
@@ -53,8 +81,8 @@ export function CarouselBanner({ images, alt, bannerData }: CarouselBannerProps)
                 alt={`${alt} ${index + 1}`}
                 fill
                 style={{ objectFit: "cover" }}
-                priority={index === 0} // Prioritize the first image for LCP
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 100vw" // Added responsive sizes
+                priority={index === 0}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 100vw"
               />
               {bannerData && bannerData[index] && (
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center p-4 md:p-8">
