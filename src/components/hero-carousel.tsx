@@ -23,6 +23,15 @@ export function HeroCarousel() {
         return <Skeleton className="w-full h-48 md:h-72 rounded-lg" />;
     }
 
+    // Add conditional rendering: Only render CarouselBanner if there are actual banners
+    if (banners.length === 0) {
+        return (
+            <div className="w-full h-48 md:h-72 flex items-center justify-center rounded-lg border bg-muted text-muted-foreground">
+                Tidak ada banner untuk ditampilkan.
+            </div>
+        );
+    }
+
     // Extract image_urls, titles, descriptions, and link_urls for the CarouselBanner component
     const images = banners.map(banner => banner.image_url);
     const bannerData = banners.map(banner => ({
