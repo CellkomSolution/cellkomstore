@@ -2,20 +2,13 @@
 
 import {
   forwardRef,
-  useCallback,
   useEffect,
   useState,
-  type MouseEvent,
 } from "react"
 import clsx from "clsx"
 import {
   AnimatePresence,
   motion,
-  useMotionTemplate,
-  useMotionValue,
-  type MotionStyle,
-  type MotionValue,
-  type Variants,
 } from "framer-motion"
 import Image from "next/image"
 
@@ -25,15 +18,10 @@ const cn = (...classes: (string | boolean | undefined)[]) => {
 }
 
 const placeholderImage = (text = "Image") =>
-  `https://placehold.co/1200x400/1a1a1a/ffffff?text=${text}`
+  `https://placehold.co/1200x192/1a1a1a/ffffff?text=${text}` // Updated placeholder size
 
 // --- Types ---
 type StaticImageData = string;
-
-type WrapperStyle = MotionStyle & {
-  "--x": MotionValue<string>
-  "--y": MotionValue<string>
-}
 
 interface CarouselBannerProps {
   images: StaticImageData[];
@@ -77,19 +65,6 @@ function useImageCycler(totalImages: number, interval: number = 5000) {
   return currentIndex;
 }
 
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const checkDevice = () => {
-      setIsMobile(window.matchMedia("(max-width: 768px)").matches)
-    }
-    checkDevice()
-    window.addEventListener("resize", checkDevice)
-    return () => window.removeEventListener("resize", checkDevice)
-  }, [])
-  return isMobile
-}
-
 // --- Components ---
 const AnimatedImage = forwardRef<HTMLImageElement, AnimatedImageProps>(
   ({ src, alt, className, style, ...props }, ref) => {
@@ -113,58 +88,28 @@ AnimatedImage.displayName = "AnimatedImage"
 
 const MotionAnimatedImage = motion(AnimatedImage)
 
-function BannerCard({ children }: { children: React.ReactNode }) {
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
-  const isMobile = useIsMobile()
-
-  function handleMouseMove({ currentTarget, clientX, clientY }: MouseEvent) {
-    if (isMobile) return
-    const { left, top } = currentTarget.getBoundingClientRect()
-    mouseX.set(clientX - left)
-    mouseY.set(clientY - top)
-  }
-
-  return (
-    <motion.div
-      className="group relative w-full rounded-2xl"
-      onMouseMove={handleMouseMove}
-      style={{ "--x": useMotionTemplate`${mouseX}px`, "--y": useMotionTemplate`${mouseY}px` } as WrapperStyle}
-    >
-      <div className="relative w-full overflow-hidden rounded-3xl border border-neutral-200 bg-white transition-colors duration-300 dark:border-neutral-800 dark:bg-neutral-900">
-        {/* Adjusted height to be responsive with aspect-video, removed fixed min-height */}
-        <div className="aspect-video w-full relative">
-          {children}
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
 export function CarouselBanner({ images, alt, interval = 5000 }: CarouselBannerProps) {
   const currentImageIndex = useImageCycler(images.length, interval);
 
   if (images.length === 0) {
     return (
-      <div className="flex items-center justify-center w-full aspect-video rounded-lg border-2 border-dashed text-muted-foreground">
+      <div className="flex items-center justify-center w-full h-48 rounded-lg border-2 border-dashed text-muted-foreground">
         Tidak ada gambar banner.
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <BannerCard>
-        <AnimatePresence mode="wait">
-          <MotionAnimatedImage
-            key={currentImageIndex}
-            src={images[currentImageIndex]}
-            alt={alt}
-            {...ANIMATION_PRESETS.fadeIn}
-            className="w-full h-full"
-          />
-        </AnimatePresence>
-      </BannerCard>
+    <div className="w-full h-48 relative rounded-lg overflow-hidden border"> {/* Direct styling for h-48 */}
+      <AnimatePresence mode="wait">
+        <MotionAnimatedImage
+          key={currentImageIndex}
+          src={images[currentImageIndex]}
+          alt={alt}
+          {...ANIMATION_PRESETS.fadeIn}
+          className="w-full h-full" // Image fills the container
+        />
+      </AnimatePresence>
     </div>
   )
 }
