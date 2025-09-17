@@ -59,7 +59,7 @@ const ImageColumn: React.FC<ImageColumnProps> = React.memo(
 
     return (
       <motion.div
-        className="relative h-14 w-24 overflow-hidden md:h-24 md:w-48"
+        className="relative h-20 w-32 overflow-hidden md:h-28 md:w-56" // Diperbesar
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
@@ -101,9 +101,9 @@ const ImageColumn: React.FC<ImageColumnProps> = React.memo(
               <Image
                 src={currentImage.src}
                 alt={currentImage.alt}
-                width={128} // Sesuaikan ukuran sesuai kebutuhan
-                height={128} // Sesuaikan ukuran sesuai kebutuhan
-                className="h-20 w-20 max-h-[80%] max-w-[80%] object-contain md:h-32 md:w-32"
+                width={160} // Sesuaikan ukuran sesuai kebutuhan
+                height={160} // Sesuaikan ukuran sesuai kebutuhan
+                className="h-24 w-24 max-h-[80%] max-w-[80%] object-contain md:h-40 md:w-40" // Diperbesar
               />
             </Link>
           </motion.div>
