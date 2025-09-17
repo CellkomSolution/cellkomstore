@@ -2,14 +2,13 @@
 
 import React from "react"
 import Image from "next/image"
-import Link from "next/link" // Import Link
 import { Swiper, SwiperSlide } from "swiper/react"
 
 import "swiper/css"
 import "swiper/css/effect-coverflow"
 import "swiper/css/pagination"
 import "swiper/css/navigation"
-// Removed SparklesIcon import
+import { SparklesIcon } from "lucide-react"
 import {
   Autoplay,
   EffectCoverflow,
@@ -17,13 +16,15 @@ import {
   Pagination,
 } from "swiper/modules"
 
-// Removed Badge import
+import { Badge } from "@/components/ui/badge"
 
 interface CarouselProps {
-  images: { src: string; alt: string; link?: string }[] // Added link property
+  images: { src: string; alt: string }[]
   autoplayDelay?: number
   showPagination?: boolean
   showNavigation?: boolean
+  title?: string;
+  description?: string;
 }
 
 export const CardCarousel: React.FC<CarouselProps> = ({
@@ -31,29 +32,26 @@ export const CardCarousel: React.FC<CarouselProps> = ({
   autoplayDelay = 1500,
   showPagination = true,
   showNavigation = true,
+  title = "Card Carousel",
+  description = "Seamless Images carousel animation.",
 }) => {
   const css = `
   .swiper {
     width: 100%;
-    padding-bottom: 50px; /* Keep for pagination dots */
+    padding-bottom: 50px;
   }
   
   .swiper-slide {
     background-position: center;
     background-size: cover;
-    width: 192px; /* Equivalent to h-48 */
-    height: 192px; /* Equivalent to h-48 */
-    display: flex; /* To center content if needed */
-    justify-content: center;
-    align-items: center;
+    width: 300px;
   }
   
   .swiper-slide img {
     display: block;
     width: 100%;
-    height: 100%; /* Ensure image fills the slide */
-    object-fit: cover; /* Ensure image covers the area without distortion */
   }
+  
   
   .swiper-3d .swiper-slide-shadow-left {
     background-image: none;
@@ -61,85 +59,77 @@ export const CardCarousel: React.FC<CarouselProps> = ({
   .swiper-3d .swiper-slide-shadow-right{
     background: none;
   }
-  /* Custom navigation button styling to make them visible and usable */
-  .swiper-button-next, .swiper-button-prev {
-    color: hsl(var(--primary)); /* Use primary color for visibility */
-    background-color: hsl(var(--background)); /* Background for contrast */
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: all 0.2s ease-in-out;
-  }
-  .swiper-button-next:hover, .swiper-button-prev:hover {
-    background-color: hsl(var(--muted));
-  }
-  .swiper-button-next::after, .swiper-button-prev::after {
-    font-size: 20px; /* Adjust icon size */
-  }
-  .swiper-button-prev {
-    left: 0px; /* Adjust position */
-  }
-  .swiper-button-next {
-    right: 0px; /* Adjust position */
-  }
   `
   return (
-    <section className="w-full">
+    <section className="w-ace-y-4">
       <style>{css}</style>
-      <div className="relative w-full">
-        <Swiper
-          spaceBetween={10} // Reduced spaceBetween for tighter packing
-          autoplay={{
-            delay: autoplayDelay,
-            disableOnInteraction: false,
-          }}
-          effect={"coverflow"}
-          grabCursor={true}
-          centeredSlides={true}
-          loop={true}
-          slidesPerView={"auto"}
-          coverflowEffect={{
-            rotate: 0,
-            stretch: 0,
-            depth: 100,
-            modifier: 2.5,
-          }}
-          pagination={showPagination ? { clickable: true } : false}
-          navigation={
-            showNavigation
-              ? {
-                  nextEl: ".swiper-button-next",
-                  prevEl: ".swiper-button-prev",
+      <div className="mx-auto w-full max-w-4xl rounded-[24px] border border-black/5 p-2 shadow-sm md:rounded-t-[44px]">
+        <div className="relative mx-auto flex w-full flex-col rounded-[24px] border border-black/5 bg-neutral-800/5 p-2 shadow-sm md:items-start md:gap-8 md:rounded-b-[20px] md:rounded-t-[40px] md:p-2">
+          <Badge
+            variant="outline"
+            className="absolute left-4 top-6 rounded-[14px] border border-black/10 text-base md:left-6"
+          >
+            <SparklesIcon className="fill-[#EEBDE0] stroke-1 text-neutral-800" />{" "}
+            Latest component
+          </Badge>
+          <div className="flex flex-col justify-center pb-2 pl-4 pt-14 md:items-center">
+            <div className="flex gap-2">
+              <div>
+                <h3 className="text-4xl opacity-85 font-bold tracking-tight">
+                  {title}
+                </h3>
+                <p>{description}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex w-full items-center justify-center gap-4">
+            <div className="w-full">
+              <Swiper
+                spaceBetween={50}
+                autoplay={{
+                  delay: autoplayDelay,
+                  disableOnInteraction: false,
+                }}
+                effect={"coverflow"}
+                grabCursor={true}
+                centeredSlides={true}
+                loop={true}
+                slidesPerView={"auto"}
+                coverflowEffect={{
+                  rotate: 0,
+                  stretch: 0,
+                  depth: 100,
+                  modifier: 2.5,
+                }}
+                pagination={showPagination}
+                navigation={
+                  showNavigation
+                    ? {
+                        nextEl: ".swiper-button-next",
+                        prevEl: ".swiper-button-prev",
+                      }
+                    : undefined
                 }
-              : undefined
-          }
-          modules={[EffectCoverflow, Autoplay, Pagination, Navigation]}
-          className="mySwiper"
-        >
-          {images.map((image, index) => (
-            <SwiperSlide key={index}>
-              <Link href={image.link || "#"} target="_blank" rel="noopener noreferrer" className="block size-full rounded-xl overflow-hidden border">
-                <Image
-                  src={image.src}
-                  width={192} // Match slide width
-                  height={192} // Match slide height
-                  className="size-full object-cover"
-                  alt={image.alt}
-                />
-              </Link>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-        {showNavigation && (
-          <>
-            <div className="swiper-button-prev absolute top-1/2 -translate-y-1/2 z-10 left-2" />
-            <div className="swiper-button-next absolute top-1/2 -translate-y-1/2 z-10 right-2" />
-          </>
-        )}
+                modules={[EffectCoverflow, Autoplay, Pagination, Navigation]}
+              >
+                {images.map((image, index) => (
+                  <SwiperSlide key={index}>
+                    <div className="size-full rounded-3xl">
+                      <Image
+                        src={image.src}
+                        width={500}
+                        height={500}
+                        className="size-full rounded-xl"
+                        alt={image.alt}
+                      />
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )
