@@ -1,7 +1,7 @@
 import { CategoryIcons } from "@/components/category-icons";
 import { FlashSale } from "@/components/flash-sale";
 import { ProductGrid } from "@/components/product-grid";
-import { FeatureBadges } from "@/components/feature-badges";
+import { LogoCarouselSection } from "@/components/logo-carousel-section"; // Import the new component
 import { FeaturedBrands } from "@/components/featured-brands";
 import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase/products"; // Import dari modul products
 
@@ -13,7 +13,8 @@ export default async function Home() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* HeroCarousel removed */}
-      <FeatureBadges />
+      {/* <FeatureBadges /> Removed FeatureBadges */}
+      <LogoCarouselSection /> {/* Added the new LogoCarouselSection */}
       <CategoryIcons />
       <FlashSale initialProducts={flashSaleProducts} />
       <FeaturedBrands />
