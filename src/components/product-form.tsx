@@ -39,7 +39,7 @@ const formSchema = z.object({
   category: z.string().min(1, { message: "Kategori harus dipilih." }),
   location: z.string().min(3, { message: "Lokasi minimal 3 karakter." }),
   description: z.string().min(10, { message: "Deskripsi minimal 10 karakter." }).nullable().default(null),
-  isFlashSale: z.boolean().nullable().default(false), // Changed to nullable().default(false)
+  isFlashSale: z.boolean().default(false), // Changed to default(false) as nullable().default(false) resolves to boolean
   imageUrl: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null),
   imageFile: z.any().optional(), // For file upload
 });
@@ -74,14 +74,14 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: initialData?.name || "",
-      price: initialData?.price || 0,
-      originalPrice: initialData?.originalPrice || null,
-      category: initialData?.category || "",
-      location: initialData?.location || "",
-      description: initialData?.description || null,
-      isFlashSale: initialData?.isFlashSale || false, // Ensure boolean
-      imageUrl: initialData?.imageUrl || null,
+      name: initialData?.name ?? "",
+      price: initialData?.price ?? 0,
+      originalPrice: initialData?.originalPrice ?? null, // Use ?? for nullish coalescing
+      category: initialData?.category ?? "",
+      location: initialData?.location ?? "",
+      description: initialData?.description ?? null, // Use ?? for nullish coalescing
+      isFlashSale: initialData?.isFlashSale ?? false, // Use ?? for nullish coalescing
+      imageUrl: initialData?.imageUrl ?? null,       // Use ?? for nullish coalescing
       imageFile: undefined,
     },
   });
@@ -248,7 +248,7 @@ export function ProductForm({ initialData, onSubmit, loading = false }: ProductF
               </div>
               <FormControl>
                 <Switch
-                  checked={!!field.value} // Ensure boolean
+                  checked={field.value} // No need for !! as it's already boolean
                   onCheckedChange={field.onChange}
                   disabled={loading || isUploadingImage}
                 />

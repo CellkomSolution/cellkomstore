@@ -33,7 +33,7 @@ const formSchema = z.object({
   name: z.string().min(3, { message: "Nama metode pembayaran minimal 3 karakter." }).max(100, { message: "Nama metode pembayaran maksimal 100 karakter." }),
   type: z.enum(['bank_transfer', 'e_wallet', 'card', 'other'], { message: "Tipe metode pembayaran harus dipilih." }),
   details: z.string().nullable().default(null),
-  is_active: z.boolean().nullable().default(true), // Changed to nullable().default(true)
+  is_active: z.boolean().default(true), // Changed to default(true) as nullable().default(true) resolves to boolean
   order: z.coerce.number().min(0, { message: "Urutan tidak boleh negatif." }).default(0),
 });
 
@@ -50,11 +50,11 @@ export function PaymentMethodForm({ initialData, onSubmit, loading = false }: Pa
   const form = useForm<PaymentMethodFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: initialData?.name || "",
-      type: initialData?.type || 'bank_transfer',
+      name: initialData?.name ?? "",
+      type: initialData?.type ?? 'bank_transfer',
       details: initialData?.details ? JSON.stringify(initialData.details, null, 2) : null,
-      is_active: initialData?.is_active || true, // Ensure boolean
-      order: initialData?.order || 0,
+      is_active: initialData?.is_active ?? true, // Use ?? for nullish coalescing
+      order: initialData?.order ?? 0,             // Use ?? for nullish coalescing
     },
   });
 
@@ -134,7 +134,7 @@ export function PaymentMethodForm({ initialData, onSubmit, loading = false }: Pa
               </div>
               <FormControl>
                 <Switch
-                  checked={!!field.value} // Ensure boolean
+                  checked={field.value} // No need for !! as it's already boolean
                   onCheckedChange={field.onChange}
                   disabled={loading}
                 />

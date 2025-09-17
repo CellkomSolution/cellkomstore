@@ -25,9 +25,9 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().default(null),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().default(null),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().default(null),
-  scrolling_text_enabled: z.boolean().nullable().default(false), // Changed to nullable().default(false)
+  scrolling_text_enabled: z.boolean().default(false), // Changed to default(false)
   scrolling_text_content: z.string().nullable().default(null),
-  right_header_text_enabled: z.boolean().nullable().default(false), // Changed to nullable().default(false)
+  right_header_text_enabled: z.boolean().default(false), // Changed to default(false)
   right_header_text_content: z.string().nullable().default(null),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().default(null),
   download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().default(null),
@@ -96,24 +96,24 @@ export default function AdminSettingsPage() {
       if (settings) {
         setInitialData(settings);
         form.reset({
-          site_name: settings.site_name || null,
-          site_logo_url: settings.site_logo_url || null,
-          contact_email: settings.contact_email || null,
-          contact_phone: settings.contact_phone || null,
-          contact_address: settings.contact_address || null,
-          facebook_url: settings.facebook_url || null,
-          instagram_url: settings.instagram_url || null,
-          twitter_url: settings.twitter_url || null,
-          youtube_url: settings.youtube_url || null,
-          linkedin_url: settings.linkedin_url || null,
-          scrolling_text_enabled: settings.scrolling_text_enabled || false,
-          scrolling_text_content: settings.scrolling_text_content || null,
-          right_header_text_enabled: settings.right_header_text_enabled || false,
-          right_header_text_content: settings.right_header_text_content || null,
-          right_header_text_link: settings.right_header_text_link || null,
-          download_app_url: settings.download_app_url || null,
-          download_app_text: settings.download_app_text || null,
-          featured_brands_title: settings.featured_brands_title || null,
+          site_name: settings.site_name ?? null,
+          site_logo_url: settings.site_logo_url ?? null,
+          contact_email: settings.contact_email ?? null,
+          contact_phone: settings.contact_phone ?? null,
+          contact_address: settings.contact_address ?? null,
+          facebook_url: settings.facebook_url ?? null,
+          instagram_url: settings.instagram_url ?? null,
+          twitter_url: settings.twitter_url ?? null,
+          youtube_url: settings.youtube_url ?? null,
+          linkedin_url: settings.linkedin_url ?? null,
+          scrolling_text_enabled: settings.scrolling_text_enabled ?? false,
+          scrolling_text_content: settings.scrolling_text_content ?? null,
+          right_header_text_enabled: settings.right_header_text_enabled ?? false,
+          right_header_text_content: settings.right_header_text_content ?? null,
+          right_header_text_link: settings.right_header_text_link ?? null,
+          download_app_url: settings.download_app_url ?? null,
+          download_app_text: settings.download_app_text ?? null,
+          featured_brands_title: settings.featured_brands_title ?? null,
         });
       } else {
         // If no settings, ensure form is reset to schema defaults

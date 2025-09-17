@@ -38,9 +38,9 @@ export function FeaturedBrandForm({ initialData, onSubmit, loading = false }: Fe
   const form = useForm<FeaturedBrandFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      image_url: initialData?.image_url || null,
-      link_url: initialData?.link_url || null,
-      order: initialData?.order || 0,
+      image_url: initialData?.image_url ?? null, // Use ?? for nullish coalescing
+      link_url: initialData?.link_url ?? null,   // Use ?? for nullish coalescing
+      order: initialData?.order ?? 0,             // Use ?? for nullish coalescing
     },
   });
 

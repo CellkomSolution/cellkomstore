@@ -29,7 +29,7 @@ const formSchema = z.object({
   slug: z.string().min(5, { message: "Slug minimal 5 karakter." }).max(200, { message: "Slug maksimal 200 karakter." }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: "Slug harus berupa huruf kecil, angka, dan tanda hubung (tanpa spasi)." }),
   content: z.string().min(50, { message: "Konten minimal 50 karakter." }),
   image_url: z.string().url({ message: "URL gambar tidak valid." }).nullable().default(null),
-  is_published: z.boolean().nullable().default(false), // Changed to nullable().default(false)
+  is_published: z.boolean().default(false), // Changed to default(false) as nullable().default(false) resolves to boolean
 });
 
 // Derive the form values type directly from the schema
@@ -48,11 +48,11 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
   const form = useForm<BlogPostFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: initialData?.title || "",
-      slug: initialData?.slug || "",
-      content: initialData?.content || "",
-      image_url: initialData?.image_url || null,
-      is_published: initialData?.is_published || false, // Ensure boolean
+      title: initialData?.title ?? "",
+      slug: initialData?.slug ?? "",
+      content: initialData?.content ?? "",
+      image_url: initialData?.image_url ?? null,
+      is_published: initialData?.is_published ?? false, // Use ?? for nullish coalescing
     },
   });
 
@@ -147,7 +147,7 @@ export function BlogPostForm({ initialData, onSubmit, loading = false }: BlogPos
               </div>
               <FormControl>
                 <Switch
-                  checked={!!field.value} // Ensure boolean
+                  checked={field.value} // No need for !! as it's already boolean
                   onCheckedChange={field.onChange}
                   disabled={loading}
                 />
