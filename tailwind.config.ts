@@ -48,7 +48,7 @@ export default {
   				'2': 'hsl(var(--chart-2))',
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5)'
+  				'5': 'hsl(var(--chart-5))'
   			},
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
@@ -82,16 +82,11 @@ export default {
   				to: {
   					height: '0'
   				}
-  			},
-            move: {
-              "0%": { transform: "translateX(-200px)" },
-              "100%": { transform: "translateX(200px)" },
-            },
+  			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out',
-            move: "move 5s linear infinite",
+  			'accordion-up': 'accordion-up 0.2s ease-out'
   		}
   	}
   },

@@ -1,4 +1,4 @@
-import { CategoryFeatureBlock } from "@/components/category-feature-block"; // Import CategoryFeatureBlock
+import { CategoryIcons } from "@/components/category-icons";
 import { FlashSale } from "@/components/flash-sale";
 import { ProductGrid } from "@/components/product-grid";
 import { FeaturedBrands } from "@/components/featured-brands";
@@ -13,8 +13,8 @@ export default async function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <HeroBannerCarousel />
-      <CategoryFeatureBlock /> {/* Mengganti CategoryIcons dengan CategoryFeatureBlock */}
+      <HeroBannerCarousel /> {/* Tambahkan HeroBannerCarousel di sini */}
+      <CategoryIcons />
       <ProductCarouselSection />
       <FlashSale initialProducts={flashSaleProducts} />
       {gadgetProducts.length > 0 && (
