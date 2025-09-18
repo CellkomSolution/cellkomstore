@@ -16,10 +16,10 @@ import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ChatWidget } from "@/components/chat-widget";
-import Image from "next/image";
+import Image from "next/image"; // Ensure Image is imported from next/image
 import { motion } from "framer-motion";
-import { Textarea } from "@/components/ui/textarea"; // Using existing Textarea
-import { ParticleButton } from "@/components/particle-button"; // New ParticleButton
+import { Textarea } from "@/components/ui/textarea";
+import { ParticleButton } from "@/components/particle-button";
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
@@ -38,7 +38,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const [relatedProducts, setRelatedProducts] = React.useState<Product[]>([]);
   const [isLoadingRelatedProducts, setIsLoadingRelatedProducts] = React.useState(true);
   const [isChatOpen, setIsChatOpen] = React.useState(false);
-  const [isWishlisted, setIsWishlisted] = React.useState(false); // Local state for wishlist
+  const [isWishlisted, setIsWishlisted] = React.useState(false);
   const [feedback, setFeedback] = React.useState("");
   const [isSubmittingFeedback, setIsSubmittingFeedback] = React.useState(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = React.useState(false);
@@ -113,6 +113,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     setTimeout(() => setFeedbackSubmitted(false), 2000); // Reset success state
   };
 
+  // Create a motion-enabled Next.js Image component
+  const MotionImage = motion(Image);
+
   return (
     <div className="container mx-auto px-4 py-8 pb-24">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
@@ -120,11 +123,11 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         <div>
           <div className="relative aspect-square rounded-lg overflow-hidden border">
             {images.length > 0 ? (
-              <motion.img
+              <MotionImage // Use MotionImage here
                 key={currentImageIndex}
                 src={images[currentImageIndex]}
                 alt={`${product.name} - View ${currentImageIndex + 1}`}
-                fill
+                fill={true} // Pass fill as a boolean
                 style={{ objectFit: "cover" }}
                 className="w-full h-full object-cover"
                 initial={{ opacity: 0 }}

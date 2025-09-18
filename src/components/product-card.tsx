@@ -7,7 +7,7 @@ import type { Product } from "@/lib/supabase/products";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useCart } from "@/context/cart-context";
-import Image from "next/image";
+import Image from "next/image"; // Ensure Image is imported from next/image
 import { formatRupiah } from "@/lib/utils";
 import * as React from "react";
 import { motion } from "framer-motion";
@@ -65,16 +65,21 @@ export function ProductCard({ product }: ProductCardProps) {
   const isBestSeller = Math.random() > 0.8; // Example: 20% chance to be best seller
   const freeShipping = Math.random() > 0.5; // Example: 50% chance for free shipping
 
+  // Create a motion-enabled Next.js Image component
+  const MotionImage = motion(Image);
+
   return (
     <Card className="w-full overflow-hidden group bg-background text-foreground shadow-xl hover:shadow-lg transition-all duration-300 rounded-md h-full flex flex-col">
       <Link href={`/product/${product.id}`} className="block flex flex-col flex-grow">
         <CardContent className="p-0 flex flex-col flex-grow">
           <div className="relative aspect-[3/4] overflow-hidden">
             {images.length > 0 ? (
-              <motion.img
+              <MotionImage // Use MotionImage here
                 key={currentImageIndex}
                 src={images[currentImageIndex]}
                 alt={`${product.name} - View ${currentImageIndex + 1}`}
+                fill={true} // Pass fill as a boolean
+                style={{ objectFit: "cover" }}
                 className="object-cover w-full h-full"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
