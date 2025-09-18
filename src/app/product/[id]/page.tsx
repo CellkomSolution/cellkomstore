@@ -16,14 +16,13 @@ import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ChatWidget } from "@/components/chat-widget";
-import Image from "next/image"; // Import Image
+import Image from "next/image";
 
 interface ProductDetailPageProps {
-  params: Promise<{ id: string }>; // Corrected: params is now a Promise
+  params: Promise<{ id: string }>;
 }
 
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
-  // Unwrap params using React.use()
   const { id } = React.use(params);
 
   const { addItem } = useCart();
@@ -84,25 +83,27 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   return (
     <div className="container mx-auto px-4 py-8 pb-24">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-        <div>
-          <div className="aspect-square rounded-lg overflow-hidden border">
-            {product.imageUrl ? (
-              <Image
-                src={product.imageUrl}
-                alt={product.name}
-                fill
-                style={{ objectFit: "cover" }}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-lg">
-                No Image
-              </div>
-            )}
-          </div>
+        {/* Product Image Section */}
+        <div className="relative h-64 md:h-96 w-full rounded-lg overflow-hidden border bg-muted flex items-center justify-center">
+          {product.imageUrl ? (
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              style={{ objectFit: "contain" }} {/* Use contain to ensure full image is visible */}
+              className="p-2" {/* Add some padding inside the container */}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority
+            />
+          ) : (
+            <div className="text-muted-foreground text-lg">
+              Tidak ada gambar
+            </div>
+          )}
         </div>
 
-        <div>
+        {/* Product Details Section */}
+        <div className="space-y-4">
           <h1 className="text-2xl lg:text-3xl font-bold mb-2">{product.name}</h1>
           <div className="flex items-center gap-4 mb-4">
             <div className="flex items-center text-sm text-muted-foreground">
@@ -138,15 +139,12 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               </Button>
               <Button 
                 variant="outline" 
-                className="
-                  h-12 px-8 text-base flex-1 // Default for sm and up (before md)
-                  md:h-10 md:w-10 md:p-0 md:flex-none // Icon size for md
-                  lg:h-12 lg:px-8 lg:text-base lg:flex-1 lg:w-auto // Back to lg size for lg
-                " 
+                size="lg" {/* Make it a full button on desktop */}
+                className="flex-1 h-12 text-base" 
                 onClick={() => setIsChatOpen(true)}
               >
-                <MessageSquare className="h-5 w-5 md:mr-0 lg:mr-2" />
-                <span className="md:sr-only lg:not-sr-only">Chat Penjual</span>
+                <MessageSquare className="h-5 w-5 mr-2" />
+                Chat Penjual
               </Button>
             </div>
           )}
@@ -168,6 +166,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         </div>
       </div>
 
+      {/* Product Description Section */}
       <div className="mt-12">
         <h2 className="text-xl font-bold mb-4 border-b pb-2">Deskripsi Produk</h2>
         <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -179,6 +178,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         </div>
       </div>
 
+      {/* Related Products Section */}
       {relatedProducts.length > 0 && (
         <div className="mt-12">
           <ProductGrid 
