@@ -2,16 +2,16 @@
 
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, DollarSign, ShoppingBag, LayoutGrid, Image as ImageIcon, CreditCard, Settings, BookOpen, MessageSquare, LayoutDashboard } from "lucide-react"; // Removed ImageStack
+import { Package, Users, DollarSign, ShoppingBag, LayoutGrid, Image as ImageIcon, CreditCard, Settings, BookOpen, MessageSquare, LayoutDashboard } from "lucide-react";
 import { getTotalProductsCount } from "@/lib/supabase/products";
 import { getTotalUsersCount } from "@/lib/supabase/profiles";
-import { getTotalOrdersCount } from "@/lib/supabase/orders"; // Import getTotalOrdersCount
-import Link from "next/link"; // Import Link
+import { getTotalOrdersCount } from "@/lib/supabase/orders";
+import Link from "next/link";
 
 export default function AdminDashboardPage() {
   const [totalProducts, setTotalProducts] = React.useState<number | null>(null);
   const [totalUsers, setTotalUsers] = React.useState<number | null>(null);
-  const [totalOrders, setTotalOrders] = React.useState<number | null>(null); // New state for total orders
+  const [totalOrders, setTotalOrders] = React.useState<number | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -19,10 +19,10 @@ export default function AdminDashboardPage() {
       setIsLoading(true);
       const productsCount = await getTotalProductsCount();
       const usersCount = await getTotalUsersCount();
-      const ordersCount = await getTotalOrdersCount(); // Fetch total orders
+      const ordersCount = await getTotalOrdersCount();
       setTotalProducts(productsCount);
       setTotalUsers(usersCount);
-      setTotalOrders(ordersCount); // Set total orders
+      setTotalOrders(ordersCount);
       setIsLoading(false);
     }
     fetchData();
@@ -99,7 +99,6 @@ export default function AdminDashboardPage() {
                 <Package className="h-4 w-4" /> Manajemen Produk
               </Link>
             </li>
-            {/* Removed Hero Carousel link */}
             <li>
               <Link href="/admin/categories" className="flex items-center gap-2 hover:text-primary">
                 <LayoutGrid className="h-4 w-4" /> Manajemen Kategori

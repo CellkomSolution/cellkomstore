@@ -9,7 +9,6 @@ import {
   CreditCard,
   BookOpen,
   MessageSquare,
-  ImageStack, // Added ImageStack icon for Hero Banners
 } from "lucide-react";
 
 export const adminNavItems = [
@@ -27,11 +26,6 @@ export const adminNavItems = [
     title: "Produk",
     href: "/admin/products",
     icon: Package,
-  },
-  {
-    title: "Hero Banners", // New entry
-    href: "/admin/hero-banners",
-    icon: ImageStack, // Using ImageStack icon
   },
   {
     title: "Kategori",

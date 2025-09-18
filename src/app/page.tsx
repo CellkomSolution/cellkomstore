@@ -3,7 +3,6 @@ import { FlashSale } from "@/components/flash-sale";
 import { ProductGrid } from "@/components/product-grid";
 import { FeaturedBrands } from "@/components/featured-brands";
 import { ProductCarouselSection } from "@/components/product-carousel-section";
-import { HeroBannerCarousel } from "@/components/hero-banner-carousel"; // Import the new component
 import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase/products";
 
 export default async function Home() {
@@ -13,7 +12,7 @@ export default async function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <HeroBannerCarousel /> {/* Added the new HeroBannerCarousel here */}
+      {/* HeroBannerCarousel removed */}
       <CategoryIcons />
       <ProductCarouselSection />
       <FlashSale initialProducts={flashSaleProducts} />
