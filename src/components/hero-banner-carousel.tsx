@@ -78,7 +78,7 @@ export function HeroBannerCarousel({
 
   if (isLoading) {
     return (
-      <div className="relative w-full aspect-[4/3] md:aspect-video rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+      <div className="relative w-full aspect-[3/2] md:aspect-video rounded-lg overflow-hidden bg-muted flex items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
       </div>
     );
@@ -86,7 +86,7 @@ export function HeroBannerCarousel({
 
   if (banners.length === 0) {
     return (
-      <div className="relative w-full aspect-[4/3] md:aspect-video rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
+      <div className="relative w-full aspect-[3/2] md:aspect-video rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
         Tidak ada banner untuk ditampilkan.
       </div>
     );
@@ -102,7 +102,7 @@ export function HeroBannerCarousel({
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex">
           {banners.map((banner, index) => (
-            <div key={banner.id} className="flex-none w-full relative aspect-[4/3] md:aspect-video">
+            <div key={banner.id} className="flex-none w-full relative aspect-[3/2] md:aspect-video">
               <Image
                 src={banner.image_url}
                 alt={banner.title}
@@ -111,15 +111,15 @@ export function HeroBannerCarousel({
                 priority={index === 0} // Prioritize first image for LCP
                 sizes="(max-width: 768px) 100vw, 100vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center p-8 md:p-12">
+              <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center p-6 md:p-12">
                 <motion.div
                   initial="hidden"
                   animate={index === selectedIndex ? "visible" : "hidden"}
                   variants={textVariants}
                   key={selectedIndex} // Reset animation on slide change
-                  className="max-w-md text-white space-y-3"
+                  className="max-w-md text-white space-y-2 md:space-y-3"
                 >
-                  <h2 className="text-3xl md:text-4xl font-bold leading-tight">
+                  <h2 className="text-2xl md:text-4xl font-bold leading-tight">
                     {banner.title}
                   </h2>
                   {banner.description && (
@@ -128,7 +128,7 @@ export function HeroBannerCarousel({
                     </p>
                   )}
                   {banner.button_text && banner.button_link && (
-                    <Button asChild size="lg" className="mt-4">
+                    <Button asChild size="sm" className="mt-3 md:mt-4 md:text-base md:px-6 md:py-3">
                       <Link href={banner.button_link}>
                         {banner.button_text}
                       </Link>
