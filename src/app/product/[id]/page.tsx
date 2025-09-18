@@ -19,11 +19,11 @@ import { ChatWidget } from "@/components/chat-widget";
 import Image from "next/image";
 
 interface ProductDetailPageProps {
-  params: { id: string }; // Diperbaiki: params adalah objek biasa, bukan Promise
+  params: { id: string };
 }
 
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const { id } = params; // Diperbaiki: Akses id secara langsung
+  const { id } = params;
 
   const { addItem } = useCart();
   const isMobile = useIsMobile();
@@ -90,8 +90,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               src={product.imageUrl}
               alt={product.name}
               fill
-              style={{ objectFit: "contain" }} {/* Use contain to ensure full image is visible */}
-              className="p-2" {/* Add some padding inside the container */}
+              style={{ objectFit: "contain" }}
+              className="p-2"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority
             />
@@ -139,7 +139,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               </Button>
               <Button 
                 variant="outline" 
-                size="lg" {/* Make it a full button on desktop */}
+                size="lg"
                 className="flex-1 h-12 text-base" 
                 onClick={() => setIsChatOpen(true)}
               >
