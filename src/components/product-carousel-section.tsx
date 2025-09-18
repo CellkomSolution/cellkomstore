@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { CardCarousel } from "@/components/ui/card-carousel";
 import { getProducts, Product } from "@/lib/supabase/products";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, ChevronRight } from "lucide-react"; // Import ChevronRight
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
-import Link from "next/link"; // Import Link
+import { Loader2, ChevronRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { ProductCardCarousel } from "./product-card-carousel"; // Import the new component
 
 export function ProductCarouselSection() {
   const [latestProducts, setLatestProducts] = useState<Product[]>([]);
@@ -23,13 +23,6 @@ export function ProductCarouselSection() {
     fetchLatestProducts();
   }, []);
 
-  const carouselImages = latestProducts
-    .filter(product => product.imageUrl) // Only include products with an image
-    .map(product => ({
-      src: product.imageUrl!, // Non-null assertion as we filtered
-      alt: product.name,
-    }));
-
   if (isLoading) {
     return (
       <Card className="p-4 rounded-lg border">
@@ -44,7 +37,7 @@ export function ProductCarouselSection() {
     );
   }
 
-  if (carouselImages.length === 0) {
+  if (latestProducts.length === 0) {
     return (
       <Card className="p-4 rounded-lg border">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -69,11 +62,20 @@ export function ProductCarouselSection() {
         </Link>
       </CardHeader>
       <CardContent className="p-0">
-        <CardCarousel
-          images={carouselImages}
+        <ProductCardCarousel
+          products={latestProducts}
           autoplayDelay={2500}
           showPagination={true}
-          showNavigation={false}
+          showNavigation={true} // Show navigation arrows
+          options={{
+            slidesToScroll: 1, // Scroll one slide at a time
+            breakpoints: {
+              '(min-width: 640px)': { slidesToScroll: 2 },
+              '(min-width: 768px)': { slidesToScroll: 3 },
+              '(min-width: 1024px)': { slidesToScroll: 4 },
+              '(min-width: 1280px)': { slidesToScroll: 5 },
+            }
+          }}
         />
       </CardContent>
     </Card>
