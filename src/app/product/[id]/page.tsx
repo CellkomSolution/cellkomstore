@@ -19,11 +19,11 @@ import { ChatWidget } from "@/components/chat-widget";
 import Image from "next/image";
 
 interface ProductDetailPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string }; // Diperbaiki: params adalah objek biasa, bukan Promise
 }
 
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const { id } = React.use(params);
+  const { id } = params; // Diperbaiki: Akses id secara langsung
 
   const { addItem } = useCart();
   const isMobile = useIsMobile();
