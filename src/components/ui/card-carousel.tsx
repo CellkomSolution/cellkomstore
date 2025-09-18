@@ -8,7 +8,6 @@ import "swiper/css"
 import "swiper/css/effect-coverflow"
 import "swiper/css/pagination"
 import "swiper/css/navigation"
-import { SparklesIcon } from "lucide-react"
 import {
   Autoplay,
   EffectCoverflow,
@@ -16,7 +15,9 @@ import {
   Pagination,
 } from "swiper/modules"
 
-import { Badge } from "@/components/ui/badge"
+// Badge dan SparklesIcon tidak lagi diperlukan karena badge 'Latest component' dihapus
+// import { Badge } from "@/components/ui/badge" 
+// import { SparklesIcon } from "lucide-react"
 
 interface CarouselProps {
   images: { src: string; alt: string }[]
@@ -32,8 +33,8 @@ export const CardCarousel: React.FC<CarouselProps> = ({
   autoplayDelay = 1500,
   showPagination = true,
   showNavigation = true,
-  title = "Card Carousel",
-  description = "Seamless Images carousel animation.",
+  title = "Card Carousel", // Default title
+  description = "Seamless Images carousel animation.", // Default description
 }) => {
   const css = `
   .swiper {
@@ -44,14 +45,16 @@ export const CardCarousel: React.FC<CarouselProps> = ({
   .swiper-slide {
     background-position: center;
     background-size: cover;
-    width: 300px;
+    /* Menghapus lebar tetap agar lebih responsif */
+    height: 288px; /* Mengatur tinggi tetap untuk slide, setara dengan h-72 */
   }
   
   .swiper-slide img {
     display: block;
     width: 100%;
+    height: 100%; /* Membuat gambar mengisi tinggi slide */
+    object-fit: cover; /* Memastikan gambar menutupi area tanpa distorsi */
   }
-  
   
   .swiper-3d .swiper-slide-shadow-left {
     background-image: none;
@@ -61,24 +64,18 @@ export const CardCarousel: React.FC<CarouselProps> = ({
   }
   `
   return (
-    <section className="w-ace-y-4">
+    <section className="w-full space-y-4"> {/* Mengubah w-ace-y-4 menjadi w-full space-y-4 */}
       <style>{css}</style>
       <div className="mx-auto w-full max-w-4xl rounded-[24px] border border-black/5 p-2 shadow-sm md:rounded-t-[44px]">
         <div className="relative mx-auto flex w-full flex-col rounded-[24px] border border-black/5 bg-neutral-800/5 p-2 shadow-sm md:items-start md:gap-8 md:rounded-b-[20px] md:rounded-t-[40px] md:p-2">
-          <Badge
-            variant="outline"
-            className="absolute left-4 top-6 rounded-[14px] border border-black/10 text-base md:left-6"
-          >
-            <SparklesIcon className="fill-[#EEBDE0] stroke-1 text-neutral-800" />{" "}
-            Latest component
-          </Badge>
-          <div className="flex flex-col justify-center pb-2 pl-4 pt-14 md:items-center">
+          {/* Badge 'Latest component' dihapus */}
+          <div className="flex flex-col justify-center pb-2 pl-4 pt-4 md:items-start"> {/* Menyesuaikan padding-top */}
             <div className="flex gap-2">
               <div>
-                <h3 className="text-4xl opacity-85 font-bold tracking-tight">
+                <h3 className="text-2xl opacity-85 font-bold tracking-tight"> {/* Menyesuaikan ukuran teks */}
                   {title}
                 </h3>
-                <p>{description}</p>
+                <p className="text-muted-foreground">{description}</p> {/* Menambahkan text-muted-foreground */}
               </div>
             </div>
           </div>
@@ -126,6 +123,7 @@ export const CardCarousel: React.FC<CarouselProps> = ({
                     </div>
                   </SwiperSlide>
                 ))}
+                {/* Menghapus duplikasi images.map */}
               </Swiper>
             </div>
           </div>
