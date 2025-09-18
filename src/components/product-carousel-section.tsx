@@ -4,7 +4,9 @@ import React, { useEffect, useState } from "react";
 import { CardCarousel } from "@/components/ui/card-carousel";
 import { getProducts, Product } from "@/lib/supabase/products";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronRight } from "lucide-react"; // Import ChevronRight
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
+import Link from "next/link"; // Import Link
 
 export function ProductCarouselSection() {
   const [latestProducts, setLatestProducts] = useState<Product[]>([]);
@@ -30,28 +32,50 @@ export function ProductCarouselSection() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
-      </div>
+      <Card className="p-4 rounded-lg border">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-xl font-bold">Produk Terbaru</CardTitle>
+          <Skeleton className="h-4 w-20" />
+        </CardHeader>
+        <CardContent className="flex items-center justify-center h-48">
+          <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
     );
   }
 
   if (carouselImages.length === 0) {
     return (
-      <div className="text-center text-muted-foreground py-8">
-        Tidak ada produk terbaru untuk ditampilkan di carousel.
-      </div>
+      <Card className="p-4 rounded-lg border">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-xl font-bold">Produk Terbaru</CardTitle>
+          <Link href="/new-arrivals" className="text-sm font-semibold text-primary hover:underline flex items-center">
+            Lihat Semua <ChevronRight className="h-4 w-4 ml-1" />
+          </Link>
+        </CardHeader>
+        <CardContent className="text-center text-muted-foreground py-8">
+          Tidak ada produk terbaru untuk ditampilkan di carousel.
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <CardCarousel
-      images={carouselImages}
-      autoplayDelay={2500}
-      showPagination={true}
-      showNavigation={false} // Navigation can be intrusive on smaller carousels
-      title="Produk Terbaru"
-      description="Jelajahi koleksi produk terbaru kami yang menarik!"
-    />
+    <Card className="bg-card p-4 rounded-lg border">
+      <CardHeader className="flex flex-row items-center justify-between mb-4 p-0">
+        <CardTitle className="text-xl font-bold">Produk Terbaru</CardTitle>
+        <Link href="/new-arrivals" className="text-sm font-semibold text-primary hover:underline flex items-center">
+          Lihat Semua <ChevronRight className="h-4 w-4 ml-1" />
+        </Link>
+      </CardHeader>
+      <CardContent className="p-0">
+        <CardCarousel
+          images={carouselImages}
+          autoplayDelay={2500}
+          showPagination={true}
+          showNavigation={false}
+        />
+      </CardContent>
+    </Card>
   );
 }
