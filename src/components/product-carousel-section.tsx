@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { ProductInteractiveCarouselCard } from "./product-interactive-carousel-card"; // Import the new interactive card
+import { ProductGradientCard } from "./product-gradient-card"; // Import the new component
 
 export function ProductCarouselSection() {
   const [latestProducts, setLatestProducts] = useState<Product[]>([]);
@@ -78,8 +78,8 @@ export function ProductCarouselSection() {
         >
           <CarouselContent className="-ml-4">
             {latestProducts.map((product) => (
-              <CarouselItem key={product.id} className="pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6">
-                <ProductInteractiveCarouselCard product={product} />
+              <CarouselItem key={product.id} className="pl-4 basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6">
+                <ProductGradientCard product={product} />
               </CarouselItem>
             ))}
           </CarouselContent>
