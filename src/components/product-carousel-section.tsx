@@ -78,7 +78,7 @@ export function ProductCarouselSection() {
         >
           <CarouselContent className="-ml-4">
             {latestProducts.map((product) => (
-              <CarouselItem key={product.id} className="pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+              <CarouselItem key={product.id} className="pl-4 basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6">
                 <ProductGradientCard product={product} />
               </CarouselItem>
             ))}
