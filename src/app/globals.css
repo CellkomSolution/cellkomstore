@@ -33,12 +33,6 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
-
-    /* Custom gradients for BackgroundGradient */
-    --gradient-start: #a855f7; /* Purple-500 */
-    --gradient-end: #ec4899;   /* Pink-500 */
-    --dark-gradient-start: #8b5cf6; /* Violet-500 */
-    --dark-gradient-end: #d946ef;   /* Fuchsia-500 */
   }
 
   .dark {
@@ -89,18 +83,4 @@
 
 .animate-marquee {
   animation: marquee 15s linear infinite; /* Adjust duration as needed */
-}
-
-/* Spin animation for BackgroundGradient */
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 8s linear infinite; /* Adjust duration as needed */
 }

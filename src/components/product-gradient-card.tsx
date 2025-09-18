@@ -45,7 +45,7 @@ export function ProductGradientCard({ product }: ProductGradientCardProps) {
           </div>
           <div className="flex flex-col flex-grow space-y-1">
             <p className="text-sm text-muted-foreground/80">{product.category}</p>
-            <p className="text-base sm:text-lg text-foreground font-medium line-clamp-2 flex-grow">
+            <p className="text-base sm:text-lg text-black dark:text-neutral-200 font-medium line-clamp-2 flex-grow">
               {product.name}
             </p>
 
@@ -71,7 +71,7 @@ export function ProductGradientCard({ product }: ProductGradientCardProps) {
                 )}
               </p>
               <Button
-                className="rounded-full text-sm px-4 py-2"
+                className="rounded-full text-sm px-4 py-2 bg-black dark:bg-zinc-800 text-white flex items-center space-x-1"
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />

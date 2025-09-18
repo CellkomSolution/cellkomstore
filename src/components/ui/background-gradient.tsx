@@ -1,35 +1,74 @@
 "use client";
 
 import React from "react";
-import { cn } from "@/lib/utils"; // Assuming cn utility is available
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
-interface BackgroundGradientProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
-  className?: string;
-  containerClassName?: string;
-  animate?: boolean;
-}
-
-export function BackgroundGradient({
+export const BackgroundGradient = ({
   children,
   className,
   containerClassName,
   animate = true,
-  ...props
-}: BackgroundGradientProps) {
+}: {
+  children?: React.ReactNode;
+  className?: string;
+  containerClassName?: string;
+  animate?: boolean;
+}) => {
+  const variants = {
+    initial: {
+      backgroundPosition: "0 50%",
+    },
+    animate: {
+      backgroundPosition: ["0, 50%", "100% 50%", "0 50%"],
+    },
+  };
   return (
-    <div className={cn("relative p-px overflow-hidden", containerClassName)}>
-      <div
+    <div className={cn("relative p-[4px] group", containerClassName)}>
+      <motion.div
+        variants={animate ? variants : undefined}
+        initial={animate ? "initial" : undefined}
+        animate={animate ? "animate" : undefined}
+        transition={
+          animate
+            ? {
+                duration: 5,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }
+            : undefined
+        }
+        style={{
+          backgroundSize: animate ? "400% 400%" : undefined,
+        }}
         className={cn(
-          "absolute inset-0 rounded-xl z-0 opacity-60 blur-xl",
-          "bg-[radial-gradient(var(--gradient-start),var(--gradient-end))] dark:bg-[radial-gradient(var(--dark-gradient-start),var(--dark-gradient-end))]",
-          animate && "animate-spin-slow", // Apply animation if animate is true
-          "before:absolute before:inset-0 before:bg-[radial-gradient(var(--gradient-start),var(--gradient-end))] before:dark:bg-[radial-gradient(var(--dark-gradient-start),var(--dark-gradient-end))] before:opacity-0 before:hover:opacity-100 before:transition-opacity before:duration-500"
+          "absolute inset-0 rounded-3xl z-[1] opacity-60 group-hover:opacity-100 blur-xl  transition duration-500 will-change-transform",
+          " bg-[radial-gradient(circle_farthest-side_at_0_100%,#00ccb1,transparent),radial-gradient(circle_farthest-side_at_100%_0,#7b61ff,transparent),radial-gradient(circle_farthest-side_at_100%_100%,#ffc414,transparent),radial-gradient(circle_farthest-side_at_0_0,#1ca0fb,#141316)]"
         )}
       />
-      <div className={cn("relative z-10", className)} {...props}>
-        {children}
-      </div>
+      <motion.div
+        variants={animate ? variants : undefined}
+        initial={animate ? "initial" : undefined}
+        animate={animate ? "animate" : undefined}
+        transition={
+          animate
+            ? {
+                duration: 5,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }
+            : undefined
+        }
+        style={{
+          backgroundSize: animate ? "400% 400%" : undefined,
+        }}
+        className={cn(
+          "absolute inset-0 rounded-3xl z-[1] will-change-transform",
+          "bg-[radial-gradient(circle_farthest-side_at_0_100%,#00ccb1,transparent),radial-gradient(circle_farthest-side_at_100%_0,#7b61ff,transparent),radial-gradient(circle_farthest-side_at_100%_100%,#ffc414,transparent),radial-gradient(circle_farthest-side_at_0_0,#1ca0fb,#141316)]"
+        )}
+      />
+
+      <div className={cn("relative z-10", className)}>{children}</div>
     </div>
   );
-}
+};
