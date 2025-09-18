@@ -5,7 +5,8 @@ const nextConfig = {
       'rsdvsmcvizbmzqeogmpa.supabase.co',
       'images.unsplash.com',
       'plus.unsplash.com',
-      'pub-940ccf6255b54fa799a9b01050e6c227.r2.dev', // Added for the new footer logo
+      'pub-940ccf6255b54fa799a9b01050e6c227.r2.dev',
+      'hero-banner-images.rsdvsmcvizbmzqeogmpa.supabase.co', // Added for hero banner images
     ],
   },
 };

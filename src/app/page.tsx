@@ -2,8 +2,9 @@ import { CategoryIcons } from "@/components/category-icons";
 import { FlashSale } from "@/components/flash-sale";
 import { ProductGrid } from "@/components/product-grid";
 import { FeaturedBrands } from "@/components/featured-brands";
-import { ProductCarouselSection } from "@/components/product-carousel-section"; // Import the new component
-import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase/products"; // Import dari modul products
+import { ProductCarouselSection } from "@/components/product-carousel-section";
+import { HeroBannerCarousel } from "@/components/hero-banner-carousel"; // Import the new component
+import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase/products";
 
 export default async function Home() {
   const products = await getProducts();
@@ -12,9 +13,9 @@ export default async function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      {/* HeroCarousel removed */}
+      <HeroBannerCarousel /> {/* Added the new HeroBannerCarousel here */}
       <CategoryIcons />
-      <ProductCarouselSection /> {/* Added the new ProductCarouselSection here */}
+      <ProductCarouselSection />
       <FlashSale initialProducts={flashSaleProducts} />
       {gadgetProducts.length > 0 && (
         <ProductGrid 
