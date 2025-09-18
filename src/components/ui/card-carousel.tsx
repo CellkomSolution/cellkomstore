@@ -37,14 +37,14 @@ export const CardCarousel: React.FC<CarouselProps> = ({
   .swiper-slide {
     background-position: center;
     background-size: cover;
-    width: 160px; /* w-40 for mobile */
-    height: 192px; /* h-48 */
+    width: 128px; /* w-32 for mobile */
+    height: 96px; /* h-24 */
   }
 
   @media (min-width: 768px) { /* md breakpoint */
     .swiper-slide {
-      width: 192px; /* w-48 for desktop */
-      height: 192px; /* h-48 */
+      width: 160px; /* w-40 for desktop */
+      height: 96px; /* h-24 */
     }
   }
   
@@ -102,7 +102,7 @@ export const CardCarousel: React.FC<CarouselProps> = ({
                     style={{ objectFit: "cover" }} // Ensure image covers the area
                     className="rounded-xl"
                     alt={image.alt}
-                    sizes="(max-width: 768px) 160px, 192px" // Responsive sizes for better performance
+                    sizes="(max-width: 768px) 128px, 160px" // Responsive sizes for better performance
                   />
                 </div>
               </SwiperSlide>
