@@ -7,3 +7,4 @@ export * from './orders';
 export * from './payment-methods';
 export * from './featured-brands';
 export * from './blog-posts';
+export * from './hero-banners';
