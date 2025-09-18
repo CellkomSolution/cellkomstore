@@ -25,7 +25,7 @@ export function ProductCarouselSection() {
 
   if (isLoading) {
     return (
-      <Card className="p-4 rounded-lg border">
+      <Card className="p-4 rounded-lg border bg-soft-red"> {/* Changed bg-card to bg-soft-red */}
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-xl font-bold">Produk Terbaru</CardTitle>
           <Skeleton className="h-4 w-20" />
@@ -39,7 +39,7 @@ export function ProductCarouselSection() {
 
   if (latestProducts.length === 0) {
     return (
-      <Card className="p-4 rounded-lg border">
+      <Card className="p-4 rounded-lg border bg-soft-red"> {/* Changed bg-card to bg-soft-red */}
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-xl font-bold">Produk Terbaru</CardTitle>
           <Link href="/new-arrivals" className="text-sm font-semibold text-primary hover:underline flex items-center">
@@ -54,7 +54,7 @@ export function ProductCarouselSection() {
   }
 
   return (
-    <Card className="bg-card p-4 rounded-lg border">
+    <Card className="bg-soft-red p-4 rounded-lg border"> {/* Changed bg-card to bg-soft-red */}
       <CardHeader className="flex flex-row items-center justify-between mb-4 p-0">
         <CardTitle className="text-xl font-bold">Produk Terbaru</CardTitle>
         <Link href="/new-arrivals" className="text-sm font-semibold text-primary hover:underline flex items-center">
