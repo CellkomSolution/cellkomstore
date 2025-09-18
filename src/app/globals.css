@@ -33,9 +33,6 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
-
-    /* Custom soft red color */
-    --soft-red: 0 84.2% 90%; /* A light, soft red */
   }
 
   .dark {
@@ -66,9 +63,6 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-
-    /* Custom soft red color for dark mode */
-    --soft-red: 0 62.8% 20%; /* A darker, soft red for dark mode */
   }
 }
 
