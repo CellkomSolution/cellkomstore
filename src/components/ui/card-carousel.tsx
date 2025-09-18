@@ -99,7 +99,7 @@ export const CardCarousel: React.FC<CarouselProps> = ({
                   <Image
                     src={image.src}
                     fill // Use fill to make image cover the parent div
-                    style={{ objectFit: "cover" }} // Ensure image covers the area
+                    style={{ objectFit: "contain" }} // Ensure image covers the area
                     className="rounded-xl"
                     alt={image.alt}
                     sizes="(max-width: 768px) 128px, 160px" // Responsive sizes for better performance
