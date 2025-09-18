@@ -114,49 +114,30 @@ const AnimatedSparkles = () => (
 )
 
 const Sparkles = () => {
-  const [sparkles, setSparkles] = React.useState<Array<{
-    id: number;
-    top: string;
-    left: string;
-    opacity: number;
-    duration: number;
-  }>>([]);
-
-  React.useEffect(() => {
-    const generateSparkles = () => {
-      const newSparkles = Array.from({ length: 12 }).map((_, i) => ({
-        id: i,
-        top: `${Math.random() * 100}%`,
-        left: `${Math.random() * 100}%`,
-        opacity: Math.random(),
-        duration: Math.random() * 2 + 4,
-      }));
-      setSparkles(newSparkles);
-    };
-
-    generateSparkles();
-  }, []);
+  const randomMove = () => Math.random() * 2 - 1
+  const randomOpacity = () => Math.random()
+  const random = () => Math.random()
 
   return (
     <div className="absolute inset-0">
-      {sparkles.map((sparkle) => (
+      {[...Array(12)].map((_, i) => (
         <motion.span
-          key={`star-${sparkle.id}`}
+          key={`star-${i}`}
           animate={{
-            top: `calc(${Math.random() * 100}% + ${Math.random() * 2 - 1}px)`,
-            left: `calc(${Math.random() * 100}% + ${Math.random() * 2 - 1}px)`,
-            opacity: Math.random(),
+            top: `calc(${random() * 100}% + ${randomMove()}px)`,
+            left: `calc(${random() * 100}% + ${randomMove()}px)`,
+            opacity: randomOpacity(),
             scale: [1, 1.2, 0],
           }}
           transition={{
-            duration: sparkle.duration,
+            duration: random() * 2 + 4,
             repeat: Infinity,
             ease: "linear",
           }}
           style={{
             position: "absolute",
-            top: sparkle.top,
-            left: sparkle.left,
+            top: `${random() * 100}%`,
+            left: `${random() * 100}%`,
             width: `2px`,
             height: `2px`,
             borderRadius: "50%",
