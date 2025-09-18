@@ -27,7 +27,7 @@ export function ProductGradientCard({ product }: ProductGradientCardProps) {
     <Link href={`/product/${product.id}`} className="block h-full">
       <BackgroundGradient className="rounded-[22px] p-4 bg-white dark:bg-zinc-900 h-full flex flex-col transition-all hover:shadow-lg hover:-translate-y-0.5 group">
         <div className="flex flex-col flex-grow">
-          <div className="relative w-full h-56 rounded-lg overflow-hidden mb-4"> {/* Increased height to h-56 */}
+          <div className="relative w-full h-56 rounded-lg overflow-hidden mb-4">
             {product.imageUrl ? (
               <Image
                 src={product.imageUrl}
@@ -45,7 +45,7 @@ export function ProductGradientCard({ product }: ProductGradientCardProps) {
           </div>
           <div className="flex flex-col flex-grow space-y-1">
             <p className="text-sm text-muted-foreground/80">{product.category}</p>
-            <p className="text-base sm:text-lg text-black dark:text-neutral-200 font-semibold line-clamp-2 flex-grow">
+            <p className="text-base sm:text-lg text-foreground font-medium line-clamp-2 flex-grow">
               {product.name}
             </p>
 
@@ -62,10 +62,10 @@ export function ProductGradientCard({ product }: ProductGradientCardProps) {
             </div>
 
             <div className="flex items-end justify-between mt-3">
-              <p className="text-xl font-bold text-primary">
+              <p className="text-base md:text-xl font-medium text-primary">
                 {formatRupiah(product.price)}
                 {product.originalPrice && (
-                  <span className="text-muted-foreground/60 text-sm line-through ml-2">
+                  <span className="text-muted-foreground/60 text-xs md:text-sm line-through ml-2">
                     {formatRupiah(product.originalPrice)}
                   </span>
                 )}
