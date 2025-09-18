@@ -62,7 +62,10 @@ export function Header() {
 
   const handleOpenCategorySheet = () => {
     setIsMobileNavOpen(false); // Close MobileNav first
-    setIsCategorySheetOpen(true); // Then open CategorySheet
+    // Introduce a small delay before opening CategorySheet
+    setTimeout(() => {
+      setIsCategorySheetOpen(true); // Then open CategorySheet
+    }, 100); // 100ms delay
   };
 
   return (
