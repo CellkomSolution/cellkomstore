@@ -44,16 +44,16 @@ export function ProductGradientCard({ product }: ProductGradientCardProps) {
             )}
           </div>
           <div className="flex flex-col flex-grow space-y-1">
-            <p className="text-xs text-muted-foreground/80">{product.category}</p> {/* Diperkecil dari text-sm */}
-            <p className="text-sm sm:text-base text-black dark:text-neutral-200 font-medium line-clamp-2 flex-grow"> {/* Diperkecil dari text-base sm:text-lg */}
+            <p className="text-xs text-muted-foreground/80">{product.category}</p>
+            <p className="text-xs sm:text-sm text-black dark:text-neutral-200 font-medium line-clamp-2 flex-grow">
               {product.name}
             </p>
 
-            <div className="flex items-center gap-0.5 text-xs text-muted-foreground"> {/* Diperkecil dari text-sm */}
+            <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
               {Array(5).fill('').map((_, i) => (
                 <Star
                   key={i}
-                  className={`h-3 w-3 ${ // Ukuran ikon bintang diperkecil
+                  className={`h-3 w-3 ${
                     product.rating > i ? "fill-yellow-400 text-yellow-400" : "fill-gray-300 text-gray-300 dark:fill-gray-600 dark:text-gray-600"
                   }`}
                 />
@@ -62,19 +62,19 @@ export function ProductGradientCard({ product }: ProductGradientCardProps) {
             </div>
 
             <div className="flex items-end justify-between mt-3">
-              <p className="text-base md:text-lg font-medium text-primary"> {/* Diperkecil dari text-base md:text-xl */}
+              <p className="text-sm md:text-base font-medium text-primary">
                 {formatRupiah(product.price)}
                 {product.originalPrice && (
-                  <span className="text-muted-foreground/60 text-xs line-through ml-2"> {/* Diperkecil dari text-xs md:text-sm */}
+                  <span className="text-muted-foreground/60 text-xs line-through ml-2">
                     {formatRupiah(product.originalPrice)}
                   </span>
                 )}
               </p>
               <Button
-                className="rounded-full text-xs px-3 py-1.5 bg-black dark:bg-zinc-800 text-white flex items-center space-x-1" // Ukuran tombol diperkecil
+                className="rounded-full text-xs px-3 py-1.5 bg-black dark:bg-zinc-800 text-white flex items-center space-x-1"
                 onClick={handleAddToCart}
               >
-                <ShoppingCart className="h-3 w-3 mr-1" /> {/* Ukuran ikon keranjang diperkecil */}
+                <ShoppingCart className="h-3 w-3 mr-1" />
                 Add
               </Button>
             </div>

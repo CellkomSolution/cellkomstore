@@ -78,7 +78,7 @@ export function HeroBannerCarousel({
 
   if (isLoading) {
     return (
-      <div className="relative w-full h-[280px] rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+      <div className="relative w-full aspect-[4/3] md:aspect-video rounded-lg overflow-hidden bg-muted flex items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
       </div>
     );
@@ -86,7 +86,7 @@ export function HeroBannerCarousel({
 
   if (banners.length === 0) {
     return (
-      <div className="relative w-full h-[280px] rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
+      <div className="relative w-full aspect-[4/3] md:aspect-video rounded-lg overflow-hidden bg-muted flex items-center justify-center text-muted-foreground">
         Tidak ada banner untuk ditampilkan.
       </div>
     );
@@ -102,14 +102,14 @@ export function HeroBannerCarousel({
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex">
           {banners.map((banner, index) => (
-            <div key={banner.id} className="flex-none w-full relative h-[280px]">
+            <div key={banner.id} className="flex-none w-full relative aspect-[4/3] md:aspect-video">
               <Image
                 src={banner.image_url}
                 alt={banner.title}
                 fill
                 style={{ objectFit: "cover" }}
                 priority={index === 0} // Prioritize first image for LCP
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
+                sizes="(max-width: 768px) 100vw, 100vw"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center p-8 md:p-12">
                 <motion.div
