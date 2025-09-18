@@ -19,7 +19,6 @@ import { useRouter } from "next/navigation";
 import { CartSheet } from "./cart-sheet";
 import { ChatWidget } from "./chat-widget";
 import { CategorySheet } from "./category-sheet"; // Import CategorySheet
-import { TopAnnouncementBar } from "./top-announcement-bar"; // Import TopAnnouncementBar
 
 export function Header() {
   const { session, isLoading: isAuthLoading, user } = useAuth();
@@ -68,7 +67,31 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
-      <TopAnnouncementBar appSettings={appSettings} />
+      <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300 hidden md:block">
+        <div className="container mx-auto px-4 py-1 flex justify-between items-center">
+          <div className="flex space-x-4">
+            {appSettings?.download_app_url && (
+              <a href={appSettings.download_app_url} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                <Download className="h-3 w-3" /> {appSettings.download_app_text || "Download Aplikasi"}
+              </a>
+            )}
+          </div>
+          <div className="flex space-x-4">
+            <a href="#" className="hover:underline">
+              Bantuan
+            </a>
+            {appSettings?.right_header_text_enabled && appSettings?.right_header_text_content && (
+              appSettings.right_header_text_link ? (
+                <Link href={appSettings.right_header_text_link} className="hover:underline">
+                  {appSettings.right_header_text_content}
+                </Link>
+              ) : (
+                <span className="hover:underline">{appSettings.right_header_text_content}</span>
+              )
+            )}
+          </div>
+        </div>
+      </div>
       <div className="container mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Mobile-only Logo and Search Row */}
         <div className="md:hidden w-full flex items-center gap-2 mb-2">
