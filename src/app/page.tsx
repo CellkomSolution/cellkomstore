@@ -4,7 +4,6 @@ import { ProductGrid } from "@/components/product-grid";
 import { FeaturedBrands } from "@/components/featured-brands";
 import { ProductCarouselSection } from "@/components/product-carousel-section";
 import { HeroBannerCarousel } from "@/components/hero-banner-carousel"; // Import HeroBannerCarousel
-import { CarouselDemo } from "@/components/demos/carousel-demo"; // Import CarouselDemo
 import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase/products";
 
 export default async function Home() {
@@ -25,7 +24,6 @@ export default async function Home() {
         />
       )}
       <FeaturedBrands />
-      <CarouselDemo /> {/* Tambahkan CarouselDemo di sini */}
       <ProductGrid products={products} title="Produk Pilihan Untukmu" />
     </div>
   );
