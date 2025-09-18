@@ -1,11 +1,21 @@
 import { supabase } from "@/integrations/supabase/client";
 
+export interface ProductImage {
+  id: string;
+  product_id: string;
+  image_url: string;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Product {
   id: string;
   name: string;
   price: number;
   originalPrice?: number | null; // Changed to allow null
-  imageUrl: string | null; // Changed to allow null
+  imageUrl: string | null; // Changed to allow null (main image)
+  images: ProductImage[]; // New: Array of product images
   location: string;
   rating: number;
   soldCount: string;
@@ -36,6 +46,7 @@ const mapProductData = (item: any): Product => ({
   price: item.price,
   originalPrice: item.original_price,
   imageUrl: item.main_image_url, // Corrected to main_image_url
+  images: item.product_images ? item.product_images.sort((a: ProductImage, b: ProductImage) => a.order - b.order) : [], // Map and sort images
   location: item.location,
   rating: item.rating,
   soldCount: item.sold_count,
@@ -45,7 +56,10 @@ const mapProductData = (item: any): Product => ({
 });
 
 export async function getProducts(sort: SortOption = 'newest'): Promise<Product[]> {
-  let query = supabase.from("products").select("*");
+  let query = supabase.from("products").select(`
+    *,
+    product_images(id, image_url, order)
+  `); // Fetch product_images
   query = applySorting(query, sort);
 
   const { data, error } = await query;
@@ -61,7 +75,10 @@ export async function getProducts(sort: SortOption = 'newest'): Promise<Product[
 export async function getFlashSaleProducts(): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
-    .select("*")
+    .select(`
+      *,
+      product_images(id, image_url, order)
+    `) // Fetch product_images
     .eq("is_flash_sale", true)
     .order("created_at", { ascending: false });
 
@@ -76,7 +93,10 @@ export async function getFlashSaleProducts(): Promise<Product[]> {
 export async function getProductsByCategory(categorySlug: string, sort: SortOption = 'newest'): Promise<Product[]> {
   let query = supabase
     .from("products")
-    .select("*")
+    .select(`
+      *,
+      product_images(id, image_url, order)
+    `) // Fetch product_images
     .eq("category", categorySlug);
   
   query = applySorting(query, sort);
@@ -94,7 +114,10 @@ export async function getProductsByCategory(categorySlug: string, sort: SortOpti
 export async function getProductById(id: string): Promise<Product | null> {
   const { data, error } = await supabase
     .from("products")
-    .select("*")
+    .select(`
+      *,
+      product_images(id, image_url, order)
+    `) // Fetch product_images
     .eq("id", id)
     .single();
 
@@ -113,7 +136,10 @@ export async function getProductById(id: string): Promise<Product | null> {
 export async function searchProducts(query: string, sort: SortOption = 'newest'): Promise<Product[]> {
   let dbQuery = supabase
     .from("products")
-    .select("*")
+    .select(`
+      *,
+      product_images(id, image_url, order)
+    `) // Fetch product_images
     .ilike("name", `%${query}%`);
 
   dbQuery = applySorting(dbQuery, sort);
@@ -141,7 +167,7 @@ export async function getTotalProductsCount(): Promise<number> {
 }
 
 // New function to create a product
-export async function createProduct(productData: Omit<Product, 'id' | 'rating' | 'soldCount'>): Promise<Product | null> {
+export async function createProduct(productData: Omit<Product, 'id' | 'rating' | 'soldCount' | 'images'>): Promise<Product | null> {
   const { name, price, originalPrice, imageUrl, location, category, isFlashSale, description } = productData;
   const { data, error } = await supabase
     .from("products")
@@ -169,7 +195,7 @@ export async function createProduct(productData: Omit<Product, 'id' | 'rating' |
 }
 
 // New function to update a product
-export async function updateProduct(id: string, productData: Partial<Omit<Product, 'id' | 'created_at' | 'rating' | 'soldCount'>>): Promise<Product | null> {
+export async function updateProduct(id: string, productData: Partial<Omit<Product, 'id' | 'created_at' | 'rating' | 'soldCount' | 'images'>>): Promise<Product | null> {
   const updatePayload: Record<string, any> = {
     updated_at: new Date().toISOString(),
   };
