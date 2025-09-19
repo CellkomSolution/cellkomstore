@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageSquare, Send, Loader2, User as UserIcon, Package, ReceiptText } from "lucide-react";
+import { MessageSquare, Send, Loader2, User as UserIcon, Package, ReceiptText } from "lucide-react"; // Added ReceiptText icon
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
@@ -27,22 +27,17 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import Image from "next/image";
-import { getProductById, mapProductData, Product } from "@/lib/supabase/products";
-import { getOrderById, Order } from "@/lib/supabase/orders";
+import { getProductById, mapProductData } from "@/lib/supabase/products";
+import { getOrderById, Order } from "@/lib/supabase/orders"; // Import getOrderById and Order
 import Link from "next/link";
 import { formatRupiah } from "@/lib/utils";
-import { createNotification } from "@/lib/supabase/notifications";
-
-// Import new chat components
-import { ChatHeader } from "./chat/chat-header";
-import { ChatMessages } from "./chat/chat-messages";
-import { ChatInput } from "./chat/chat-input";
+import { createNotification } from "@/lib/supabase/notifications"; // Import createNotification
 
 interface ChatWidgetProps {
   productId?: string | null;
   productName?: string | null;
-  orderId?: string | null;
-  orderName?: string | null;
+  orderId?: string | null; // New: Add orderId prop
+  orderName?: string | null; // New: Add orderName prop
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -56,8 +51,6 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const [targetAdminId, setTargetAdminId] = React.useState<string | null>(null);
   const [isLoadingAdminId, setIsLoadingAdminId] = React.useState(true);
-  const [productContext, setProductContext] = React.useState<Product | null>(null);
-  const [orderContext, setOrderContext] = React.useState<Order | null>(null);
   const isMobile = useIsMobile();
 
   React.useEffect(() => {
@@ -69,24 +62,6 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
     }
     loadAdminId();
   }, []);
-
-  React.useEffect(() => {
-    async function loadContextData() {
-      if (productId) {
-        const product = await getProductById(productId);
-        setProductContext(product);
-      } else {
-        setProductContext(null);
-      }
-      if (orderId) {
-        const order = await getOrderById(orderId);
-        setOrderContext(order);
-      } else {
-        setOrderContext(null);
-      }
-    }
-    loadContextData();
-  }, [productId, orderId]);
 
   const fetchMessages = React.useCallback(async () => {
     if (!user || !targetAdminId) return;
@@ -371,47 +346,135 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
   const ChatContent = (
     <>
       <div className="flex-1 flex flex-col overflow-hidden border rounded-md bg-muted/20">
-        <ChatMessages
-          messages={messages}
-          currentUser={user}
-          currentUserProfile={profile}
-          isLoadingMessages={isLoadingMessages}
-          messagesEndRef={messagesEndRef}
-          isAdminView={false} // This is the user's widget, so not admin view
-        />
+        {isLoadingMessages ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <ScrollArea className="flex-1 p-4">
+            <div className="space-y-4">
+              {messages.length === 0 ? (
+                <p className="text-center text-muted-foreground text-sm">
+                  Belum ada pesan. Mulai chat Anda sekarang!
+                </p>
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex items-start gap-3 ${
+                      msg.type === 'system' ? 'justify-center' : (msg.sender_id === user.id ? "justify-end" : "justify-start")
+                    }`}
+                  >
+                    {msg.type === 'system' ? (
+                      <div className="w-full text-center text-muted-foreground text-sm my-2">
+                        {msg.products?.[0] && (
+                          <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
+                            {msg.products[0].imageUrl ? (
+                              <Image src={msg.products[0].imageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                            ) : (
+                              <div className="h-8 w-8 bg-gray-200 rounded-sm flex items-center justify-center text-xs">No Img</div>
+                            )}
+                            <span>
+                              Percakapan tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
+                            </span>
+                          </div>
+                        )}
+                        {msg.order && (
+                          <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
+                            <Package className="h-5 w-5 text-muted-foreground" />
+                            <span>
+                              Percakapan tentang Pesanan: <Link href={`/my-orders/${msg.order.id}`} className="underline hover:text-primary">#{msg.order.id.substring(0, 8)}</Link>
+                              <span className="ml-2 text-xs">
+                                (Status: {msg.order.order_status}, Pembayaran: {msg.order.payment_status}, Kode Unik: {msg.order.payment_unique_code})
+                              </span>
+                            </span>
+                          </div>
+                        )}
+                        {!msg.products?.[0] && !msg.order && msg.message}
+                      </div>
+                    ) : (
+                      <>
+                        {msg.sender_id !== user.id && (
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
+                            <AvatarFallback>
+                              {msg.sender_profile[0]?.first_name ? msg.sender_profile[0].first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div
+                          className={`max-w-[70%] p-3 rounded-lg ${
+                            msg.sender_id === user.id
+                              ? "bg-primary text-primary-foreground rounded-br-none"
+                              : "bg-card text-foreground rounded-bl-none border"
+                          }`}
+                        >
+                          <p className="text-sm">{msg.message}</p>
+                          {msg.product_id && msg.products?.[0] && (
+                            <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
+                              {msg.products[0].imageUrl ? (
+                                <Image src={msg.products[0].imageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
+                              ) : (
+                                <div className="h-8 w-8 bg-gray-200 rounded-sm flex items-center justify-center text-xs">No Img</div>
+                              )}
+                              <span className="text-xs text-muted-foreground line-clamp-1">
+                                Tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
+                              </span>
+                            </div>
+                          )}
+                          {msg.order_id && msg.order && (
+                            <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
+                              <Package className="h-5 w-5 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground line-clamp-1">
+                                Tentang Pesanan: <Link href={`/my-orders/${msg.order.id}`} className="underline hover:text-primary">#{msg.order.id.substring(0, 8)}</Link>
+                                <span className="ml-2 text-xs">
+                                  (Status: {msg.order.order_status}, Pembayaran: {msg.order.payment_status}, Kode Unik: {msg.order.payment_unique_code})
+                                </span>
+                              </span>
+                            </div>
+                          )}
+                          <p className={`text-xs mt-1 ${msg.sender_id === user.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                            {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
+                          </p>
+                        </div>
+                        {msg.sender_id === user.id && (
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={profile?.avatar_url || undefined} />
+                            <AvatarFallback>
+                              {profile?.first_name ? profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+        )}
       </div>
-      <ChatInput
-        newMessage={newMessage}
-        setNewMessage={setNewMessage}
-        isSending={isSending}
-        onSendMessage={handleSendMessage}
-      />
+      <form onSubmit={handleSendMessage} className="flex gap-2 mt-4">
+        <Input
+          placeholder="Ketik pesan Anda..."
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          disabled={isSending}
+          className="flex-1"
+        />
+        <Button type="submit" disabled={isSending}>
+          {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          <span className="sr-only">Kirim</span>
+        </Button>
+      </form>
     </>
   );
-
-  const chatHeaderProps = {
-    otherUserProfile: {
-      id: targetAdminId,
-      first_name: "Admin",
-      last_name: null,
-      avatar_url: null,
-      role: 'admin',
-      email: "admin@example.com", // Placeholder, actual admin email might not be exposed
-    },
-    currentUserName: profile?.first_name || user.email?.split('@')[0] || "Pengguna",
-    currentUserAvatar: profile?.avatar_url || undefined,
-    orderContext: orderContext,
-    productContext: productContext,
-    isMobile: isMobile,
-    onBackClick: () => onOpenChange(false),
-    isAdminView: false,
-  };
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="h-[90vh] flex flex-col">
-          <ChatHeader {...chatHeaderProps} />
           {ChatContent}
         </DrawerContent>
       </Drawer>
@@ -420,7 +483,9 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
-          <ChatHeader {...chatHeaderProps} />
+          <SheetHeader>
+            <SheetTitle><Title /></SheetTitle>
+          </SheetHeader>
           {ChatContent}
         </SheetContent>
       </Sheet>
