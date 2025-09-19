@@ -104,7 +104,7 @@ export async function deletePaymentMethod(id: string): Promise<void> {
     const imageUrlParts = methodToDelete.image_url.split('/');
     const fileName = imageUrlParts[imageUrlParts.length - 1];
     const { error: storageError } = await supabase.storage
-      .from('payment-method-logos') // Assuming a bucket named 'payment-method-logos'
+      .from('app-assets') // Changed to 'app-assets'
       .remove([fileName]);
 
     if (storageError) {

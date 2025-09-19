@@ -235,7 +235,7 @@ export function PaymentMethodForm({ initialData, onSubmit, loading = false }: Pa
           <FormLabel>Logo Metode Pembayaran (Opsional)</FormLabel>
           <FormControl>
             <ImageUploader
-              bucketName="payment-method-logos"
+              bucketName="app-assets" // Changed to 'app-assets'
               currentImageUrl={form.watch("image_url")}
               onUploadSuccess={handleImageUploadSuccess}
               onRemove={handleRemoveImage}
