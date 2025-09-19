@@ -15,6 +15,7 @@ import { useCart } from "@/context/cart-context";
 import { ChatNotificationIcon } from "./chat-notification-icon";
 import { AdminChatNotificationIcon } from "./admin-chat-notification-icon";
 import { NotificationBellIcon } from "./notification-bell-icon"; // Import NotificationBellIcon
+import { AdminNotificationBellIcon } from "./admin-notification-bell-icon"; // Import AdminNotificationBellIcon
 import { useAdmin } from "@/hooks/use-admin";
 import { useRouter } from "next/navigation";
 import { CartSheet } from "./cart-sheet";
@@ -166,7 +167,10 @@ export function Header() {
               // Logged in: Show Chat and Notification icons
               <>
                 {isAdmin ? (
-                  <AdminChatNotificationIcon />
+                  <>
+                    <AdminChatNotificationIcon />
+                    <AdminNotificationBellIcon /> {/* Admin Notification Bell Icon */}
+                  </>
                 ) : (
                   <>
                     <ChatNotificationIcon />

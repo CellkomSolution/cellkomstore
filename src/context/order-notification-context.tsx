@@ -9,6 +9,7 @@ import { Clock, Package, CheckCircle, XCircle, ShoppingBag, BellRing, ReceiptTex
 import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 import { createNotification } from "@/lib/supabase/notifications"; // Import createNotification
+import { getAdminUserId } from "@/lib/supabase/profiles"; // Import getAdminUserId
 
 interface OrderNotificationProviderProps {
   children: React.ReactNode;
@@ -17,6 +18,16 @@ interface OrderNotificationProviderProps {
 export function OrderNotificationProvider({ children }: OrderNotificationProviderProps) {
   const { user, isLoading: isSessionLoading } = useSession();
   const { isAdmin, isAdminLoading } = useAdmin(); // Get admin status
+  const [adminUserId, setAdminUserId] = React.useState<string | null>(null); // New state for admin ID
+
+  // Fetch admin user ID once
+  React.useEffect(() => {
+    async function fetchAdminId() {
+      const id = await getAdminUserId();
+      setAdminUserId(id);
+    }
+    fetchAdminId();
+  }, []);
 
   const getOrderStatusMessage = useCallback((status: Order['order_status']) => {
     switch (status) {
@@ -68,8 +79,8 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
   }, []);
 
   useEffect(() => {
-    if (isSessionLoading || isAdminLoading) {
-      return; // Tunggu hingga sesi dan status admin dimuat
+    if (isSessionLoading || isAdminLoading || (isAdmin && !adminUserId)) { // Wait for adminUserId if current user is admin
+      return;
     }
 
     // --- Notifikasi pesanan khusus pengguna (perubahan status & pesanan baru oleh pengguna ini) ---
@@ -153,7 +164,7 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
     }
 
     // --- Notifikasi khusus admin (pesanan baru dari pengguna mana pun & perubahan status pembayaran) ---
-    if (user && isAdmin) { // Hanya untuk pengguna admin
+    if (user && isAdmin && adminUserId) { // Hanya untuk pengguna admin
       const adminOrderChannel = supabase
         .channel(`admin_order_notifications`)
         .on(
@@ -164,19 +175,23 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
             table: "orders",
             // Tidak perlu filter, admin harus melihat semua pesanan baru
           },
-          (payload) => {
+          async (payload) => { // Make async to use await createNotification
             const newRecord = payload.new as Order;
-            toast.info(
-              `Pesanan baru #${newRecord.id.substring(0, 8)} masuk! Total: ${formatRupiah(newRecord.total_amount + newRecord.payment_unique_code)}.`,
-              {
-                icon: <BellRing className="h-4 w-4" />,
-                action: {
-                  label: "Lihat",
-                  onClick: () => window.location.href = `/admin/orders/${newRecord.id}`,
-                },
-                duration: 8000, // Notifikasi admin sedikit lebih lama
-              }
-            );
+            const title = `Pesanan Baru #${newRecord.id.substring(0, 8)}`;
+            const message = `Pesanan baru masuk! Total: ${formatRupiah(newRecord.total_amount + newRecord.payment_unique_code)}.`;
+            const link = `/admin/orders/${newRecord.id}`;
+
+            // Create persistent notification for admin
+            await createNotification(adminUserId, 'order_status_update', title, message, link);
+
+            toast.info(message, {
+              icon: <BellRing className="h-4 w-4" />,
+              action: {
+                label: "Lihat",
+                onClick: () => window.location.href = link,
+              },
+              duration: 8000,
+            });
           }
         )
         .on(
@@ -188,22 +203,26 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
             // Admin needs to know when payment status changes to 'awaiting_confirmation'
             filter: `payment_status=eq.awaiting_confirmation`,
           },
-          (payload) => {
+          async (payload) => { // Make async
             const oldRecord = payload.old as Order;
             const newRecord = payload.new as Order;
 
             if (newRecord.payment_status === 'awaiting_confirmation' && oldRecord.payment_status === 'unpaid') {
-              toast.warning(
-                `Pembayaran pesanan #${newRecord.id.substring(0, 8)} menunggu konfirmasi! Kode unik: ${newRecord.payment_unique_code}.`,
-                {
-                  icon: <ReceiptText className="h-4 w-4" />,
-                  action: {
-                    label: "Cek",
-                    onClick: () => window.location.href = `/admin/orders/${newRecord.id}`,
-                  },
-                  duration: 10000, // Notifikasi ini lebih penting
-                }
-              );
+              const title = `Konfirmasi Pembayaran Pesanan #${newRecord.id.substring(0, 8)}`;
+              const message = `Pembayaran pesanan menunggu konfirmasi! Kode unik: ${newRecord.payment_unique_code}.`;
+              const link = `/admin/orders/${newRecord.id}`;
+
+              // Create persistent notification for admin
+              await createNotification(adminUserId, 'payment_status_update', title, message, link);
+
+              toast.warning(message, {
+                icon: <ReceiptText className="h-4 w-4" />,
+                action: {
+                  label: "Cek",
+                  onClick: () => window.location.href = link,
+                },
+                duration: 10000,
+              });
             }
           }
         )
@@ -214,7 +233,7 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
       };
     }
 
-  }, [isSessionLoading, isAdminLoading, user, isAdmin, getOrderStatusMessage, getPaymentStatusMessage, getStatusIcon]);
+  }, [isSessionLoading, isAdminLoading, user, isAdmin, adminUserId, getOrderStatusMessage, getPaymentStatusMessage, getStatusIcon]);
 
   return <>{children}</>;
 }
