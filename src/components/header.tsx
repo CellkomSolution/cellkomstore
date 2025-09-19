@@ -158,26 +158,30 @@ export function Header() {
             </form>
           </div>
 
-          {/* Right side: Cart, UserNav/Auth */}
+          {/* Right side: Conditional Icons (Chat, Notification), Cart, UserNav/Auth */}
           <div className="flex items-center space-x-4">
-            <CartSheet />
-            {/* Removed Heart/Wishlist Button */}
-
             {isAuthLoading ? (
               <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
             ) : session ? (
-              // Logged in: Show Chat and UserNav dropdown
+              // Logged in: Show Chat and Notification icons
               <>
                 {isAdmin ? (
                   <AdminChatNotificationIcon />
                 ) : (
                   <>
                     <ChatNotificationIcon />
-                    <NotificationBellIcon /> {/* New Notification Bell Icon */}
+                    <NotificationBellIcon /> {/* Notification Bell Icon for non-admins */}
                   </>
                 )}
-                <UserNav />
               </>
+            ) : null} {/* No notification/chat icons if not logged in */}
+
+            <CartSheet /> {/* Cart is always visible */}
+
+            {isAuthLoading ? (
+              <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
+            ) : session ? (
+              <UserNav />
             ) : (
               // Not logged in: Show Masuk/Daftar buttons
               <div className="flex items-center space-x-2">
