@@ -1,225 +1,210 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
-import Image from "next/image"; // Import Image for product images
-import Link from "next/link"; // Import Link for navigation
-import { Package } from "lucide-react"; // Lucide icons
+import * as React from "react";
+import useEmblaCarousel, { EmblaOptionsType } from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
+import ClassNames from "embla-carousel-class-names";
+import { cn, formatRupiah } from "@/lib/utils"; // Import formatRupiah
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react"; // Import Star icon
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge"; // Import Badge
 
-// Interfaces
 export interface CustomCarouselItem {
+  id: string;
   title: string;
-  description: string;
-  id: string; // Changed to string for product IDs
-  imageUrl: string | null; // Changed from icon: JSX.Element
-  linkUrl: string; // To link to product detail page
+  description?: string;
+  imageUrl: string | null;
+  linkUrl: string;
+  // New fields to mimic ProductCard
+  price: number;
+  originalPrice?: number | null;
+  rating: number;
+  soldCount: string;
+  location: string;
 }
 
-export interface CustomCarouselProps {
-  items: CustomCarouselItem[]; // Changed to required
-  baseWidth?: number; // Keep baseWidth for internal calculations
+interface CustomCarouselProps {
+  items: CustomCarouselItem[];
   autoplay?: boolean;
   autoplayDelay?: number;
   pauseOnHover?: boolean;
   loop?: boolean;
+  showNavigation?: boolean;
+  showPagination?: boolean;
+  options?: EmblaOptionsType;
+  itemClassName?: string; // New prop for custom class on each carousel item
+  imageHeightClass?: string; // New prop for custom image height class
 }
 
-// Constants
-const DRAG_BUFFER = 0;
-const VELOCITY_THRESHOLD = 500;
-const GAP = 16;
-const SPRING_OPTIONS = { type: "spring", stiffness: 300, damping: 30 };
-
-// Component definition
-export const CustomCarousel = ({
+export function CustomCarousel({
   items,
-  baseWidth = 300, // Default baseWidth for internal calculations
   autoplay = false,
   autoplayDelay = 3000,
-  pauseOnHover = false,
-  loop = false,
-}: CustomCarouselProps): JSX.Element => {
-  const containerPadding = 16;
-  const itemWidth = baseWidth - containerPadding * 2; // Internal item width calculation
-  const trackItemOffset = itemWidth + GAP;
+  pauseOnHover = true,
+  loop = true,
+  showNavigation = true,
+  showPagination = true,
+  options,
+  itemClassName = "w-full", // Default to full width of its container
+  imageHeightClass = "h-48", // Default image height to match ProductCard
+}: CustomCarouselProps) {
+  const plugins = [];
+  if (autoplay) {
+    plugins.push(Autoplay({ delay: autoplayDelay, stopOnInteraction: !pauseOnHover }));
+  }
+  plugins.push(ClassNames());
 
-  const carouselItems = loop ? [...items, items[0]] : items;
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const x = useMotionValue(0);
-  const [isHovered, setIsHovered] = useState<boolean>(false);
-  const [isResetting, setIsResetting] = useState<boolean>(false);
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      loop,
+      align: "start",
+      ...options,
+    },
+    plugins
+  );
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (pauseOnHover && containerRef.current) {
-      const container = containerRef.current;
-      const handleMouseEnter = () => setIsHovered(true);
-      const handleMouseLeave = () => setIsHovered(false);
-      container.addEventListener("mouseenter", handleMouseEnter);
-      container.addEventListener("mouseleave", handleMouseLeave);
-      return () => {
-        container.removeEventListener("mouseenter", handleMouseEnter);
-        container.removeEventListener("mouseleave", handleMouseLeave);
-      };
-    }
-  }, [pauseOnHover]);
+  const scrollPrev = React.useCallback(() => {
+    emblaApi && emblaApi.scrollPrev();
+  }, [emblaApi]);
 
-  useEffect(() => {
-    if (autoplay && (!pauseOnHover || !isHovered)) {
-      const timer = setInterval(() => {
-        setCurrentIndex((prev) => {
-          if (prev === items.length - 1 && loop) {
-            return prev + 1;
-          }
-          if (prev === carouselItems.length - 1) {
-            return loop ? 0 : prev;
-          }
-          return prev + 1;
-        });
-      }, autoplayDelay);
-      return () => clearInterval(timer);
-    }
-  }, [
-    autoplay,
-    autoplayDelay,
-    isHovered,
-    loop,
-    items.length,
-    carouselItems.length,
-    pauseOnHover,
-  ]);
+  const scrollNext = React.useCallback(() => {
+    emblaApi && emblaApi.scrollNext();
+  }, [emblaApi]);
 
-  const effectiveTransition = isResetting ? { duration: 0 } : SPRING_OPTIONS;
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([]);
 
-  const handleAnimationComplete = () => {
-    if (loop && currentIndex === carouselItems.length - 1) {
-      setIsResetting(true);
-      x.set(0);
-      setCurrentIndex(0);
-      setTimeout(() => setIsResetting(false), 50);
-    }
-  };
+  const onSelect = React.useCallback((emblaApi: any) => {
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, []);
 
-  const handleDragEnd = (
-    _: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo
-  ): void => {
-    const offset = info.offset.x;
-    const velocity = info.velocity.x;
+  const onInit = React.useCallback((emblaApi: any) => {
+    setScrollSnaps(emblaApi.scrollSnapList());
+  }, []);
 
-    if (offset < -DRAG_BUFFER || velocity < -VELOCITY_THRESHOLD) {
-      if (loop && currentIndex === items.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        setCurrentIndex((prev) => Math.min(prev + 1, carouselItems.length - 1));
-      }
-    } else if (offset > DRAG_BUFFER || velocity > VELOCITY_THRESHOLD) {
-      if (loop && currentIndex === 0) {
-        setCurrentIndex(items.length - 1);
-      } else {
-        setCurrentIndex((prev) => Math.max(prev - 1, 0));
-      }
-    }
-  };
+  React.useEffect(() => {
+    if (!emblaApi) return;
+    onInit(emblaApi);
+    onSelect(emblaApi);
+    emblaApi.on("reInit", onInit);
+    emblaApi.on("reInit", onSelect);
+    emblaApi.on("select", onSelect);
+  }, [emblaApi, onInit, onSelect]);
 
-  const dragProps = loop
-    ? {}
-    : {
-        dragConstraints: {
-          left: -trackItemOffset * (carouselItems.length - 1),
-          right: 0,
-        },
-      };
+  if (items.length === 0) {
+    return (
+      <Card className="w-full">
+        <CardContent className="flex items-center justify-center p-6 text-muted-foreground">
+          Tidak ada item untuk ditampilkan.
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <div
-      ref={containerRef}
-      className="relative overflow-hidden p-4 rounded-lg border bg-card" // Simplified styling
-      style={{
-        width: `${baseWidth}px`, // Fixed width for the carousel container
-      }}
-    >
-      <motion.div
-        className="flex"
-        drag="x"
-        {...dragProps}
-        style={{
-          width: itemWidth,
-          gap: `${GAP}px`,
-          perspective: 1000,
-          perspectiveOrigin: `${currentIndex * trackItemOffset + itemWidth / 2}px 50%`,
-          x,
-        }}
-        onDragEnd={handleDragEnd}
-        animate={{ x: -(currentIndex * trackItemOffset) }}
-        transition={effectiveTransition}
-        onAnimationComplete={handleAnimationComplete}
-      >
-        {carouselItems.map((item, index) => {
-          const range = [
-            -(index + 1) * trackItemOffset,
-            -index * trackItemOffset,
-            -(index - 1) * trackItemOffset,
-          ];
-          const outputRange = [90, 0, -90];
-          const rotateY = useTransform(x, range, outputRange, { clamp: false });
-          return (
-            <motion.div
+    <div className="relative">
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex -ml-4"> {/* Adjust margin to compensate for item padding */}
+          {items.map((item) => {
+            const discountPercentage = item.originalPrice
+              ? Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)
+              : 0;
+
+            return (
+              <div key={item.id} className={cn("flex-none pl-4", itemClassName)}>
+                <Link href={item.linkUrl} className="block h-full">
+                  <Card className="overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 flex flex-col group h-full">
+                    <CardContent className="p-0 flex flex-col flex-grow">
+                      <div className="relative">
+                        {item.imageUrl ? (
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.title}
+                            width={200} // Provide a base width, actual size will be controlled by CSS
+                            height={200} // Provide a base height, actual size will be controlled by CSS
+                            className={cn("w-full object-cover", imageHeightClass)}
+                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                          />
+                        ) : (
+                          <div className={cn("w-full bg-muted flex items-center justify-center text-muted-foreground text-sm", imageHeightClass)}>
+                            No Image
+                          </div>
+                        )}
+                        <Badge variant="secondary" className="absolute top-2 left-2 text-xs">Bekas</Badge> {/* "Bekas" badge */}
+                      </div>
+                      <div className="p-4 space-y-2 flex flex-col flex-grow"> {/* Adjusted space-y to match ProductCard */}
+                        <h3 className="font-medium text-sm h-10 leading-tight text-foreground line-clamp-2">
+                          {item.title}
+                        </h3>
+                        <div className="flex-grow" /> {/* Spacer to push price/details to bottom */}
+                        <div>
+                          <p className="font-bold text-lg text-foreground">
+                            {formatRupiah(item.price)}
+                          </p>
+                          {item.originalPrice && (
+                            <div className="flex items-center gap-2">
+                              <Badge variant="destructive" className="text-xs">{discountPercentage}%</Badge>
+                              <span className="text-xs text-muted-foreground line-through">
+                                {formatRupiah(item.originalPrice)}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex items-center text-xs text-muted-foreground pt-2">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                            <span>{item.rating}</span>
+                            <span className="mx-1">|</span>
+                            <span>Terjual {item.soldCount}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{item.location}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {showNavigation && items.length > 1 && (
+        <>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={scrollPrev}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full hidden md:flex"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={scrollNext}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full hidden md:flex"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+        </>
+      )}
+
+      {showPagination && scrollSnaps.length > 1 && (
+        <div className="flex justify-center mt-4 space-x-2">
+          {scrollSnaps.map((_, index) => (
+            <button
               key={index}
-              className="relative shrink-0 flex flex-col items-start justify-between bg-muted border border-border rounded-lg overflow-hidden cursor-grab active:cursor-grabbing"
-              style={{
-                width: itemWidth,
-                height: "280px", // Fixed height to match product cards
-                rotateY: rotateY,
-              }}
-              transition={effectiveTransition}
-            >
-              <Link href={item.linkUrl} className="block w-full h-full flex flex-col">
-                <div className="relative w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
-                  {item.imageUrl ? (
-                    <Image
-                      src={item.imageUrl}
-                      alt={item.title}
-                      fill
-                      style={{ objectFit: "cover" }}
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                  ) : (
-                    <Package className="h-8 w-8 text-muted-foreground" />
-                  )}
-                  {/* Overlay for product title */}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-white">
-                    <div className="font-semibold text-sm line-clamp-2">
-                      {item.title}
-                    </div>
-                    {/* Optionally add description here if needed, but user asked for title inside image */}
-                    {/* <p className="text-xs line-clamp-1">{item.description}</p> */}
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          );
-        })}
-      </motion.div>
-      <div className="flex w-full justify-center mt-4">
-        <div className="flex w-[150px] justify-between px-8">
-          {items.map((_, index) => (
-            <motion.div
-              key={index}
-              className={`h-2 w-2 rounded-full cursor-pointer transition-colors duration-150 ${
-                currentIndex % items.length === index
-                  ? "bg-primary"
-                  : "bg-muted-foreground/40"
-              }`}
-              animate={{
-                scale: currentIndex % items.length === index ? 1.2 : 1,
-              }}
-              onClick={() => setCurrentIndex(index)}
-              transition={{ duration: 0.15 }}
+              className={cn(
+                "h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-700",
+                index === selectedIndex && "bg-primary dark:bg-primary-foreground"
+              )}
+              onClick={() => emblaApi && emblaApi.scrollTo(index)}
             />
           ))}
         </div>
-      </div>
+      )}
     </div>
   );
-};
+}

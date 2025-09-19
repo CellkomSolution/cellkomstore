@@ -6,6 +6,7 @@ import { getProductsByCategory, Product } from "@/lib/supabase/products";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Package } from "lucide-react";
 import Link from "next/link";
+import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
 export function UsedProductsCarousel() {
   const [carouselItems, setCarouselItems] = React.useState<CustomCarouselItem[]>([]);
@@ -22,13 +23,18 @@ export function UsedProductsCarousel() {
         allUsedProducts = [...allUsedProducts, ...products];
       }
 
-      // Map Product to CustomCarouselItem
+      // Map Product to CustomCarouselItem with full details
       const mappedItems: CustomCarouselItem[] = allUsedProducts.map(product => ({
         id: product.id,
         title: product.name,
-        description: product.description || `Harga: ${product.price}`, // Fallback description
+        description: product.description || `Harga: ${formatRupiah(product.price)}`, // Fallback description
         imageUrl: product.imageUrl,
         linkUrl: `/product/${product.id}`,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        rating: product.rating,
+        soldCount: product.soldCount,
+        location: product.location,
       }));
 
       setCarouselItems(mappedItems);
@@ -64,18 +70,28 @@ export function UsedProductsCarousel() {
   }
 
   return (
-    <section>
-      <h2 className="text-2xl font-bold mb-4">Produk Bekas Pilihan</h2>
-      <div className="flex justify-center"> {/* Center the carousel */}
-        <CustomCarousel
-          items={carouselItems}
-          autoplay={true}
-          autoplayDelay={4000}
-          pauseOnHover={true}
-          loop={true}
-          baseWidth={300} // Fixed baseWidth for internal calculations
-        />
-      </div>
-    </section>
+    <div className="space-y-4"> {/* Container for title and carousel */}
+      <h2 className="text-2xl font-bold">Produk Bekas Pilihan</h2> {/* Title above the carousel */}
+      <CustomCarousel
+        items={carouselItems}
+        autoplay={true}
+        autoplayDelay={4000}
+        pauseOnHover={true}
+        loop={true}
+        showNavigation={true}
+        showPagination={true}
+        options={{
+          slidesToScroll: 1,
+          breakpoints: {
+            '(min-width: 640px)': { slidesToScroll: 2 },
+            '(min-width: 768px)': { slidesToScroll: 3 },
+            '(min-width: 1024px)': { slidesToScroll: 4 },
+            '(min-width: 1280px)': { slidesToScroll: 5 },
+          }
+        }}
+        itemClassName="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-1/6" // Match ProductGrid item width
+        imageHeightClass="h-48" // Match ProductCard image height
+      />
+    </div>
   );
 }
