@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
 import Image from "next/image"; // Import Image for product images
 import Link from "next/link"; // Import Link for navigation
-import { Circle, Code, FileText, Layers, Layout, Package, Smartphone, Laptop } from "lucide-react"; // Lucide icons
+import { Package } from "lucide-react"; // Lucide icons
 
 // Interfaces
 export interface CustomCarouselItem {
@@ -166,16 +166,16 @@ export const CustomCarousel = ({
           return (
             <motion.div
               key={index}
-              className="relative shrink-0 flex flex-col items-start justify-between bg-muted border border-border rounded-lg overflow-hidden cursor-grab active:cursor-grabbing" // Simplified styling
+              className="relative shrink-0 flex flex-col items-start justify-between bg-muted border border-border rounded-lg overflow-hidden cursor-grab active:cursor-grabbing"
               style={{
                 width: itemWidth,
-                height: "100%", // Make height flexible
+                height: "280px", // Fixed height to match product cards
                 rotateY: rotateY,
               }}
               transition={effectiveTransition}
             >
               <Link href={item.linkUrl} className="block w-full h-full flex flex-col">
-                <div className="relative w-full h-32 bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+                <div className="relative w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
                   {item.imageUrl ? (
                     <Image
                       src={item.imageUrl}
@@ -187,14 +187,14 @@ export const CustomCarousel = ({
                   ) : (
                     <Package className="h-8 w-8 text-muted-foreground" />
                   )}
-                </div>
-                <div className="p-3 flex-grow">
-                  <div className="mb-1 font-semibold text-sm text-foreground line-clamp-2">
-                    {item.title}
+                  {/* Overlay for product title */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-white">
+                    <div className="font-semibold text-sm line-clamp-2">
+                      {item.title}
+                    </div>
+                    {/* Optionally add description here if needed, but user asked for title inside image */}
+                    {/* <p className="text-xs line-clamp-1">{item.description}</p> */}
                   </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {item.description}
-                  </p>
                 </div>
               </Link>
             </motion.div>

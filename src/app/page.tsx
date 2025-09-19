@@ -16,7 +16,7 @@ export default async function Home() {
     <div className="container mx-auto px-4 py-8 space-y-8">
       <HeroBannerCarousel />
       <CategoryIcons />
-      <UsedProductsCarousel /> {/* Place the new carousel here */}
+      <UsedProductsCarousel /> {/* Moved here */}
       <ProductCarouselSection />
       <FlashSale initialProducts={flashSaleProducts} />
       {gadgetProducts.length > 0 && (
