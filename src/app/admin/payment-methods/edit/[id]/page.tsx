@@ -42,7 +42,7 @@ export default function EditPaymentMethodPage({ params }: { params: Promise<{ id
       const methodData = {
         name: values.name,
         type: values.type,
-        details: values.details ? JSON.parse(values.details) : null, // Parse JSON string to object
+        details: values.details, // Removed JSON.parse
         is_active: values.is_active || false, // Ensure it's boolean
         order: values.order,
       };
@@ -53,7 +53,7 @@ export default function EditPaymentMethodPage({ params }: { params: Promise<{ id
       router.push("/admin/payment-methods");
     } catch (error: any) {
       console.error("Error updating payment method:", error);
-      toast.error("Gagal memperbarui metode pembayaran: " + (error.message || "Format detail JSON tidak valid."));
+      toast.error("Gagal memperbarui metode pembayaran: " + (error.message || "Terjadi kesalahan."));
     } finally {
       setIsSubmitting(false);
     }
