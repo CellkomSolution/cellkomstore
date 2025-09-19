@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageSquare, Send, Loader2, User as UserIcon } from "lucide-react";
+import { MessageSquare, Send, Loader2, User as UserIcon, Package } from "lucide-react"; // Added Package icon
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
@@ -27,17 +27,20 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import Image from "next/image";
-import { getProductById, mapProductData } from "@/lib/supabase/products"; // Import mapProductData
-import Link from "next/link"; // Import Link for product links
+import { getProductById, mapProductData } from "@/lib/supabase/products";
+import { getOrderById, Order } from "@/lib/supabase/orders"; // Import getOrderById and Order
+import Link from "next/link";
 
 interface ChatWidgetProps {
   productId?: string | null;
   productName?: string | null;
+  orderId?: string | null; // New: Add orderId prop
+  orderName?: string | null; // New: Add orderName prop
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function ChatWidget({ productId, productName, open, onOpenChange }: ChatWidgetProps) {
+export function ChatWidget({ productId, productName, orderId, orderName, open, onOpenChange }: ChatWidgetProps) {
   const { user, profile, isLoading: isSessionLoading } = useSession();
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = React.useState("");
@@ -74,8 +77,10 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     
     const finalMessages: ChatMessage[] = [];
     const productsIntroduced = new Set<string>();
+    const ordersIntroduced = new Set<string>(); // New: Track introduced orders
 
     for (const msg of fetchedMessages) {
+      // System message for product
       if (msg.product_id && !productsIntroduced.has(msg.product_id)) {
         const product = await getProductById(msg.product_id);
         if (product) {
@@ -86,14 +91,37 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
             message: `Percakapan ini dimulai terkait produk: ${product.name}`,
             created_at: msg.created_at,
             product_id: product.id,
+            order_id: null, // Explicitly null
             is_read: true,
             updated_at: msg.created_at,
             sender_profile: [],
             receiver_profile: [],
-            products: [product], // Fixed: Pass the full product object
+            products: [product],
             type: 'system',
           });
           productsIntroduced.add(msg.product_id);
+        }
+      }
+      // System message for order
+      if (msg.order_id && !ordersIntroduced.has(msg.order_id)) { // New: Check for order_id
+        const order = await getOrderById(msg.order_id);
+        if (order) {
+          finalMessages.push({
+            id: `system-order-intro-${msg.order_id}-${msg.id}`,
+            sender_id: 'system-id',
+            receiver_id: user.id,
+            message: `Percakapan ini dimulai terkait pesanan: #${order.id.substring(0, 8)}`,
+            created_at: msg.created_at,
+            product_id: null, // Explicitly null
+            order_id: order.id,
+            is_read: true,
+            updated_at: msg.created_at,
+            sender_profile: [],
+            receiver_profile: [],
+            order: order, // Pass the full order object
+            type: 'system',
+          });
+          ordersIntroduced.add(msg.order_id);
         }
       }
       finalMessages.push(msg);
@@ -167,6 +195,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     setIsSending(true);
     const { data, error } = await supabase.from("chats").insert({
       product_id: productId || null,
+      order_id: orderId || null, // New: Include order_id
       sender_id: user.id,
       receiver_id: targetAdminId,
       message: newMessage.trim(),
@@ -174,17 +203,18 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
-      products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description)
+      products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description),
+      order:orders!order_id(id, total_amount, status)
     `).single();
 
     if (error) {
       console.error("Error sending message:", error.message);
       toast.error("Gagal mengirim pesan.");
     } else if (data) {
-      // Map product data from snake_case to camelCase for the new message
       const mappedData = {
         ...data,
-        products: data.products ? [mapProductData(data.products)] : [], // Fixed: Wrap data.products in an array
+        products: data.products ? [mapProductData(data.products)] : [],
+        order: data.order as Order | undefined, // Map order data
       };
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
@@ -192,7 +222,11 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
     setIsSending(false);
   };
 
-  const Title = () => <p>Chat {productName ? `tentang ${productName}` : 'Admin'}</p>;
+  const Title = () => {
+    if (orderName) return <p>Chat tentang {orderName}</p>;
+    if (productName) return <p>Chat tentang {productName}</p>;
+    return <p>Chat Admin</p>;
+  };
 
   if (isSessionLoading || isLoadingAdminId) {
     const Content = () => (
@@ -333,7 +367,15 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                             </span>
                           </div>
                         )}
-                        {!msg.products?.[0] && msg.message}
+                        {msg.order && ( // New: Display order context for system message
+                          <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
+                            <Package className="h-5 w-5 text-muted-foreground" />
+                            <span>
+                              Percakapan tentang Pesanan: <Link href={`/my-orders/${msg.order.id}`} className="underline hover:text-primary">#{msg.order.id.substring(0, 8)}</Link>
+                            </span>
+                          </div>
+                        )}
+                        {!msg.products?.[0] && !msg.order && msg.message}
                       </div>
                     ) : (
                       <>
@@ -365,13 +407,21 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
                               </span>
                             </div>
                           )}
+                          {msg.order_id && msg.order && ( // New: Display order context for regular message
+                            <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
+                              <Package className="h-5 w-5 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground line-clamp-1">
+                                Tentang Pesanan: <Link href={`/my-orders/${msg.order.id}`} className="underline hover:text-primary">#{msg.order.id.substring(0, 8)}</Link>
+                              </span>
+                            </div>
+                          )}
                           <p className={`text-xs mt-1 ${msg.sender_id === user.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                             {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: id })}
                           </p>
                         </div>
                         {msg.sender_id === user.id && (
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={msg.sender_profile[0]?.avatar_url || undefined} />
+                            <AvatarImage src={profile?.avatar_url || undefined} />
                             <AvatarFallback>
                               {profile?.first_name ? profile.first_name[0].toUpperCase() : <UserIcon className="h-4 w-4" />}
                             </AvatarFallback>
@@ -406,9 +456,9 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[90vh] flex flex-col p-4">
+        <DrawerContent className="h-[90vh] flex flex-col">
           <DrawerHeader className="text-center">
-            <DrawerTitle>Chat {productName ? `tentang ${productName}` : 'Umum'}</DrawerTitle>
+            <DrawerTitle><Title /></DrawerTitle>
           </DrawerHeader>
           {ChatContent}
         </DrawerContent>
@@ -419,7 +469,7 @@ export function ChatWidget({ productId, productName, open, onOpenChange }: ChatW
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
           <SheetHeader>
-            <SheetTitle>Chat {productName ? `tentang ${productName}` : 'Umum'}</SheetTitle>
+            <SheetTitle><Title /></SheetTitle>
           </SheetHeader>
           {ChatContent}
         </SheetContent>

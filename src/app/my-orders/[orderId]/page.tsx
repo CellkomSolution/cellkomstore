@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, MapPin, Phone, User as UserIcon, CalendarDays, ArrowLeft, MessageSquare, Banknote, Wallet, CreditCard } from "lucide-react";
+import { Loader2, MapPin, Phone, User as UserIcon, CalendarDays, ArrowLeft, MessageSquare, Banknote, Wallet, CreditCard, Package } from "lucide-react"; // Added Package icon
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
 import { getOrderById, updateOrderPaymentMethod, Order } from "@/lib/supabase/orders";
@@ -18,17 +18,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatWidget } from "@/components/chat-widget";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { useCart } from "@/context/cart-context"; // Import useCart to clear cart
+import { useCart } from "@/context/cart-context";
 
 interface UserOrderDetailPageProps {
-  params: Promise<{ orderId: string }>; // Changed to direct object
+  params: { orderId: string };
 }
 
 export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps) {
-  const { orderId } = React.use(params); // Access orderId directly using React.use()
+  const { orderId } = params;
   const router = useRouter();
   const { user, isLoading: isSessionLoading } = useSession();
-  const { clearCart } = useCart(); // Get clearCart from context
+  const { clearCart } = useCart();
 
   const [order, setOrder] = React.useState<Order | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -56,7 +56,6 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     if (fetchedOrder.status === 'pending') {
       const activeMethods = await getPaymentMethods(true);
       setPaymentMethods(activeMethods);
-      // Pre-select if there's only one active method or if one was already chosen
       if (activeMethods.length === 1) {
         setSelectedPaymentMethodId(activeMethods[0].id);
       } else if (fetchedOrder.payment_method_id) {
@@ -78,9 +77,9 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     setIsConfirmingPayment(true);
     try {
       await updateOrderPaymentMethod(order.id, selectedPaymentMethodId);
-      clearCart(); // Clear cart after payment confirmation
+      clearCart();
       toast.success("Metode pembayaran berhasil dikonfirmasi!");
-      await fetchData(); // Refetch order data to update UI
+      await fetchData();
     } catch (error: any) {
       console.error("Error confirming payment method:", error);
       toast.error(error.message || "Gagal mengonfirmasi pembayaran.");
@@ -267,7 +266,9 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
       </div>
       <ChatWidget
         productId={null}
-        productName={`Pesanan #${order.id.substring(0, 8)}`}
+        productName={null} // Set to null as we are passing order context
+        orderId={order.id} // New: Pass orderId
+        orderName={`Pesanan #${order.id.substring(0, 8)}`} // New: Pass orderName
         open={isChatOpen}
         onOpenChange={setIsChatOpen}
       />

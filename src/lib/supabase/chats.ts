@@ -1,10 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "./profiles";
-import { Product, mapProductData } from "./products"; // Import mapProductData
+import { Product, mapProductData } from "./products";
+import { Order } from "./orders"; // Import Order type
 
 export type ChatMessage = {
   id: string;
   product_id: string | null;
+  order_id: string | null; // New: Add order_id
   sender_id: string;
   receiver_id: string;
   message: string;
@@ -14,6 +16,7 @@ export type ChatMessage = {
   sender_profile: Profile[];
   receiver_profile: Profile[];
   products?: Product[];
+  order?: Order; // New: Joined order data
   type?: 'system' | 'message';
 };
 
@@ -31,7 +34,8 @@ export async function getChatMessages(user1Id: string, user2Id: string): Promise
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
-      products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description)
+      products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description),
+      order:orders!order_id(id, total_amount, status)
     `)
     .or(`and(sender_id.eq.${user1Id},receiver_id.eq.${user2Id}),and(sender_id.eq.${user2Id},receiver_id.eq.${user1Id})`)
     .order("created_at", { ascending: true });
@@ -43,9 +47,8 @@ export async function getChatMessages(user1Id: string, user2Id: string): Promise
 
   return data.map(chat => ({
     ...chat,
-    // If chat.products exists (meaning there's a product_id), map that single object and wrap in an array.
-    // If not, use an empty array.
     products: chat.products ? [mapProductData(chat.products)] : [],
+    order: chat.order as Order | undefined, // Map order data
   })) as ChatMessage[];
 }
 
@@ -132,7 +135,7 @@ export async function getChatParticipants(adminId: string) {
 
   const { data: profilesData, error: profilesError } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, avatar_url, email, role') // Ditambahkan 'role'
+    .select('id, first_name, last_name, avatar_url, email, role')
     .in('id', participantIds);
 
   if (profilesError) {

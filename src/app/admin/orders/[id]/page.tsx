@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, MapPin, Phone, User as UserIcon, Package, CalendarDays } from "lucide-react";
+import { Loader2, MapPin, Phone, User as UserIcon, Package, CalendarDays, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
 import { getOrderById, updateOrderStatus, Order } from "@/lib/supabase/orders";
@@ -23,11 +23,11 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AdminOrderDetailPageProps {
-  params: Promise<{ id: string }>; // Changed to direct object
+  params: { id: string };
 }
 
 export default function AdminOrderDetailPage({ params }: AdminOrderDetailPageProps) {
-  const { id: orderId } = React.use(params); // Access orderId directly using React.use()
+  const { id: orderId } = params;
   const router = useRouter();
 
   const [order, setOrder] = React.useState<Order | null>(null);
@@ -86,16 +86,26 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
   }
 
   if (!order) {
-    return null; // Redirect handled in useEffect
+    return null;
   }
 
   return (
     <div className="space-y-6 py-8">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Detail Pesanan #{order.id.substring(0, 8)}</h2>
-        <Button variant="outline" onClick={() => router.back()}>
-          Kembali ke Daftar Pesanan
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => router.back()}>
+            Kembali ke Daftar Pesanan
+          </Button>
+          {order.user_profile?.id && (
+            <Button asChild>
+              <Link href={`/chats/${order.user_profile.id}?orderId=${order.id}`}>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Chat dengan Pelanggan
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">

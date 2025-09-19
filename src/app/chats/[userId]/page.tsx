@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation"; // Import useSearchParams
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,34 +16,39 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Profile } from "@/lib/supabase/profiles"; 
 import { getChatMessages, markMessagesAsRead, ChatMessage } from "@/lib/supabase/chats";
 import { getProductById, Product, mapProductData } from "@/lib/supabase/products";
+import { getOrderById, Order } from "@/lib/supabase/orders"; // Import getOrderById and Order
 import Link from "next/link";
 import Image from "next/image";
-import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
 interface AdminChatDetailPageProps {
-  params: Promise<{ userId: string }>; // Changed to direct object
+  params: { userId: string };
 }
 
 export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps) {
-  const { userId } = React.use(params); // Access userId directly using React.use()
-
+  const { userId } = params;
   const router = useRouter();
+  const searchParams = useSearchParams(); // Initialize useSearchParams
+  const orderIdFromUrl = searchParams.get("orderId"); // Get orderId from URL
+
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();
-  const isMobile = useIsMobile(); // Dapatkan status mobile
+  const isMobile = useIsMobile();
 
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = React.useState("");
   const [isLoadingMessages, setIsLoadingMessages] = React.useState(true);
   const [isSending, setIsSending] = React.useState(false);
   const [otherUserProfile, setOtherUserProfile] = React.useState<Profile | null>(null);
+  const [orderContext, setOrderContext] = React.useState<Order | null>(null); // New state for order context
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = React.useState(true); // State untuk mengontrol drawer
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(true);
 
   const adminId = adminUser?.id;
 
@@ -66,6 +71,33 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
     loadUserProfile();
   }, [userId, adminUser, adminId]);
 
+  // Effect to load order context and potentially pre-fill message
+  React.useEffect(() => {
+    async function loadOrderContextAndPrefill() {
+      if (orderIdFromUrl) {
+        const order = await getOrderById(orderIdFromUrl);
+        if (order) {
+          setOrderContext(order);
+          // Only pre-fill if newMessage is currently empty
+          if (newMessage === "") {
+            const orderLink = `${window.location.origin}/admin/orders/${order.id}`;
+            setNewMessage(`Halo, saya ingin membahas pesanan #${order.id.substring(0, 8)} Anda. Detail pesanan: ${orderLink}`);
+          }
+        } else {
+          toast.error("Detail pesanan tidak ditemukan.");
+          setOrderContext(null);
+        }
+      } else {
+        setOrderContext(null);
+        // If orderId is removed from URL, clear pre-filled message if it was order-related
+        if (newMessage.includes("pesanan #") && newMessage.includes("Detail pesanan:")) {
+            setNewMessage("");
+        }
+      }
+    }
+    loadOrderContextAndPrefill();
+  }, [orderIdFromUrl, newMessage]); // Depend on newMessage to re-evaluate pre-fill logic
+
   const fetchMessages = React.useCallback(async () => {
     if (!adminUser || !adminId || !otherUserProfile) return;
     setIsLoadingMessages(true);
@@ -74,8 +106,10 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       
       const finalMessages: ChatMessage[] = [];
       const productsIntroduced = new Set<string>();
+      const ordersIntroduced = new Set<string>(); // New: Track introduced orders
 
       for (const msg of fetchedMessages) {
+        // System message for product
         if (msg.product_id && !productsIntroduced.has(msg.product_id)) {
           const product = await getProductById(msg.product_id);
           if (product) {
@@ -86,6 +120,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
               message: `Percakapan ini dimulai terkait produk: ${product.name}`,
               created_at: msg.created_at,
               product_id: product.id,
+              order_id: null, // Explicitly null
               is_read: true,
               updated_at: msg.created_at,
               sender_profile: [],
@@ -94,6 +129,28 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
               type: 'system',
             });
             productsIntroduced.add(msg.product_id);
+          }
+        }
+        // System message for order
+        if (msg.order_id && !ordersIntroduced.has(msg.order_id)) { // New: Check for order_id
+          const order = await getOrderById(msg.order_id);
+          if (order) {
+            finalMessages.push({
+              id: `system-order-intro-${msg.order_id}-${msg.id}`,
+              sender_id: 'system-id',
+              receiver_id: adminId,
+              message: `Percakapan ini dimulai terkait pesanan: #${order.id.substring(0, 8)}`,
+              created_at: msg.created_at,
+              product_id: null, // Explicitly null
+              order_id: order.id,
+              is_read: true,
+              updated_at: msg.created_at,
+              sender_profile: [],
+              receiver_profile: [],
+              order: order, // Pass the full order object
+              type: 'system',
+            });
+            ordersIntroduced.add(msg.order_id);
           }
         }
         finalMessages.push(msg);
@@ -156,11 +213,14 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       sender_id: adminUser.id,
       receiver_id: userId,
       message: newMessage.trim(),
+      product_id: null, // Admin-initiated chat from order context should not have product_id
+      order_id: orderIdFromUrl, // New: Include order_id if present in URL
     }).select(`
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
-      products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description)
+      products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description),
+      order:orders!order_id(id, total_amount, status)
     `).single();
 
     if (error) {
@@ -170,6 +230,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       const mappedData = {
         ...data,
         products: data.products ? [mapProductData(data.products)] : [],
+        order: data.order as Order | undefined, // Map order data
       };
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
@@ -180,8 +241,8 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
   const ChatHeaderContent = (
     <div className="flex items-center gap-3">
       <Button variant="ghost" size="icon" onClick={() => {
-        setIsDrawerOpen(false); // Tutup drawer
-        router.push("/chats"); // Navigasi kembali
+        setIsDrawerOpen(false);
+        router.push("/chats");
       }}>
         <ArrowLeft className="h-5 w-5" />
         <span className="sr-only">Kembali</span>
@@ -197,6 +258,11 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
           {otherUserProfile?.first_name || "Pengguna"} {otherUserProfile?.last_name || ""}
         </CardTitle>
         <p className="text-sm text-muted-foreground">{otherUserProfile?.email}</p>
+        {orderContext && ( // Display order context if available
+          <p className="text-xs text-primary mt-1">
+            Membahas Pesanan: <Link href={`/admin/orders/${orderContext.id}`} className="underline hover:text-primary">#{orderContext.id.substring(0, 8)}</Link> (Total: {formatRupiah(orderContext.total_amount)})
+          </p>
+        )}
       </div>
     </div>
   );
@@ -237,7 +303,15 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                             </span>
                           </div>
                         )}
-                        {!msg.products?.[0] && msg.message}
+                        {msg.order && ( // New: Display order context for system message
+                          <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
+                            <Package className="h-5 w-5 text-muted-foreground" />
+                            <span>
+                              Percakapan tentang Pesanan: <Link href={`/admin/orders/${msg.order.id}`} className="underline hover:text-primary">#{msg.order.id.substring(0, 8)}</Link>
+                            </span>
+                          </div>
+                        )}
+                        {!msg.products?.[0] && !msg.order && msg.message}
                       </div>
                     ) : (
                       <>
@@ -266,6 +340,14 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                               )}
                               <span className="text-xs text-muted-foreground line-clamp-1">
                                 Tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
+                              </span>
+                            </div>
+                          )}
+                          {msg.order_id && msg.order && ( // New: Display order context for regular message
+                            <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
+                              <Package className="h-5 w-5 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground line-clamp-1">
+                                Tentang Pesanan: <Link href={`/admin/orders/${msg.order.id}`} className="underline hover:text-primary">#{msg.order.id.substring(0, 8)}</Link>
                               </span>
                             </div>
                           )}
@@ -328,7 +410,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       <Drawer open={isDrawerOpen} onOpenChange={(open) => {
         setIsDrawerOpen(open);
         if (!open) {
-          router.push("/chats"); // Kembali ke daftar chat saat drawer ditutup
+          router.push("/chats");
         }
       }}>
         <DrawerContent className="h-[90vh] flex flex-col">
