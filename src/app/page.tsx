@@ -4,7 +4,8 @@ import { ProductGrid } from "@/components/product-grid";
 import { FeaturedBrands } from "@/components/featured-brands";
 import { ProductCarouselSection } from "@/components/product-carousel-section";
 import { HeroBannerCarousel } from "@/components/hero-banner-carousel";
-import { UsedProductsCarousel } from "@/components/used-products-carousel"; // Import new component
+import { UsedProductsCarousel } from "@/components/used-products-carousel";
+import { HomeProductShowcase } from "@/components/home-product-showcase"; // Import new component
 import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase/products";
 
 export default async function Home() {
@@ -16,7 +17,6 @@ export default async function Home() {
     <div className="container mx-auto px-4 py-8 space-y-8">
       <HeroBannerCarousel />
       <CategoryIcons />
-      <UsedProductsCarousel /> {/* Moved here */}
       <ProductCarouselSection />
       <FlashSale initialProducts={flashSaleProducts} />
       {gadgetProducts.length > 0 && (
@@ -26,7 +26,7 @@ export default async function Home() {
         />
       )}
       <FeaturedBrands />
-      <ProductGrid products={products} title="Produk Pilihan Untukmu" />
+      <HomeProductShowcase products={products} title="Produk Pilihan Untukmu" /> {/* Use the new component here */}
     </div>
   );
 }
