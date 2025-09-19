@@ -4,20 +4,22 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import CardTitle
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Notification as SupabaseNotification } from "@/lib/supabase/notifications";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { Bell, CheckCircle, Package, MessageSquare, Tag, Loader2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface NotificationItemProps {
   notification: SupabaseNotification;
   onMarkAsRead: (id: string) => void;
+  onCloseSheet?: () => void; // Optional prop to close the sheet/drawer
 }
 
-function NotificationItem({ notification, onMarkAsRead }: NotificationItemProps) {
+function NotificationItem({ notification, onMarkAsRead, onCloseSheet }: NotificationItemProps) {
   const getIconForType = (type: SupabaseNotification['type']) => {
     switch (type) {
       case 'order_status_update':
@@ -40,6 +42,7 @@ function NotificationItem({ notification, onMarkAsRead }: NotificationItemProps)
     if (notification.link) {
       window.location.href = notification.link; // Use window.location.href for full page navigation
     }
+    onCloseSheet?.(); // Close the sheet/drawer if the prop is provided
   };
 
   return (
@@ -74,17 +77,21 @@ function NotificationItem({ notification, onMarkAsRead }: NotificationItemProps)
   );
 }
 
-export const NotificationsPageContent = ({
-  notifications: initialNotifications,
-  onMarkAllAsRead,
-  onMarkAsRead,
-  isLoading,
-}: {
+interface NotificationListContentProps {
   notifications: SupabaseNotification[];
   onMarkAllAsRead: () => void;
   onMarkAsRead: (id: string) => void;
   isLoading: boolean;
-}) => {
+  onCloseSheet?: () => void; // Optional prop to close the sheet/drawer
+}
+
+export const NotificationListContent = ({
+  notifications: initialNotifications,
+  onMarkAllAsRead,
+  onMarkAsRead,
+  isLoading,
+  onCloseSheet,
+}: NotificationListContentProps) => {
   const [activeTab, setActiveTab] = React.useState<string>("all");
 
   const allNotifications = initialNotifications;
@@ -102,40 +109,38 @@ export const NotificationsPageContent = ({
   const filteredNotifications = getFilteredNotifications();
 
   return (
-    <Card className="flex w-full flex-col gap-6 p-4 shadow-none md:p-8">
-      <CardHeader className="p-0">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base leading-none font-semibold tracking-[-0.006em]">
-            Notifikasi Anda
-          </h3>
-          <div className="flex items-center gap-2">
-            <Button className="size-8" variant="ghost" size="icon" onClick={onMarkAllAsRead} disabled={unreadNotifications.length === 0}>
-              <CheckCircle className="size-4.5 text-muted-foreground" />
-              <span className="sr-only">Tandai semua dibaca</span>
-            </Button>
-          </div>
+    <div className="flex w-full flex-col gap-6 p-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-base leading-none font-semibold tracking-[-0.006em]">
+          Notifikasi Anda
+        </h3>
+        <div className="flex items-center gap-2">
+          <Button className="size-8" variant="ghost" size="icon" onClick={onMarkAllAsRead} disabled={unreadNotifications.length === 0}>
+            <CheckCircle className="size-4.5 text-muted-foreground" />
+            <span className="sr-only">Tandai semua dibaca</span>
+          </Button>
         </div>
+      </div>
 
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-full flex-col justify-start"
-        >
-          <div className="flex items-center justify-between">
-            <TabsList className="**:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:bg-muted-foreground/30 [&_button]:gap-1.5">
-              <TabsTrigger value="all">
-                Semua
-                <Badge variant="secondary">{allNotifications.length}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="unread">
-                Belum Dibaca <Badge variant="secondary">{unreadNotifications.length}</Badge>
-              </TabsTrigger>
-            </TabsList>
-          </div>
-        </Tabs>
-      </CardHeader>
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full flex-col justify-start"
+      >
+        <div className="flex items-center justify-between">
+          <TabsList className="**:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:bg-muted-foreground/30 [&_button]:gap-1.5">
+            <TabsTrigger value="all">
+              Semua
+              <Badge variant="secondary">{allNotifications.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="unread">
+              Belum Dibaca <Badge variant="secondary">{unreadNotifications.length}</Badge>
+            </TabsTrigger>
+          </TabsList>
+        </div>
+      </Tabs>
 
-      <CardContent className="h-full p-0">
+      <div className="h-full p-0">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center space-y-4 py-12">
             <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
@@ -144,15 +149,18 @@ export const NotificationsPageContent = ({
             </p>
           </div>
         ) : filteredNotifications.length > 0 ? (
-          <div className="space-y-0 divide-y divide-dashed divide-border">
-            {filteredNotifications.map((notification) => (
-              <NotificationItem
-                key={notification.id}
-                notification={notification}
-                onMarkAsRead={onMarkAsRead}
-              />
-            ))}
-          </div>
+          <ScrollArea className="h-[calc(100vh-280px)]"> {/* Adjusted height for scroll area */}
+            <div className="space-y-0 divide-y divide-dashed divide-border pr-4">
+              {filteredNotifications.map((notification) => (
+                <NotificationItem
+                  key={notification.id}
+                  notification={notification}
+                  onMarkAsRead={onMarkAsRead}
+                  onCloseSheet={onCloseSheet}
+                />
+              ))}
+            </div>
+          </ScrollArea>
         ) : (
           <div className="flex flex-col items-center justify-center space-y-2.5 py-12 text-center">
             <div className="rounded-full bg-muted p-4">
@@ -163,7 +171,7 @@ export const NotificationsPageContent = ({
             </p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

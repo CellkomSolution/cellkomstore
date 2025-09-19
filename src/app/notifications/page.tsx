@@ -6,7 +6,8 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, Notification } from "@/lib/supabase/notifications";
 import { useSession } from "@/context/session-context";
-import { NotificationsPageContent } from "@/components/ui/notifications-menu"; // Import the new component
+import { NotificationListContent } from "@/components/notification-list-content"; // Import the new content component
+import { Card, CardContent } from "@/components/ui/card"; // Import Card
 
 export default function NotificationsPage() {
   const { user, isLoading: isSessionLoading } = useSession();
@@ -72,12 +73,16 @@ export default function NotificationsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <NotificationsPageContent
-        notifications={notifications}
-        onMarkAllAsRead={handleMarkAllAsRead}
-        onMarkAsRead={handleMarkAsRead}
-        isLoading={isLoading}
-      />
+      <Card className="shadow-none">
+        <CardContent className="p-0">
+          <NotificationListContent
+            notifications={notifications}
+            onMarkAllAsRead={handleMarkAllAsRead}
+            onMarkAsRead={handleMarkAsRead}
+            isLoading={isLoading}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

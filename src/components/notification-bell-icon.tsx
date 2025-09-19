@@ -9,12 +9,14 @@ import { getUnreadNotificationsCount } from "@/lib/supabase/notifications";
 import { supabase } from "@/integrations/supabase/client";
 import { useRouter } from "next/navigation";
 import { useAdmin } from "@/hooks/use-admin";
+import { NotificationSheet } from "./notification-sheet"; // Import NotificationSheet
 
 export function NotificationBellIcon() {
   const { user, isLoading: isSessionLoading } = useSession();
   const { isAdmin, isAdminLoading } = useAdmin();
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [isLoadingCount, setIsLoadingCount] = React.useState(true);
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false); // State to control the sheet
   const router = useRouter();
 
   const fetchUnreadCount = React.useCallback(async () => {
@@ -61,26 +63,29 @@ export function NotificationBellIcon() {
   }
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="relative"
-      onClick={() => router.push("/notifications")}
-      disabled={isLoadingCount}
-    >
-      {isLoadingCount ? (
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      ) : (
-        <>
-          <Bell className="h-6 w-6" />
-          {unreadCount > 0 && (
-            <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-              {unreadCount}
-            </Badge>
-          )}
-        </>
-      )}
-      <span className="sr-only">Notifikasi</span>
-    </Button>
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative"
+        onClick={() => setIsSheetOpen(true)} // Open the sheet on click
+        disabled={isLoadingCount}
+      >
+        {isLoadingCount ? (
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        ) : (
+          <>
+            <Bell className="h-6 w-6" />
+            {unreadCount > 0 && (
+              <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                {unreadCount}
+              </Badge>
+            )}
+          </>
+        )}
+        <span className="sr-only">Notifikasi</span>
+      </Button>
+      <NotificationSheet open={isSheetOpen} onOpenChange={setIsSheetOpen} />
+    </>
   );
 }
