@@ -8,6 +8,7 @@ import { Order } from "@/lib/supabase/orders"; // Import Order type
 import { Clock, Package, CheckCircle, XCircle, ShoppingBag, BellRing, ReceiptText } from "lucide-react"; // Import icons, including ShoppingBag and BellRing
 import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
+import { createNotification } from "@/lib/supabase/notifications"; // Import createNotification
 
 interface OrderNotificationProviderProps {
   children: React.ReactNode;
@@ -84,35 +85,39 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
             table: "orders",
             filter: `user_id=eq.${userId}`,
           },
-          (payload) => {
+          async (payload) => {
             const oldRecord = payload.old as Order;
             const newRecord = payload.new as Order;
 
             // Notify on order_status change
             if (newRecord.order_status !== oldRecord.order_status) {
-              toast.info(
-                `Status pesanan #${newRecord.id.substring(0, 8)} Anda telah berubah menjadi ${getOrderStatusMessage(newRecord.order_status)}.`,
-                {
-                  icon: getStatusIcon(newRecord.order_status, newRecord.payment_status),
-                  action: {
-                    label: "Lihat",
-                    onClick: () => window.location.href = `/my-orders/${newRecord.id}`,
-                  },
-                }
-              );
+              const title = `Status Pesanan #${newRecord.id.substring(0, 8)} Diperbarui`;
+              const message = `Pesanan Anda sekarang ${getOrderStatusMessage(newRecord.order_status)}.`;
+              const link = `/my-orders/${newRecord.id}`;
+              
+              await createNotification(userId, 'order_status_update', title, message, link);
+              toast.info(message, {
+                icon: getStatusIcon(newRecord.order_status, newRecord.payment_status),
+                action: {
+                  label: "Lihat",
+                  onClick: () => window.location.href = link,
+                },
+              });
             }
             // Notify on payment_status change (e.g., admin confirmed payment)
             if (newRecord.payment_status !== oldRecord.payment_status && newRecord.payment_status === 'paid') {
-              toast.success(
-                `Pembayaran pesanan #${newRecord.id.substring(0, 8)} Anda telah dikonfirmasi!`,
-                {
-                  icon: getStatusIcon(newRecord.order_status, newRecord.payment_status),
-                  action: {
-                    label: "Lihat",
-                    onClick: () => window.location.href = `/my-orders/${newRecord.id}`,
-                  },
-                }
-              );
+              const title = `Pembayaran Pesanan #${newRecord.id.substring(0, 8)} Dikonfirmasi`;
+              const message = `Pembayaran pesanan Anda telah dikonfirmasi!`;
+              const link = `/my-orders/${newRecord.id}`;
+
+              await createNotification(userId, 'payment_status_update', title, message, link);
+              toast.success(message, {
+                icon: getStatusIcon(newRecord.order_status, newRecord.payment_status),
+                action: {
+                  label: "Lihat",
+                  onClick: () => window.location.href = link,
+                },
+              });
             }
           }
         )
@@ -124,18 +129,20 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
             table: "orders",
             filter: `user_id=eq.${userId}`,
           },
-          (payload) => {
+          async (payload) => {
             const newRecord = payload.new as Order;
-            toast.success(
-              `Pesanan baru Anda #${newRecord.id.substring(0, 8)} berhasil dibuat!`,
-              {
-                icon: <ShoppingBag className="h-4 w-4" />,
-                action: {
-                  label: "Lihat",
-                  onClick: () => window.location.href = `/my-orders/${newRecord.id}`,
-                },
-              }
-            );
+            const title = `Pesanan Baru #${newRecord.id.substring(0, 8)}`;
+            const message = `Pesanan Anda berhasil dibuat! Total: ${formatRupiah(newRecord.total_amount + newRecord.payment_unique_code)}.`;
+            const link = `/my-orders/${newRecord.id}`;
+
+            await createNotification(userId, 'order_status_update', title, message, link);
+            toast.success(message, {
+              icon: <ShoppingBag className="h-4 w-4" />,
+              action: {
+                label: "Lihat",
+                onClick: () => window.location.href = link,
+              },
+            });
           }
         )
         .subscribe();

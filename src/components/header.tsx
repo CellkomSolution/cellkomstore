@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Search, User, Download, MessageSquare } from "lucide-react"; // Removed Heart and Bell
+import { ShoppingCart, Search, User, Download, MessageSquare, Bell } from "lucide-react"; // Added Bell, Removed Heart
 import { MainNav } from "./main-nav";
 import { MobileNav } from "./mobile-nav";
 import { UserNav } from "./user-nav";
@@ -14,6 +14,7 @@ import { AppSettings } from "@/lib/supabase/app-settings";
 import { useCart } from "@/context/cart-context";
 import { ChatNotificationIcon } from "./chat-notification-icon";
 import { AdminChatNotificationIcon } from "./admin-chat-notification-icon";
+import { NotificationBellIcon } from "./notification-bell-icon"; // Import NotificationBellIcon
 import { useAdmin } from "@/hooks/use-admin";
 import { useRouter } from "next/navigation";
 import { CartSheet } from "./cart-sheet";
@@ -170,9 +171,11 @@ export function Header() {
                 {isAdmin ? (
                   <AdminChatNotificationIcon />
                 ) : (
-                  <ChatNotificationIcon />
+                  <>
+                    <ChatNotificationIcon />
+                    <NotificationBellIcon /> {/* New Notification Bell Icon */}
+                  </>
                 )}
-                {/* Removed Bell/Notification Button */}
                 <UserNav />
               </>
             ) : (
