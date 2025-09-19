@@ -19,7 +19,6 @@ import { AdminNotificationBellIcon } from "./admin-notification-bell-icon"; // I
 import { useAdmin } from "@/hooks/use-admin";
 import { useRouter } from "next/navigation";
 import { CartSheet } from "./cart-sheet";
-import { ChatWidget } from "./chat-widget";
 import { CategorySheet } from "./category-sheet"; // Import CategorySheet
 
 export function Header() {
@@ -29,7 +28,7 @@ export function Header() {
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isGeneralChatOpen, setIsGeneralChatOpen] = useState(false);
+  // isGeneralChatOpen removed from here, now managed by NotificationBellIcon
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false); // State for MobileNav
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false); // State for CategorySheet
   const router = useRouter();

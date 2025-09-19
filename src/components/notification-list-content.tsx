@@ -17,9 +17,10 @@ interface NotificationItemProps {
   notification: SupabaseNotification;
   onMarkAsRead: (id: string) => void;
   onCloseSheet?: () => void; // Optional prop to close the sheet/drawer
+  onOpenChatWidget?: () => void; // New: Optional prop to open the chat widget
 }
 
-function NotificationItem({ notification, onMarkAsRead, onCloseSheet }: NotificationItemProps) {
+function NotificationItem({ notification, onMarkAsRead, onCloseSheet, onOpenChatWidget }: NotificationItemProps) {
   const getIconForType = (type: SupabaseNotification['type']) => {
     switch (type) {
       case 'order_status_update':
@@ -39,10 +40,14 @@ function NotificationItem({ notification, onMarkAsRead, onCloseSheet }: Notifica
     if (!notification.is_read) {
       onMarkAsRead(notification.id);
     }
+    onCloseSheet?.(); // Always close the sheet/drawer
+
     if (notification.link) {
-      window.location.href = notification.link; // Use window.location.href for full page navigation
+      window.location.href = notification.link; // Navigate to specific link
+    } else if (notification.type === 'new_message' && onOpenChatWidget) {
+      // If it's a general chat notification without a specific link, open the chat widget
+      onOpenChatWidget();
     }
-    onCloseSheet?.(); // Close the sheet/drawer if the prop is provided
   };
 
   return (
@@ -83,6 +88,7 @@ interface NotificationListContentProps {
   onMarkAsRead: (id: string) => void;
   isLoading: boolean;
   onCloseSheet?: () => void; // Optional prop to close the sheet/drawer
+  onOpenChatWidget?: () => void; // New: Optional prop to open the chat widget
 }
 
 export const NotificationListContent = ({
@@ -91,6 +97,7 @@ export const NotificationListContent = ({
   onMarkAsRead,
   isLoading,
   onCloseSheet,
+  onOpenChatWidget, // New: Pass down to NotificationItem
 }: NotificationListContentProps) => {
   const [activeTab, setActiveTab] = React.useState<string>("all");
 
@@ -157,6 +164,7 @@ export const NotificationListContent = ({
                   notification={notification}
                   onMarkAsRead={onMarkAsRead}
                   onCloseSheet={onCloseSheet}
+                  onOpenChatWidget={onOpenChatWidget} // New: Pass down
                 />
               ))}
             </div>

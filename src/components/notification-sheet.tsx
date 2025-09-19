@@ -23,9 +23,10 @@ import { toast } from "sonner";
 interface NotificationSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onOpenChatWidget?: () => void; // New: Optional prop to open the chat widget
 }
 
-export function NotificationSheet({ open, onOpenChange }: NotificationSheetProps) {
+export function NotificationSheet({ open, onOpenChange, onOpenChatWidget }: NotificationSheetProps) {
   const isMobile = useIsMobile();
   const { user, isLoading: isSessionLoading } = useSession();
 
@@ -89,6 +90,7 @@ export function NotificationSheet({ open, onOpenChange }: NotificationSheetProps
           onMarkAsRead={handleMarkAsRead}
           isLoading={isLoading}
           onCloseSheet={() => onOpenChange(false)} // Pass close handler
+          onOpenChatWidget={onOpenChatWidget} // New: Pass down
         />
       </div>
     </>

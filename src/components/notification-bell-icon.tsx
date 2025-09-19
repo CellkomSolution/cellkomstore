@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRouter } from "next/navigation";
 import { useAdmin } from "@/hooks/use-admin";
 import { NotificationSheet } from "./notification-sheet"; // Import NotificationSheet
+import { ChatWidget } from "./chat-widget"; // Import ChatWidget
 
 export function NotificationBellIcon() {
   const { user, isLoading: isSessionLoading } = useSession();
@@ -17,6 +18,7 @@ export function NotificationBellIcon() {
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [isLoadingCount, setIsLoadingCount] = React.useState(true);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false); // State to control the sheet
+  const [isGeneralChatOpen, setIsGeneralChatOpen] = React.useState(false); // State to control the general chat widget
   const router = useRouter();
 
   const fetchUnreadCount = React.useCallback(async () => {
@@ -85,7 +87,19 @@ export function NotificationBellIcon() {
         )}
         <span className="sr-only">Notifikasi</span>
       </Button>
-      <NotificationSheet open={isSheetOpen} onOpenChange={setIsSheetOpen} />
+      <NotificationSheet 
+        open={isSheetOpen} 
+        onOpenChange={setIsSheetOpen} 
+        onOpenChatWidget={() => setIsGeneralChatOpen(true)} // Pass handler to open chat widget
+      />
+      <ChatWidget 
+        productId={null} 
+        productName={null} 
+        orderId={null}
+        orderName={null}
+        open={isGeneralChatOpen} 
+        onOpenChange={setIsGeneralChatOpen} 
+      />
     </>
   );
 }
