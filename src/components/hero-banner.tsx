@@ -24,7 +24,7 @@ export function HeroBanner({
   className,
 }: HeroBannerProps) {
   return (
-    <div className={cn("relative w-full h-[250px] md:h-[350px] lg:h-[450px] rounded-lg overflow-hidden", className)}>
+    <div className={cn("relative w-full h-[200px] md:h-[300px] lg:h-[400px] rounded-lg overflow-hidden", className)}>
       <Image
         src={imageUrl}
         alt={title}
