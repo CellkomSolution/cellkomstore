@@ -125,7 +125,7 @@ export function CustomCarousel({
                             alt={item.title}
                             width={200} // Provide a base width, actual size will be controlled by CSS
                             height={200} // Provide a base height, actual size will be controlled by CSS
-                            className={cn("w-full object-cover", imageHeightClass)}
+                            className={cn("w-full object-contain", imageHeightClass)} {/* Changed to object-contain */}
                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
                           />
                         ) : (

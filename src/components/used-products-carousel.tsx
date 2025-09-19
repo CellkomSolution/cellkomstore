@@ -70,8 +70,8 @@ export function UsedProductsCarousel() {
   }
 
   return (
-    <div className="space-y-4"> {/* Container for title and carousel */}
-      <h2 className="text-2xl font-bold">Produk Bekas Pilihan</h2> {/* Title above the carousel */}
+    <div className="space-y-4"> {/* Container for carousel */}
+      {/* Removed h2 tag for "Produk Bekas Pilihan" */}
       <CustomCarousel
         items={carouselItems}
         autoplay={true}
