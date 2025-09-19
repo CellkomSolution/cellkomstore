@@ -29,11 +29,11 @@ import {
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
 interface AdminChatDetailPageProps {
-  params: { userId: string };
+  params: Promise<{ userId: string }>; // Corrected: params is now a Promise
 }
 
 export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps) {
-  const { userId } = params;
+  const { userId } = React.use(params); // Corrected: Using React.use() to unwrap the Promise
   const router = useRouter();
   const searchParams = useSearchParams(); // Initialize useSearchParams
   const orderIdFromUrl = searchParams.get("orderId"); // Get orderId from URL
