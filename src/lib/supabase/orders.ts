@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CartItem } from "@/context/cart-context";
 import { Profile } from "./profiles";
 import { Product, mapProductData } from "./products";
+import { PaymentMethod } from "./payment-methods"; // Import PaymentMethod type
 
 // Define a type for the raw product data as it comes from Supabase
 interface RawProductData {
@@ -9,7 +10,7 @@ interface RawProductData {
   name: string;
   price: number;
   original_price: number | null;
-  main_image_url: string | null; // Changed to main_image_url and allow null
+  main_image_url: string | null;
   location: string;
   rating: number;
   sold_count: string;
@@ -28,7 +29,7 @@ interface RawOrderItemData {
   quantity: number;
   price_at_purchase: number;
   product_name_at_purchase: string;
-  product_image_url_at_purchase: string | null; // Changed to allow null
+  product_image_url_at_purchase: string | null;
   created_at: string;
   products: RawProductData | null; // Raw product data before mapping
 }
@@ -40,7 +41,7 @@ export interface OrderItem {
   quantity: number;
   price_at_purchase: number;
   product_name_at_purchase: string;
-  product_image_url_at_purchase: string | null; // Changed to allow null
+  product_image_url_at_purchase: string | null;
   created_at: string;
   product?: Product; // Joined product data
 }
@@ -49,7 +50,9 @@ export interface Order {
   id: string;
   user_id: string;
   total_amount: number;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  order_status: 'pending' | 'processing' | 'completed' | 'cancelled'; // Renamed from 'status'
+  payment_status: 'unpaid' | 'awaiting_confirmation' | 'paid' | 'refunded'; // New payment status
+  payment_unique_code: number; // New: Unique code for payment identification
   shipping_address_name: string;
   shipping_address_full: string;
   shipping_address_nagari: string;
@@ -60,7 +63,7 @@ export interface Order {
   updated_at: string;
   user_profile?: Profile; // Joined user profile data
   order_items?: OrderItem[]; // Joined order items
-  payment_method?: { id: string; name: string; type: string; details: any }; // Joined payment method
+  payment_method?: PaymentMethod; // Joined payment method
 }
 
 export async function createOrder(
@@ -75,13 +78,16 @@ export async function createOrder(
   }
 ): Promise<Order | null> {
   const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const paymentUniqueCode = Math.floor(100 + Math.random() * 900); // Generate a 3-digit unique code
 
   const { data: orderData, error: orderError } = await supabase
     .from("orders")
     .insert({
       user_id: userId,
       total_amount: totalAmount,
-      status: 'pending',
+      order_status: 'pending', // Initial order status
+      payment_status: 'unpaid', // Initial payment status
+      payment_unique_code: paymentUniqueCode,
       shipping_address_name: shippingInfo.name,
       shipping_address_full: shippingInfo.fullAddress,
       shipping_address_nagari: shippingInfo.nagari,
@@ -126,7 +132,7 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
       *,
       user_profile:profiles!user_id(id, first_name, last_name, avatar_url, email),
       order_items:order_items_order_id_fkey(*, products:products!order_items_product_id_fkey(id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description)),
-      payment_method:payment_methods!orders_payment_method_id_fkey(id, name, type, details)
+      payment_method:payment_methods!orders_payment_method_id_fkey(id, name, type, details, image_url)
     `)
     .eq("id", orderId)
     .single();
@@ -148,14 +154,18 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
     ...data,
     user_profile: data.user_profile as Profile,
     order_items: mappedOrderItems as OrderItem[],
-    payment_method: data.payment_method as { id: string; name: string; type: string; details: any } | undefined,
+    payment_method: data.payment_method as PaymentMethod | undefined,
   } as Order;
 }
 
-export async function updateOrderPaymentMethod(orderId: string, paymentMethodId: string): Promise<Order | null> {
+export async function updateOrderPaymentMethodAndStatus(orderId: string, paymentMethodId: string): Promise<Order | null> {
   const { data, error } = await supabase
     .from("orders")
-    .update({ payment_method_id: paymentMethodId, status: 'processing', updated_at: new Date().toISOString() })
+    .update({ 
+      payment_method_id: paymentMethodId, 
+      payment_status: 'awaiting_confirmation', // Buyer has selected method and confirmed
+      updated_at: new Date().toISOString() 
+    })
     .eq("id", orderId)
     .select()
     .single();
@@ -167,10 +177,19 @@ export async function updateOrderPaymentMethod(orderId: string, paymentMethodId:
   return data as Order;
 }
 
-export async function updateOrderStatus(orderId: string, newStatus: Order['status']): Promise<Order | null> {
+export async function updateOrderStatus(orderId: string, newOrderStatus: Order['order_status'], newPaymentStatus?: Order['payment_status']): Promise<Order | null> {
+  const updatePayload: { order_status: Order['order_status']; payment_status?: Order['payment_status']; updated_at: string } = {
+    order_status: newOrderStatus,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (newPaymentStatus) {
+    updatePayload.payment_status = newPaymentStatus;
+  }
+
   const { data, error } = await supabase
     .from("orders")
-    .update({ status: newStatus, updated_at: new Date().toISOString() })
+    .update(updatePayload)
     .eq("id", orderId)
     .select()
     .single();
@@ -182,18 +201,21 @@ export async function updateOrderStatus(orderId: string, newStatus: Order['statu
   return data as Order;
 }
 
-export async function getOrders(status?: Order['status']): Promise<Order[]> {
+export async function getOrders(orderStatus?: Order['order_status'], paymentStatus?: Order['payment_status']): Promise<Order[]> {
   let query = supabase
     .from("orders")
     .select(`
       *,
       user_profile:profiles!user_id(id, first_name, last_name, avatar_url, email),
-      payment_method:payment_methods!orders_payment_method_id_fkey(id, name, type)
+      payment_method:payment_methods!orders_payment_method_id_fkey(id, name, type, image_url)
     `)
     .order("created_at", { ascending: false });
 
-  if (status) {
-    query = query.eq("status", status);
+  if (orderStatus) {
+    query = query.eq("order_status", orderStatus);
+  }
+  if (paymentStatus) {
+    query = query.eq("payment_status", paymentStatus);
   }
 
   const { data, error } = await query;
@@ -206,7 +228,7 @@ export async function getOrders(status?: Order['status']): Promise<Order[]> {
   return data.map(order => ({
     ...order,
     user_profile: order.user_profile as Profile,
-    payment_method: order.payment_method as { id: string; name: string; type: string } | undefined,
+    payment_method: order.payment_method as PaymentMethod | undefined,
   })) as Order[];
 }
 
@@ -216,7 +238,7 @@ export async function getUserOrders(userId: string): Promise<Order[]> {
     .select(`
       *,
       user_profile:profiles!user_id(id, first_name, last_name, avatar_url, email),
-      payment_method:payment_methods!orders_payment_method_id_fkey(id, name, type),
+      payment_method:payment_methods!orders_payment_method_id_fkey(id, name, type, image_url),
       order_items:order_items_order_id_fkey(id, product_name_at_purchase, product_image_url_at_purchase, quantity, price_at_purchase)
     `)
     .eq("user_id", userId)
@@ -230,7 +252,7 @@ export async function getUserOrders(userId: string): Promise<Order[]> {
   return data.map(order => ({
     ...order,
     user_profile: order.user_profile as Profile,
-    payment_method: order.payment_method as { id: string; name: string; type: string } | undefined,
+    payment_method: order.payment_method as PaymentMethod | undefined,
     order_items: order.order_items as OrderItem[],
   })) as Order[];
 }

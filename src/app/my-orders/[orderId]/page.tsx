@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, MapPin, Phone, User as UserIcon, CalendarDays, ArrowLeft, MessageSquare, Banknote, Wallet, CreditCard, Package } from "lucide-react"; // Added Package icon
+import { Loader2, MapPin, Phone, User as UserIcon, CalendarDays, ArrowLeft, MessageSquare, Banknote, Wallet, CreditCard, Package, ReceiptText } from "lucide-react"; // Added ReceiptText icon
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
-import { getOrderById, updateOrderPaymentMethod, Order } from "@/lib/supabase/orders";
+import { getOrderById, updateOrderPaymentMethodAndStatus, Order } from "@/lib/supabase/orders";
 import { getPaymentMethods, PaymentMethod } from "@/lib/supabase/payment-methods";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -25,7 +25,7 @@ interface UserOrderDetailPageProps {
 }
 
 export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps) {
-  const { orderId } = React.use(params); // Corrected: Using React.use() to unwrap the Promise
+  const { orderId } = React.use(params);
   const router = useRouter();
   const { user, isLoading: isSessionLoading } = useSession();
   const { clearCart } = useCart();
@@ -53,7 +53,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     }
     setOrder(fetchedOrder);
 
-    if (fetchedOrder.status === 'pending') {
+    if (fetchedOrder.payment_status === 'unpaid') {
       const activeMethods = await getPaymentMethods(true);
       setPaymentMethods(activeMethods);
       if (activeMethods.length === 1) {
@@ -69,32 +69,47 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     fetchData();
   }, [fetchData]);
 
-  const handleConfirmPayment = async () => {
+  const handleConfirmPaymentMethod = async () => {
     if (!order || !selectedPaymentMethodId) {
       toast.error("Silakan pilih metode pembayaran terlebih dahulu.");
       return;
     }
     setIsConfirmingPayment(true);
     try {
-      await updateOrderPaymentMethod(order.id, selectedPaymentMethodId);
-      clearCart();
-      toast.success("Metode pembayaran berhasil dikonfirmasi!");
-      await fetchData();
+      await updateOrderPaymentMethodAndStatus(order.id, selectedPaymentMethodId);
+      clearCart(); // Clear cart after payment method is selected and confirmed
+      toast.success("Metode pembayaran berhasil dipilih! Mohon lakukan pembayaran.");
+      await fetchData(); // Refetch to update UI with new payment status
     } catch (error: any) {
       console.error("Error confirming payment method:", error);
-      toast.error(error.message || "Gagal mengonfirmasi pembayaran.");
+      toast.error(error.message || "Gagal mengonfirmasi metode pembayaran.");
     } finally {
       setIsConfirmingPayment(false);
     }
   };
 
-  const getStatusBadgeVariant = (status: Order['status']) => {
-    switch (status) {
+  const getStatusBadgeVariant = (orderStatus: Order['order_status'], paymentStatus: Order['payment_status']) => {
+    if (paymentStatus === 'unpaid') return 'secondary';
+    if (paymentStatus === 'awaiting_confirmation') return 'info'; // Assuming 'info' variant exists or can be added
+    if (paymentStatus === 'paid') return 'success';
+    if (paymentStatus === 'refunded') return 'destructive';
+
+    switch (orderStatus) {
       case 'pending': return 'secondary';
       case 'processing': return 'default';
       case 'completed': return 'success';
       case 'cancelled': return 'destructive';
       default: return 'outline';
+    }
+  };
+
+  const getPaymentStatusText = (paymentStatus: Order['payment_status']) => {
+    switch (paymentStatus) {
+      case 'unpaid': return 'Belum Dibayar';
+      case 'awaiting_confirmation': return 'Menunggu Konfirmasi Pembayaran';
+      case 'paid': return 'Sudah Dibayar';
+      case 'refunded': return 'Dikembalikan';
+      default: return 'Tidak Diketahui';
     }
   };
 
@@ -239,20 +254,32 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
                 <CardTitle>Status & Pembayaran</CardTitle>
               </CardHeader>
               <CardContent>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-medium">Status Pesanan:</span>
+                  <Badge variant={getStatusBadgeVariant(order.order_status, order.payment_status)}>
+                    {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
+                  </Badge>
+                </div>
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="font-medium">Status:</span>
-                  <Badge variant={getStatusBadgeVariant(order.status)}>
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  <span className="font-medium">Status Pembayaran:</span>
+                  <Badge variant={getStatusBadgeVariant(order.order_status, order.payment_status)}>
+                    {getPaymentStatusText(order.payment_status)}
                   </Badge>
                 </div>
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total Pembayaran</span>
-                  <span>{formatRupiah(order.total_amount)}</span>
+                  <span>{formatRupiah(order.total_amount + order.payment_unique_code)}</span> {/* Display total with unique code */}
                 </div>
+                {order.payment_status === 'unpaid' && (
+                  <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                    <ReceiptText className="h-4 w-4" />
+                    <span>Kode Unik Pembayaran: <span className="font-semibold text-primary">{order.payment_unique_code}</span></span>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {order.status === 'pending' && (
+            {order.payment_status === 'unpaid' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Pilih Metode Pembayaran</CardTitle>
@@ -272,20 +299,23 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
                   {selectedPaymentMethod && (
                     <div className="mt-4 p-3 bg-muted/50 rounded-md border">
                       <h4 className="font-semibold mb-2">Instruksi Pembayaran</h4>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Mohon transfer sebesar <span className="font-bold text-primary">{formatRupiah(order.total_amount + order.payment_unique_code)}</span> ke rekening/e-wallet berikut, termasuk kode unik <span className="font-bold text-primary">{order.payment_unique_code}</span>.
+                      </p>
                       {getDetailsDisplay(selectedPaymentMethod)}
                     </div>
                   )}
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" onClick={handleConfirmPayment} disabled={!selectedPaymentMethodId || isConfirmingPayment}>
+                  <Button className="w-full" onClick={handleConfirmPaymentMethod} disabled={!selectedPaymentMethodId || isConfirmingPayment}>
                     {isConfirmingPayment ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Konfirmasi Pembayaran
+                    Konfirmasi Metode Pembayaran
                   </Button>
                 </CardFooter>
               </Card>
             )}
 
-            {order.status !== 'pending' && order.payment_method && (
+            {(order.payment_status === 'awaiting_confirmation' || order.payment_status === 'paid') && order.payment_method && (
               <Card>
                 <CardHeader>
                   <CardTitle>Detail Pembayaran</CardTitle>
@@ -305,6 +335,9 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
                   </div>
                   <div className="p-3 bg-muted/50 rounded-md border">
                     <h4 className="font-semibold mb-2">Instruksi Pembayaran</h4>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Total yang harus dibayar: <span className="font-bold text-primary">{formatRupiah(order.total_amount + order.payment_unique_code)}</span> (termasuk kode unik <span className="font-bold text-primary">{order.payment_unique_code}</span>).
+                    </p>
                     {getDetailsDisplay(order.payment_method)}
                   </div>
                 </CardContent>
@@ -320,9 +353,9 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
       </div>
       <ChatWidget
         productId={null}
-        productName={null} // Set to null as we are passing order context
-        orderId={order.id} // New: Pass orderId
-        orderName={`Pesanan #${order.id.substring(0, 8)}`} // New: Pass orderName
+        productName={null}
+        orderId={order.id}
+        orderName={`Pesanan #${order.id.substring(0, 8)}`}
         open={isChatOpen}
         onOpenChange={setIsChatOpen}
       />

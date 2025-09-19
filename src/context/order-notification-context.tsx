@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
 import { Order } from "@/lib/supabase/orders"; // Import Order type
-import { Clock, Package, CheckCircle, XCircle, ShoppingBag, BellRing } from "lucide-react"; // Import icons, including ShoppingBag and BellRing
+import { Clock, Package, CheckCircle, XCircle, ShoppingBag, BellRing, ReceiptText } from "lucide-react"; // Import icons, including ShoppingBag and BellRing
 import { useAdmin } from "@/hooks/use-admin"; // Import useAdmin
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
@@ -17,7 +17,7 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
   const { user, isLoading: isSessionLoading } = useSession();
   const { isAdmin, isAdminLoading } = useAdmin(); // Get admin status
 
-  const getStatusMessage = useCallback((status: Order['status']) => {
+  const getOrderStatusMessage = useCallback((status: Order['order_status']) => {
     switch (status) {
       case 'pending':
         return "menunggu pembayaran";
@@ -32,8 +32,27 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
     }
   }, []);
 
-  const getStatusIcon = useCallback((status: Order['status']) => {
+  const getPaymentStatusMessage = useCallback((status: Order['payment_status']) => {
     switch (status) {
+      case 'unpaid':
+        return "belum dibayar";
+      case 'awaiting_confirmation':
+        return "menunggu konfirmasi pembayaran";
+      case 'paid':
+        return "sudah dibayar";
+      case 'refunded':
+        return "dikembalikan";
+      default:
+        return status;
+    }
+  }, []);
+
+  const getStatusIcon = useCallback((orderStatus: Order['order_status'], paymentStatus: Order['payment_status']) => {
+    if (paymentStatus === 'awaiting_confirmation') return <ReceiptText className="h-4 w-4" />;
+    if (paymentStatus === 'paid') return <CheckCircle className="h-4 w-4" />;
+    if (paymentStatus === 'refunded') return <XCircle className="h-4 w-4" />;
+
+    switch (orderStatus) {
       case 'pending':
         return <Clock className="h-4 w-4" />;
       case 'processing':
@@ -69,11 +88,25 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
             const oldRecord = payload.old as Order;
             const newRecord = payload.new as Order;
 
-            if (newRecord.status !== oldRecord.status) {
+            // Notify on order_status change
+            if (newRecord.order_status !== oldRecord.order_status) {
               toast.info(
-                `Status pesanan #${newRecord.id.substring(0, 8)} Anda telah berubah menjadi ${getStatusMessage(newRecord.status)}.`,
+                `Status pesanan #${newRecord.id.substring(0, 8)} Anda telah berubah menjadi ${getOrderStatusMessage(newRecord.order_status)}.`,
                 {
-                  icon: getStatusIcon(newRecord.status),
+                  icon: getStatusIcon(newRecord.order_status, newRecord.payment_status),
+                  action: {
+                    label: "Lihat",
+                    onClick: () => window.location.href = `/my-orders/${newRecord.id}`,
+                  },
+                }
+              );
+            }
+            // Notify on payment_status change (e.g., admin confirmed payment)
+            if (newRecord.payment_status !== oldRecord.payment_status && newRecord.payment_status === 'paid') {
+              toast.success(
+                `Pembayaran pesanan #${newRecord.id.substring(0, 8)} Anda telah dikonfirmasi!`,
+                {
+                  icon: getStatusIcon(newRecord.order_status, newRecord.payment_status),
                   action: {
                     label: "Lihat",
                     onClick: () => window.location.href = `/my-orders/${newRecord.id}`,
@@ -112,10 +145,10 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
       };
     }
 
-    // --- Notifikasi khusus admin (pesanan baru dari pengguna mana pun) ---
+    // --- Notifikasi khusus admin (pesanan baru dari pengguna mana pun & perubahan status pembayaran) ---
     if (user && isAdmin) { // Hanya untuk pengguna admin
       const adminOrderChannel = supabase
-        .channel(`admin_new_orders`)
+        .channel(`admin_order_notifications`)
         .on(
           "postgres_changes",
           {
@@ -127,7 +160,7 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
           (payload) => {
             const newRecord = payload.new as Order;
             toast.info(
-              `Pesanan baru #${newRecord.id.substring(0, 8)} masuk! Total: ${formatRupiah(newRecord.total_amount)}.`,
+              `Pesanan baru #${newRecord.id.substring(0, 8)} masuk! Total: ${formatRupiah(newRecord.total_amount + newRecord.payment_unique_code)}.`,
               {
                 icon: <BellRing className="h-4 w-4" />,
                 action: {
@@ -139,6 +172,34 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
             );
           }
         )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "orders",
+            // Admin needs to know when payment status changes to 'awaiting_confirmation'
+            filter: `payment_status=eq.awaiting_confirmation`,
+          },
+          (payload) => {
+            const oldRecord = payload.old as Order;
+            const newRecord = payload.new as Order;
+
+            if (newRecord.payment_status === 'awaiting_confirmation' && oldRecord.payment_status === 'unpaid') {
+              toast.warning(
+                `Pembayaran pesanan #${newRecord.id.substring(0, 8)} menunggu konfirmasi! Kode unik: ${newRecord.payment_unique_code}.`,
+                {
+                  icon: <ReceiptText className="h-4 w-4" />,
+                  action: {
+                    label: "Cek",
+                    onClick: () => window.location.href = `/admin/orders/${newRecord.id}`,
+                  },
+                  duration: 10000, // Notifikasi ini lebih penting
+                }
+              );
+            }
+          }
+        )
         .subscribe();
 
       return () => {
@@ -146,7 +207,7 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
       };
     }
 
-  }, [isSessionLoading, isAdminLoading, user, isAdmin, getStatusMessage, getStatusIcon]);
+  }, [isSessionLoading, isAdminLoading, user, isAdmin, getOrderStatusMessage, getPaymentStatusMessage, getStatusIcon]);
 
   return <>{children}</>;
 }

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"; // Import useSearc
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageSquare, Send, Loader2, User as UserIcon, ArrowLeft, Package } from "lucide-react"; // Package diimpor secara eksplisit
+import { MessageSquare, Send, Loader2, User as UserIcon, ArrowLeft, Package, ReceiptText } from "lucide-react"; // Package dan ReceiptText diimpor secara eksplisit
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
@@ -29,14 +29,14 @@ import {
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
 
 interface AdminChatDetailPageProps {
-  params: Promise<{ userId: string }>; // Corrected: params is now a Promise
+  params: Promise<{ userId: string }>;
 }
 
 export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps) {
-  const { userId } = React.use(params); // Corrected: Using React.use() to unwrap the Promise
+  const { userId } = React.use(params);
   const router = useRouter();
-  const searchParams = useSearchParams(); // Initialize useSearchParams
-  const orderIdFromUrl = searchParams.get("orderId"); // Get orderId from URL
+  const searchParams = useSearchParams();
+  const orderIdFromUrl = searchParams.get("orderId");
 
   const { user: adminUser, profile: adminProfile, isLoading: isSessionLoading } = useSession();
   const isMobile = useIsMobile();
@@ -46,7 +46,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
   const [isLoadingMessages, setIsLoadingMessages] = React.useState(true);
   const [isSending, setIsSending] = React.useState(false);
   const [otherUserProfile, setOtherUserProfile] = React.useState<Profile | null>(null);
-  const [orderContext, setOrderContext] = React.useState<Order | null>(null); // New state for order context
+  const [orderContext, setOrderContext] = React.useState<Order | null>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(true);
 
@@ -96,7 +96,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       }
     }
     loadOrderContextAndPrefill();
-  }, [orderIdFromUrl, newMessage]); // Depend on newMessage to re-evaluate pre-fill logic
+  }, [orderIdFromUrl, newMessage]);
 
   const fetchMessages = React.useCallback(async () => {
     if (!adminUser || !adminId || !otherUserProfile) return;
@@ -106,7 +106,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       
       const finalMessages: ChatMessage[] = [];
       const productsIntroduced = new Set<string>();
-      const ordersIntroduced = new Set<string>(); // New: Track introduced orders
+      const ordersIntroduced = new Set<string>();
 
       for (const msg of fetchedMessages) {
         // System message for product
@@ -120,7 +120,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
               message: `Percakapan ini dimulai terkait produk: ${product.name}`,
               created_at: msg.created_at,
               product_id: product.id,
-              order_id: null, // Explicitly null
+              order_id: null,
               is_read: true,
               updated_at: msg.created_at,
               sender_profile: [],
@@ -132,7 +132,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
           }
         }
         // System message for order
-        if (msg.order_id && !ordersIntroduced.has(msg.order_id)) { // New: Check for order_id
+        if (msg.order_id && !ordersIntroduced.has(msg.order_id)) {
           const order = await getOrderById(msg.order_id);
           if (order) {
             finalMessages.push({
@@ -141,13 +141,13 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
               receiver_id: adminId,
               message: `Percakapan ini dimulai terkait pesanan: #${order.id.substring(0, 8)}`,
               created_at: msg.created_at,
-              product_id: null, // Explicitly null
+              product_id: null,
               order_id: order.id,
               is_read: true,
               updated_at: msg.created_at,
               sender_profile: [],
               receiver_profile: [],
-              order: order, // Pass the full order object
+              order: order,
               type: 'system',
             });
             ordersIntroduced.add(msg.order_id);
@@ -213,14 +213,14 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       sender_id: adminUser.id,
       receiver_id: userId,
       message: newMessage.trim(),
-      product_id: null, // Admin-initiated chat from order context should not have product_id
-      order_id: orderIdFromUrl, // New: Include order_id if present in URL
+      product_id: null,
+      order_id: orderIdFromUrl,
     }).select(`
       *,
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
       products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description),
-      order:orders!order_id(id, total_amount, status)
+      order:orders!order_id(id, total_amount, order_status, payment_status, payment_unique_code)
     `).single();
 
     if (error) {
@@ -230,7 +230,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       const mappedData = {
         ...data,
         products: data.products ? [mapProductData(data.products)] : [],
-        order: data.order as Order | undefined, // Map order data
+        order: data.order as Order | undefined,
       };
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
@@ -258,9 +258,12 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
           {otherUserProfile?.first_name || "Pengguna"} {otherUserProfile?.last_name || ""}
         </CardTitle>
         <p className="text-sm text-muted-foreground">{otherUserProfile?.email}</p>
-        {orderContext && ( // Display order context if available
+        {orderContext && (
           <p className="text-xs text-primary mt-1">
-            Membahas Pesanan: <Link href={`/admin/orders/${orderContext.id}`} className="underline hover:text-primary">#{orderContext.id.substring(0, 8)}</Link> (Total: {formatRupiah(orderContext.total_amount)})
+            Membahas Pesanan: <Link href={`/admin/orders/${orderContext.id}`} className="underline hover:text-primary">#{orderContext.id.substring(0, 8)}</Link> (Total: {formatRupiah(orderContext.total_amount + orderContext.payment_unique_code)})
+            <span className="ml-2 text-xs">
+              (Status: {orderContext.order_status}, Pembayaran: {orderContext.payment_status}, Kode Unik: {orderContext.payment_unique_code})
+            </span>
           </p>
         )}
       </div>
@@ -303,11 +306,14 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                             </span>
                           </div>
                         )}
-                        {msg.order && ( // New: Display order context for system message
+                        {msg.order && (
                           <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
                             <Package className="h-5 w-5 text-muted-foreground" />
                             <span>
                               Percakapan tentang Pesanan: <Link href={`/admin/orders/${msg.order.id}`} className="underline hover:text-primary">#{msg.order.id.substring(0, 8)}</Link>
+                              <span className="ml-2 text-xs">
+                                (Status: {msg.order.order_status}, Pembayaran: {msg.order.payment_status}, Kode Unik: {msg.order.payment_unique_code})
+                              </span>
                             </span>
                           </div>
                         )}
@@ -343,11 +349,14 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                               </span>
                             </div>
                           )}
-                          {msg.order_id && msg.order && ( // New: Display order context for regular message
+                          {msg.order_id && msg.order && (
                             <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
                               <Package className="h-5 w-5 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground line-clamp-1">
                                 Tentang Pesanan: <Link href={`/admin/orders/${msg.order.id}`} className="underline hover:text-primary">#{msg.order.id.substring(0, 8)}</Link>
+                                <span className="ml-2 text-xs">
+                                  (Status: {msg.order.order_status}, Pembayaran: {msg.order.payment_status}, Kode Unik: {msg.order.payment_unique_code})
+                                </span>
                               </span>
                             </div>
                           )}

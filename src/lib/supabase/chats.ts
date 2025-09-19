@@ -6,7 +6,7 @@ import { Order } from "./orders"; // Import Order type
 export type ChatMessage = {
   id: string;
   product_id: string | null;
-  order_id: string | null; // New: Add order_id
+  order_id: string | null;
   sender_id: string;
   receiver_id: string;
   message: string;
@@ -16,7 +16,7 @@ export type ChatMessage = {
   sender_profile: Profile[];
   receiver_profile: Profile[];
   products?: Product[];
-  order?: Order; // New: Joined order data
+  order?: Order; // New: Joined order data, now includes order_status, payment_status, unique_code
   type?: 'system' | 'message';
 };
 
@@ -24,6 +24,7 @@ export type ChatMessage = {
 export interface ChatConversation extends Profile {
   latestMessage: string;
   latestTimestamp: string;
+  otherUserId: string; // Added for clarity in admin chat list
   unreadCount: number;
 }
 
@@ -35,7 +36,7 @@ export async function getChatMessages(user1Id: string, user2Id: string): Promise
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
       products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description),
-      order:orders!order_id(id, total_amount, status)
+      order:orders!order_id(id, total_amount, order_status, payment_status, payment_unique_code)
     `)
     .or(`and(sender_id.eq.${user1Id},receiver_id.eq.${user2Id}),and(sender_id.eq.${user2Id},receiver_id.eq.${user1Id})`)
     .order("created_at", { ascending: true });
@@ -147,6 +148,7 @@ export async function getChatParticipants(adminId: string) {
     ...profile,
     latestMessage: conversationsMap.get(profile.id)?.latestMessage || '',
     latestTimestamp: conversationsMap.get(profile.id)?.latestTimestamp || '',
+    otherUserId: profile.id, // Ensure otherUserId is set
     unreadCount: conversationsMap.get(profile.id)?.unreadCount || 0,
   }));
 }

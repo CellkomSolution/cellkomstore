@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Search, User, Heart, Download, MessageSquare, Bell } from "lucide-react";
+import { ShoppingCart, Search, User, Download, MessageSquare } from "lucide-react"; // Removed Heart and Bell
 import { MainNav } from "./main-nav";
 import { MobileNav } from "./mobile-nav";
 import { UserNav } from "./user-nav";
@@ -157,28 +157,22 @@ export function Header() {
             </form>
           </div>
 
-          {/* Right side: Cart, Heart, UserNav/Auth */}
+          {/* Right side: Cart, UserNav/Auth */}
           <div className="flex items-center space-x-4">
             <CartSheet />
-            <Button variant="ghost" size="icon">
-              <Heart className="h-5 w-5" />
-              <span className="sr-only">Favorit</span>
-            </Button>
+            {/* Removed Heart/Wishlist Button */}
 
             {isAuthLoading ? (
               <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
             ) : session ? (
-              // Logged in: Show Chat, Bell, and UserNav dropdown
+              // Logged in: Show Chat and UserNav dropdown
               <>
                 {isAdmin ? (
                   <AdminChatNotificationIcon />
                 ) : (
                   <ChatNotificationIcon />
                 )}
-                <Button variant="ghost" size="icon">
-                  <Bell className="h-5 w-5" />
-                  <span className="sr-only">Notifikasi</span>
-                </Button>
+                {/* Removed Bell/Notification Button */}
                 <UserNav />
               </>
             ) : (

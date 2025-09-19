@@ -26,13 +26,33 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }, []);
 
-  const getStatusBadgeVariant = (status: Order['status']) => {
+  const getOrderStatusBadgeVariant = (status: Order['order_status']) => {
     switch (status) {
       case 'pending': return 'secondary';
       case 'processing': return 'default';
-      case 'completed': return 'success'; // Assuming 'success' variant exists or can be added
+      case 'completed': return 'success';
       case 'cancelled': return 'destructive';
       default: return 'outline';
+    }
+  };
+
+  const getPaymentStatusBadgeVariant = (status: Order['payment_status']) => {
+    switch (status) {
+      case 'unpaid': return 'secondary';
+      case 'awaiting_confirmation': return 'info'; // Assuming 'info' variant exists
+      case 'paid': return 'success';
+      case 'refunded': return 'destructive';
+      default: return 'outline';
+    }
+  };
+
+  const getPaymentStatusText = (status: Order['payment_status']) => {
+    switch (status) {
+      case 'unpaid': return 'Belum Dibayar';
+      case 'awaiting_confirmation': return 'Menunggu Konfirmasi';
+      case 'paid': return 'Sudah Dibayar';
+      case 'refunded': return 'Dikembalikan';
+      default: return 'Tidak Diketahui';
     }
   };
 
@@ -54,7 +74,9 @@ export default function AdminOrdersPage() {
                   <TableHead>ID Pesanan</TableHead>
                   <TableHead>Pelanggan</TableHead>
                   <TableHead>Total</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Status Pesanan</TableHead>
+                  <TableHead>Status Pembayaran</TableHead>
+                  <TableHead>Kode Unik</TableHead>
                   <TableHead>Metode Pembayaran</TableHead>
                   <TableHead>Tanggal</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
@@ -68,6 +90,8 @@ export default function AdminOrdersPage() {
                       <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-[70px]" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-[70px]" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-[50px]" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
                       <TableCell className="text-right"><Skeleton className="h-8 w-8 rounded-md" /></TableCell>
@@ -75,7 +99,7 @@ export default function AdminOrdersPage() {
                   ))
                 ) : orders.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                       Belum ada pesanan yang dibuat.
                     </TableCell>
                   </TableRow>
@@ -86,12 +110,18 @@ export default function AdminOrdersPage() {
                       <TableCell className="font-medium">
                         {order.user_profile?.first_name || order.user_profile?.email || "N/A"}
                       </TableCell>
-                      <TableCell>{formatRupiah(order.total_amount)}</TableCell>
+                      <TableCell>{formatRupiah(order.total_amount + order.payment_unique_code)}</TableCell>
                       <TableCell>
-                        <Badge variant={getStatusBadgeVariant(order.status)}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        <Badge variant={getOrderStatusBadgeVariant(order.order_status)}>
+                          {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
                         </Badge>
                       </TableCell>
+                      <TableCell>
+                        <Badge variant={getPaymentStatusBadgeVariant(order.payment_status)}>
+                          {getPaymentStatusText(order.payment_status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">{order.payment_unique_code}</TableCell>
                       <TableCell>{order.payment_method?.name || "Belum Dipilih"}</TableCell>
                       <TableCell>{format(new Date(order.created_at), "dd MMM yyyy, HH:mm")}</TableCell>
                       <TableCell className="text-right">

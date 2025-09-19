@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageSquare, Send, Loader2, User as UserIcon, Package } from "lucide-react"; // Added Package icon
+import { MessageSquare, Send, Loader2, User as UserIcon, Package, ReceiptText } from "lucide-react"; // Added ReceiptText icon
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ import Image from "next/image";
 import { getProductById, mapProductData } from "@/lib/supabase/products";
 import { getOrderById, Order } from "@/lib/supabase/orders"; // Import getOrderById and Order
 import Link from "next/link";
+import { formatRupiah } from "@/lib/utils";
 
 interface ChatWidgetProps {
   productId?: string | null;
@@ -77,7 +78,7 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
     
     const finalMessages: ChatMessage[] = [];
     const productsIntroduced = new Set<string>();
-    const ordersIntroduced = new Set<string>(); // New: Track introduced orders
+    const ordersIntroduced = new Set<string>();
 
     for (const msg of fetchedMessages) {
       // System message for product
@@ -91,7 +92,7 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
             message: `Percakapan ini dimulai terkait produk: ${product.name}`,
             created_at: msg.created_at,
             product_id: product.id,
-            order_id: null, // Explicitly null
+            order_id: null,
             is_read: true,
             updated_at: msg.created_at,
             sender_profile: [],
@@ -103,7 +104,7 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
         }
       }
       // System message for order
-      if (msg.order_id && !ordersIntroduced.has(msg.order_id)) { // New: Check for order_id
+      if (msg.order_id && !ordersIntroduced.has(msg.order_id)) {
         const order = await getOrderById(msg.order_id);
         if (order) {
           finalMessages.push({
@@ -112,13 +113,13 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
             receiver_id: user.id,
             message: `Percakapan ini dimulai terkait pesanan: #${order.id.substring(0, 8)}`,
             created_at: msg.created_at,
-            product_id: null, // Explicitly null
+            product_id: null,
             order_id: order.id,
             is_read: true,
             updated_at: msg.created_at,
             sender_profile: [],
             receiver_profile: [],
-            order: order, // Pass the full order object
+            order: order,
             type: 'system',
           });
           ordersIntroduced.add(msg.order_id);
@@ -195,7 +196,7 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
     setIsSending(true);
     const { data, error } = await supabase.from("chats").insert({
       product_id: productId || null,
-      order_id: orderId || null, // New: Include order_id
+      order_id: orderId || null,
       sender_id: user.id,
       receiver_id: targetAdminId,
       message: newMessage.trim(),
@@ -204,7 +205,7 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
       sender_profile:profiles!sender_id (first_name, last_name, avatar_url, role),
       receiver_profile:profiles!receiver_id (first_name, last_name, avatar_url, role),
       products (id, name, price, original_price, main_image_url, location, rating, sold_count, category, is_flash_sale, description),
-      order:orders!order_id(id, total_amount, status)
+      order:orders!order_id(id, total_amount, order_status, payment_status, payment_unique_code)
     `).single();
 
     if (error) {
@@ -214,7 +215,7 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
       const mappedData = {
         ...data,
         products: data.products ? [mapProductData(data.products)] : [],
-        order: data.order as Order | undefined, // Map order data
+        order: data.order as Order | undefined,
       };
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
@@ -367,11 +368,14 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
                             </span>
                           </div>
                         )}
-                        {msg.order && ( // New: Display order context for system message
+                        {msg.order && (
                           <div className="inline-flex items-center gap-2 p-2 bg-muted rounded-md border">
                             <Package className="h-5 w-5 text-muted-foreground" />
                             <span>
                               Percakapan tentang Pesanan: <Link href={`/my-orders/${msg.order.id}`} className="underline hover:text-primary">#{msg.order.id.substring(0, 8)}</Link>
+                              <span className="ml-2 text-xs">
+                                (Status: {msg.order.order_status}, Pembayaran: {msg.order.payment_status}, Kode Unik: {msg.order.payment_unique_code})
+                              </span>
                             </span>
                           </div>
                         )}
@@ -407,11 +411,14 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
                               </span>
                             </div>
                           )}
-                          {msg.order_id && msg.order && ( // New: Display order context for regular message
+                          {msg.order_id && msg.order && (
                             <div className="flex items-center gap-2 mt-2 p-2 bg-muted rounded-md">
                               <Package className="h-5 w-5 text-muted-foreground" />
                               <span className="text-xs text-muted-foreground line-clamp-1">
                                 Tentang Pesanan: <Link href={`/my-orders/${msg.order.id}`} className="underline hover:text-primary">#{msg.order.id.substring(0, 8)}</Link>
+                                <span className="ml-2 text-xs">
+                                  (Status: {msg.order.order_status}, Pembayaran: {msg.order.payment_status}, Kode Unik: {msg.order.payment_unique_code})
+                                </span>
                               </span>
                             </div>
                           )}

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, ShoppingBag, Package, CalendarDays, Eye } from "lucide-react";
+import { Loader2, ShoppingBag, Package, CalendarDays, Eye, ReceiptText } from "lucide-react"; // Added ReceiptText icon
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
 import { getUserOrders, Order } from "@/lib/supabase/orders";
@@ -40,13 +40,28 @@ export default function MyOrdersPage() {
     fetchData();
   }, [user, isSessionLoading, router]);
 
-  const getStatusBadgeVariant = (status: Order['status']) => {
-    switch (status) {
+  const getStatusBadgeVariant = (orderStatus: Order['order_status'], paymentStatus: Order['payment_status']) => {
+    if (paymentStatus === 'unpaid') return 'secondary';
+    if (paymentStatus === 'awaiting_confirmation') return 'info'; // Assuming 'info' variant exists or can be added
+    if (paymentStatus === 'paid') return 'success';
+    if (paymentStatus === 'refunded') return 'destructive';
+
+    switch (orderStatus) {
       case 'pending': return 'secondary';
       case 'processing': return 'default';
       case 'completed': return 'success';
       case 'cancelled': return 'destructive';
       default: return 'outline';
+    }
+  };
+
+  const getPaymentStatusText = (paymentStatus: Order['payment_status']) => {
+    switch (paymentStatus) {
+      case 'unpaid': return 'Belum Dibayar';
+      case 'awaiting_confirmation': return 'Menunggu Konfirmasi Pembayaran';
+      case 'paid': return 'Sudah Dibayar';
+      case 'refunded': return 'Dikembalikan';
+      default: return 'Tidak Diketahui';
     }
   };
 
@@ -93,11 +108,14 @@ export default function MyOrdersPage() {
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={getStatusBadgeVariant(order.status)}>
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  <Badge variant={getStatusBadgeVariant(order.order_status, order.payment_status)}>
+                    {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
+                  </Badge>
+                  <Badge variant={getStatusBadgeVariant(order.order_status, order.payment_status)}>
+                    {getPaymentStatusText(order.payment_status)}
                   </Badge>
                   <Button variant="outline" size="icon" asChild>
-                    <Link href={`/my-orders/${order.id}`}> {/* Updated link */}
+                    <Link href={`/my-orders/${order.id}`}>
                       <Eye className="h-4 w-4" />
                       <span className="sr-only">Lihat Detail</span>
                     </Link>
@@ -143,9 +161,17 @@ export default function MyOrdersPage() {
                         <span>Total Item:</span>
                         <span>{order.order_items?.reduce((sum, item) => sum + item.quantity, 0)}</span>
                       </div>
+                      <div className="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span>{formatRupiah(order.total_amount)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Kode Unik Pembayaran:</span>
+                        <span>{order.payment_unique_code}</span>
+                      </div>
                       <div className="flex justify-between font-bold">
                         <span>Total Pembayaran:</span>
-                        <span>{formatRupiah(order.total_amount)}</span>
+                        <span>{formatRupiah(order.total_amount + order.payment_unique_code)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Metode Pembayaran:</span>

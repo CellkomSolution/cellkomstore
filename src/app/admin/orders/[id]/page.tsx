@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, MapPin, Phone, User as UserIcon, Package, CalendarDays, MessageSquare } from "lucide-react";
+import { Loader2, MapPin, Phone, User as UserIcon, Package, CalendarDays, MessageSquare, ReceiptText } from "lucide-react"; // Added ReceiptText icon
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
 import { getOrderById, updateOrderStatus, Order } from "@/lib/supabase/orders";
@@ -49,14 +49,21 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
     fetchData();
   }, [orderId, router]);
 
-  const handleStatusChange = async (newStatus: Order['status']) => {
+  const handleStatusChange = async (newStatus: Order['order_status'] | Order['payment_status']) => {
     if (!order) return;
     setIsUpdatingStatus(true);
     try {
-      await updateOrderStatus(order.id, newStatus);
-      toast.success(`Status pesanan berhasil diperbarui menjadi ${newStatus}.`);
-      // Refetch order to show updated status
-      const updatedOrder = await getOrderById(order.id);
+      let updatedOrder: Order | null = null;
+      if (order.payment_status === 'awaiting_confirmation' && newStatus === 'processing') {
+        // Admin confirms payment
+        updatedOrder = await updateOrderStatus(order.id, newStatus as Order['order_status'], 'paid');
+        toast.success(`Pembayaran dikonfirmasi! Status pesanan diubah menjadi ${newStatus}.`);
+      } else {
+        // Regular order status update
+        updatedOrder = await updateOrderStatus(order.id, newStatus as Order['order_status']);
+        toast.success(`Status pesanan berhasil diperbarui menjadi ${newStatus}.`);
+      }
+      
       setOrder(updatedOrder);
     } catch (error: any) {
       console.error("Error updating order status:", error);
@@ -66,13 +73,33 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
     }
   };
 
-  const getStatusBadgeVariant = (status: Order['status']) => {
+  const getOrderStatusBadgeVariant = (status: Order['order_status']) => {
     switch (status) {
       case 'pending': return 'secondary';
       case 'processing': return 'default';
       case 'completed': return 'success';
       case 'cancelled': return 'destructive';
       default: return 'outline';
+    }
+  };
+
+  const getPaymentStatusBadgeVariant = (status: Order['payment_status']) => {
+    switch (status) {
+      case 'unpaid': return 'secondary';
+      case 'awaiting_confirmation': return 'info';
+      case 'paid': return 'success';
+      case 'refunded': return 'destructive';
+      default: return 'outline';
+    }
+  };
+
+  const getPaymentStatusText = (status: Order['payment_status']) => {
+    switch (status) {
+      case 'unpaid': return 'Belum Dibayar';
+      case 'awaiting_confirmation': return 'Menunggu Konfirmasi';
+      case 'paid': return 'Sudah Dibayar';
+      case 'refunded': return 'Dikembalikan';
+      default: return 'Tidak Diketahui';
     }
   };
 
@@ -178,31 +205,72 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Status Pesanan</CardTitle>
+              <CardTitle>Status Pesanan & Pembayaran</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2">
-                <span className="font-medium">Status Saat Ini:</span>
-                <Badge variant={getStatusBadgeVariant(order.status)}>
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                <span className="font-medium">Status Pesanan:</span>
+                <Badge variant={getOrderStatusBadgeVariant(order.order_status)}>
+                  {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
                 </Badge>
               </div>
-              <Select
-                value={order.status}
-                onValueChange={(value: Order['status']) => handleStatusChange(value)}
-                disabled={isUpdatingStatus}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Ubah Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-              {isUpdatingStatus && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mt-2" />}
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Status Pembayaran:</span>
+                <Badge variant={getPaymentStatusBadgeVariant(order.payment_status)}>
+                  {getPaymentStatusText(order.payment_status)}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <ReceiptText className="h-4 w-4" />
+                <span>Kode Unik Pembayaran: <span className="font-semibold text-primary">{order.payment_unique_code}</span></span>
+              </div>
+              
+              {order.payment_status === 'awaiting_confirmation' && (
+                <div className="mt-4">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Pembeli telah memilih metode pembayaran dan menunggu konfirmasi Anda.
+                  </p>
+                  <Button 
+                    className="w-full" 
+                    onClick={() => handleStatusChange('processing')} 
+                    disabled={isUpdatingStatus}
+                  >
+                    {isUpdatingStatus ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Konfirmasi Pembayaran & Proses Pesanan
+                  </Button>
+                </div>
+              )}
+
+              {order.payment_status === 'paid' && (
+                <div className="mt-4">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Pembayaran telah dikonfirmasi. Anda dapat mengubah status pesanan.
+                  </p>
+                  <Select
+                    value={order.order_status}
+                    onValueChange={(value: Order['order_status']) => handleStatusChange(value)}
+                    disabled={isUpdatingStatus}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Ubah Status Pesanan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="processing">Processing</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {isUpdatingStatus && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mt-2" />}
+                </div>
+              )}
+
+              {order.payment_status === 'unpaid' && (
+                <div className="mt-4">
+                  <p className="text-sm text-muted-foreground">
+                    Pembeli belum memilih metode pembayaran.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -216,13 +284,17 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
                 <span>{formatRupiah(order.total_amount)}</span>
               </div>
               <div className="flex justify-between">
+                <span>Kode Unik Pembayaran</span>
+                <span>{order.payment_unique_code}</span>
+              </div>
+              <div className="flex justify-between">
                 <span>Biaya Pengiriman</span>
                 <span>{formatRupiah(0)}</span>
               </div>
               <Separator className="my-2" />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total Pembayaran</span>
-                <span>{formatRupiah(order.total_amount)}</span>
+                <span>{formatRupiah(order.total_amount + order.payment_unique_code)}</span>
               </div>
               <Separator className="my-2" />
               <div className="flex justify-between items-center">

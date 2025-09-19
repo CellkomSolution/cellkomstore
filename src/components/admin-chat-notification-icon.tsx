@@ -1,14 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { MessageSquare, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button"; // Pastikan import ini ada
+import { MessageSquare, Loader2, BellRing } from "lucide-react"; // Added BellRing for toast icon
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/context/session-context";
 import { getUnreadMessageCount } from "@/lib/supabase/chats";
 import { supabase } from "@/integrations/supabase/client";
 import { useRouter } from "next/navigation";
 import { useAdmin } from "@/hooks/use-admin";
+import { toast } from "sonner"; // Import toast
 
 export function AdminChatNotificationIcon() {
   const { user, isLoading: isSessionLoading } = useSession();
@@ -38,7 +39,29 @@ export function AdminChatNotificationIcon() {
         .on(
           "postgres_changes",
           {
-            event: "*", // Listen for INSERT and UPDATE (for is_read changes)
+            event: "INSERT", // Listen only for new messages
+            schema: "public",
+            table: "chats",
+            filter: `receiver_id=eq.${user.id}`,
+          },
+          (payload) => {
+            // Refetch count on any relevant change
+            fetchUnreadCount();
+            // Show a toast notification for new messages
+            toast.info("Anda memiliki pesan chat baru!", {
+              icon: <BellRing className="h-4 w-4" />,
+              action: {
+                label: "Lihat",
+                onClick: () => router.push("/chats"),
+              },
+              duration: 5000,
+            });
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE", // Listen for updates (e.g., message marked as read)
             schema: "public",
             table: "chats",
             filter: `receiver_id=eq.${user.id}`,
@@ -54,7 +77,7 @@ export function AdminChatNotificationIcon() {
         supabase.removeChannel(channel);
       };
     }
-  }, [isSessionLoading, isAdminLoading, user, isAdmin, fetchUnreadCount]);
+  }, [isSessionLoading, isAdminLoading, user, isAdmin, fetchUnreadCount, router]);
 
   if (isSessionLoading || isAdminLoading || !user || !isAdmin) {
     return null; // Only render for logged-in admins
