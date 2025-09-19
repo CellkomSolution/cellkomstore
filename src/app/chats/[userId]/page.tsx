@@ -81,7 +81,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
           setOrderContext(order);
           // Only pre-fill if newMessage is currently empty
           if (newMessage === "") {
-            const orderLink = `${window.location.origin}/admin/orders/${order.id}`;
+            const orderLink = `${window.location.origin}/my-orders/${order.id}`; // Link to user's order page
             setNewMessage(`Halo, saya ingin membahas pesanan #${order.id.substring(0, 8)} Anda. Detail pesanan: ${orderLink}`);
           }
         } else {
@@ -240,7 +240,8 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       if (otherUserProfile) {
         const notificationTitle = `Pesan Baru dari Admin`;
         const notificationMessage = `Anda memiliki pesan baru dari Admin di chat.`;
-        const notificationLink = orderIdFromUrl ? `/my-orders/${orderIdFromUrl}` : `/notifications`; // Link to user's order or general notifications
+        // Link to user's order page if chat is order-related, otherwise null for general chat
+        const notificationLink = orderIdFromUrl ? `/my-orders/${orderIdFromUrl}` : null; 
 
         await createNotification(userId, 'new_message', notificationTitle, notificationMessage, notificationLink);
       }
