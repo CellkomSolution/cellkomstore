@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/drawer";
 import { Bell, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { NotificationListContent } from "./notification-list-content"; // Import the new content component
+import { NotificationListContent } from "./notification-list-content";
 import { Notification as SupabaseNotification, getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/supabase/notifications";
 import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
@@ -106,7 +106,7 @@ export function NotificationSheet({ open, onOpenChange }: NotificationSheetProps
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="flex flex-col w-full sm:max-w-md p-0">
+      <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-0">
         {Content}
       </SheetContent>
     </Sheet>
