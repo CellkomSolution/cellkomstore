@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 export default function AdminPaymentMethodsPage() {
   const [paymentMethods, setPaymentMethods] = React.useState<PaymentMethod[]>([]);
@@ -57,13 +58,56 @@ export default function AdminPaymentMethodsPage() {
     }
   };
 
-  const getMethodIcon = (type: PaymentMethod['type']) => {
-    switch (type) {
+  const getMethodDisplay = (method: PaymentMethod) => {
+    if (method.image_url) {
+      return (
+        <Image
+          src={method.image_url}
+          alt={method.name}
+          width={40}
+          height={40}
+          className="object-contain rounded"
+        />
+      );
+    }
+    switch (method.type) {
       case 'bank_transfer': return <Banknote className="h-5 w-5 text-muted-foreground" />;
       case 'e_wallet': return <Wallet className="h-5 w-5 text-muted-foreground" />;
       case 'card': return <CreditCard className="h-5 w-5 text-muted-foreground" />;
       default: return <Banknote className="h-5 w-5 text-muted-foreground" />;
     }
+  };
+
+  const getDetailsDisplay = (method: PaymentMethod) => {
+    if (!method.details) return "N/A";
+
+    if (method.type === 'bank_transfer' && typeof method.details === 'object') {
+      return (
+        <div className="text-xs">
+          <p>Bank: {method.details.bank_name}</p>
+          <p>A/N: {method.details.account_name}</p>
+          <p>No. Rek: {method.details.account_number}</p>
+        </div>
+      );
+    }
+    if (method.type === 'e_wallet' && typeof method.details === 'object') {
+      return (
+        <div className="text-xs">
+          <p>E-Wallet: {method.details.e_wallet_name}</p>
+          <p>ID: {method.details.phone_number_or_id}</p>
+        </div>
+      );
+    }
+    if (method.type === 'card' && typeof method.details === 'object') {
+      return (
+        <div className="text-xs">
+          <p>Tipe: {method.details.card_type}</p>
+          {method.details.last_four_digits && <p>**** {method.details.last_four_digits}</p>}
+        </div>
+      );
+    }
+    // Fallback for 'other' type or malformed JSON
+    return typeof method.details === 'string' ? method.details : JSON.stringify(method.details);
   };
 
   return (
@@ -87,9 +131,10 @@ export default function AdminPaymentMethodsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[60px]">Ikon</TableHead>
+                  <TableHead className="w-[60px]">Logo</TableHead> {/* New TableHead */}
                   <TableHead>Nama Metode</TableHead>
                   <TableHead>Tipe</TableHead>
+                  <TableHead>Detail</TableHead> {/* Changed to Detail */}
                   <TableHead>Status</TableHead>
                   <TableHead>Urutan</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
@@ -99,9 +144,10 @@ export default function AdminPaymentMethodsPage() {
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, index) => (
                     <TableRow key={index}>
-                      <TableCell><Skeleton className="h-8 w-8 rounded-md" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                      <TableCell><Skeleton className="h-10 w-10 rounded-md" /></TableCell> {/* Skeleton for logo */}
+                      <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell> {/* Skeleton for details */}
                       <TableCell><Skeleton className="h-4 w-[70px]" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-[50px]" /></TableCell>
                       <TableCell className="text-right">
@@ -114,7 +160,7 @@ export default function AdminPaymentMethodsPage() {
                   ))
                 ) : paymentMethods.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       Belum ada metode pembayaran yang ditambahkan.
                     </TableCell>
                   </TableRow>
@@ -122,10 +168,11 @@ export default function AdminPaymentMethodsPage() {
                   paymentMethods.map((method) => (
                     <TableRow key={method.id}>
                       <TableCell className="text-center">
-                        {getMethodIcon(method.type)}
+                        {getMethodDisplay(method)}
                       </TableCell>
                       <TableCell className="font-medium">{method.name}</TableCell>
                       <TableCell>{method.type.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}</TableCell>
+                      <TableCell>{getDetailsDisplay(method)}</TableCell> {/* Display structured details */}
                       <TableCell>
                         <Badge variant={method.is_active ? "success" : "secondary"}>
                           {method.is_active ? "Aktif" : "Tidak Aktif"}

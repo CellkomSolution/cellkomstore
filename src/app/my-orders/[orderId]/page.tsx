@@ -98,13 +98,56 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     }
   };
 
-  const getMethodIcon = (type: PaymentMethod['type']) => {
-    switch (type) {
+  const getMethodIcon = (method: PaymentMethod) => {
+    if (method.image_url) {
+      return (
+        <Image
+          src={method.image_url}
+          alt={method.name}
+          width={32}
+          height={32}
+          className="object-contain rounded"
+        />
+      );
+    }
+    switch (method.type) {
       case 'bank_transfer': return <Banknote className="h-5 w-5 text-muted-foreground" />;
       case 'e_wallet': return <Wallet className="h-5 w-5 text-muted-foreground" />;
       case 'card': return <CreditCard className="h-5 w-5 text-muted-foreground" />;
       default: return <Banknote className="h-5 w-5 text-muted-foreground" />;
     }
+  };
+
+  const getDetailsDisplay = (method: PaymentMethod) => {
+    if (!method.details) return "N/A";
+
+    if (method.type === 'bank_transfer' && typeof method.details === 'object') {
+      return (
+        <div className="text-sm space-y-1">
+          <p><span className="font-medium">Bank:</span> {method.details.bank_name}</p>
+          <p><span className="font-medium">A/N:</span> {method.details.account_name}</p>
+          <p><span className="font-medium">No. Rek:</span> {method.details.account_number}</p>
+        </div>
+      );
+    }
+    if (method.type === 'e_wallet' && typeof method.details === 'object') {
+      return (
+        <div className="text-sm space-y-1">
+          <p><span className="font-medium">E-Wallet:</span> {method.details.e_wallet_name}</p>
+          <p><span className="font-medium">ID:</span> {method.details.phone_number_or_id}</p>
+        </div>
+      );
+    }
+    if (method.type === 'card' && typeof method.details === 'object') {
+      return (
+        <div className="text-sm space-y-1">
+          <p><span className="font-medium">Tipe:</span> {method.details.card_type}</p>
+          {method.details.last_four_digits && <p><span className="font-medium">No. Kartu:</span> **** {method.details.last_four_digits}</p>}
+        </div>
+      );
+    }
+    // Fallback for 'other' type or malformed JSON
+    return typeof method.details === 'string' ? method.details : JSON.stringify(method.details, null, 2);
   };
 
   const selectedPaymentMethod = paymentMethods.find(pm => pm.id === selectedPaymentMethodId);
@@ -220,7 +263,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
                       {paymentMethods.map((method) => (
                         <Label key={method.id} htmlFor={method.id} className="flex items-center gap-3 p-3 border rounded-md cursor-pointer hover:bg-muted/50 has-[:checked]:bg-muted has-[:checked]:border-primary">
                           <RadioGroupItem value={method.id} id={method.id} />
-                          {getMethodIcon(method.type)}
+                          {getMethodIcon(method)}
                           <span>{method.name}</span>
                         </Label>
                       ))}
@@ -229,7 +272,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
                   {selectedPaymentMethod && (
                     <div className="mt-4 p-3 bg-muted/50 rounded-md border">
                       <h4 className="font-semibold mb-2">Instruksi Pembayaran</h4>
-                      <pre className="text-sm whitespace-pre-wrap font-sans">{JSON.stringify(selectedPaymentMethod.details, null, 2)}</pre>
+                      {getDetailsDisplay(selectedPaymentMethod)}
                     </div>
                   )}
                 </CardContent>
@@ -248,10 +291,21 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
                   <CardTitle>Detail Pembayaran</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="font-semibold mb-2">{order.payment_method.name}</p>
+                  <div className="flex items-center gap-3 mb-3">
+                    {order.payment_method.image_url && (
+                      <Image
+                        src={order.payment_method.image_url}
+                        alt={order.payment_method.name}
+                        width={40}
+                        height={40}
+                        className="object-contain rounded"
+                      />
+                    )}
+                    <p className="font-semibold text-lg">{order.payment_method.name}</p>
+                  </div>
                   <div className="p-3 bg-muted/50 rounded-md border">
                     <h4 className="font-semibold mb-2">Instruksi Pembayaran</h4>
-                    <pre className="text-sm whitespace-pre-wrap font-sans">{JSON.stringify(order.payment_method.details, null, 2)}</pre>
+                    {getDetailsDisplay(order.payment_method)}
                   </div>
                 </CardContent>
               </Card>
