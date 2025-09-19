@@ -91,6 +91,30 @@ export async function getProductsByCategory(categorySlug: string, sort: SortOpti
   return data.map(mapProductData);
 }
 
+// New function to get products by multiple categories
+export async function getProductsByCategories(categorySlugs: string[], sort: SortOption = 'newest'): Promise<Product[]> {
+  if (categorySlugs.length === 0) {
+    return [];
+  }
+
+  let query = supabase
+    .from("products")
+    .select("*")
+    .in("category", categorySlugs);
+  
+  query = applySorting(query, sort);
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error(`Error fetching products for categories ${categorySlugs.join(', ')}:`, error.message || error);
+    return [];
+  }
+
+  return data.map(mapProductData);
+}
+
+
 export async function getProductById(id: string): Promise<Product | null> {
   const { data, error } = await supabase
     .from("products")
