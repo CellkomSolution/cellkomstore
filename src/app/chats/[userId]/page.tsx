@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"; // Import useSearc
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageSquare, Send, Loader2, User as UserIcon, ArrowLeft } from "lucide-react";
+import { MessageSquare, Send, Loader2, User as UserIcon, ArrowLeft, Package } from "lucide-react"; // Package diimpor secara eksplisit
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
