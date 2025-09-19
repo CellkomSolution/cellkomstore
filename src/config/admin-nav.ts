@@ -9,7 +9,8 @@ import {
   CreditCard,
   BookOpen,
   MessageSquare,
-  Images, // Mengubah ImageStack menjadi Images
+  Images,
+  BellRing, // Import BellRing icon
 } from "lucide-react";
 
 export const adminNavItems = [
@@ -39,9 +40,9 @@ export const adminNavItems = [
     icon: ImageIcon,
   },
   {
-    title: "Banner Hero", // Item baru
+    title: "Banner Hero",
     href: "/admin/hero-banners",
-    icon: Images, // Menggunakan ikon Images
+    icon: Images,
   },
   {
     title: "Blog",
@@ -62,6 +63,11 @@ export const adminNavItems = [
     title: "Chat Admin",
     href: "/chats",
     icon: MessageSquare,
+  },
+  {
+    title: "Kirim Notifikasi", // New item
+    href: "/admin/notifications",
+    icon: BellRing, // Using BellRing icon
   },
   {
     title: "Pengaturan",

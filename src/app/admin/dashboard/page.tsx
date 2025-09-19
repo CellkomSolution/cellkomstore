@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, DollarSign, ShoppingBag, LayoutGrid, Image as ImageIcon, CreditCard, Settings, BookOpen, MessageSquare, LayoutDashboard } from "lucide-react";
+import { Package, Users, DollarSign, ShoppingBag, LayoutGrid, Image as ImageIcon, CreditCard, Settings, BookOpen, MessageSquare, LayoutDashboard, BellRing } from "lucide-react"; // Import BellRing
 import { getTotalProductsCount } from "@/lib/supabase/products";
 import { getTotalUsersCount } from "@/lib/supabase/profiles";
 import { getTotalOrdersCount } from "@/lib/supabase/orders";
@@ -132,6 +132,12 @@ export default function AdminDashboardPage() {
               <Link href="/chats" className="flex items-center gap-2 hover:text-primary">
                 <MessageSquare className="h-4 w-4" />
                 Chat Admin
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/notifications" className="flex items-center gap-2 hover:text-primary">
+                <BellRing className="h-4 w-4" />
+                Kirim Notifikasi
               </Link>
             </li>
             <li>
