@@ -44,11 +44,10 @@ export function StickyProductActions({ product, onAddToCart }: StickyProductActi
           <span className="sr-only">Chat Penjual</span>
         </Button>
         <Button variant="outline" size="lg" className="flex-1 h-12 text-base" onClick={handleBuyNow}>
-          Beli Sekarang
+          Beli
         </Button>
         <Button size="lg" className="flex-1 h-12 text-base" onClick={onAddToCart}>
-          <ShoppingCart className="h-5 w-5 mr-2" />
-          Tambah ke Keranjang
+          Keranjang
         </Button>
       </div>
       <ChatWidget 
