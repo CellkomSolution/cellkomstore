@@ -31,6 +31,7 @@ import { getProductById, mapProductData } from "@/lib/supabase/products";
 import { getOrderById, Order } from "@/lib/supabase/orders"; // Import getOrderById and Order
 import Link from "next/link";
 import { formatRupiah } from "@/lib/utils";
+import { createNotification } from "@/lib/supabase/notifications"; // Import createNotification
 
 interface ChatWidgetProps {
   productId?: string | null;
@@ -219,6 +220,16 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
       };
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
+
+      // Create notification for the admin
+      if (targetAdminId) {
+        const senderName = profile?.first_name || user.email?.split('@')[0] || "Pengguna";
+        const notificationTitle = `Pesan Baru dari ${senderName}`;
+        const notificationMessage = `Anda memiliki pesan baru dari ${senderName} di chat.`;
+        const notificationLink = `/chats/${user.id}`; // Link to admin's chat with this user
+
+        await createNotification(targetAdminId, 'new_message', notificationTitle, notificationMessage, notificationLink);
+      }
     }
     setIsSending(false);
   };
@@ -464,9 +475,6 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="h-[90vh] flex flex-col">
-          <DrawerHeader className="text-center">
-            <DrawerTitle><Title /></DrawerTitle>
-          </DrawerHeader>
           {ChatContent}
         </DrawerContent>
       </Drawer>

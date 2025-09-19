@@ -27,6 +27,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
+import { createNotification } from "@/lib/supabase/notifications"; // Import createNotification
 
 interface AdminChatDetailPageProps {
   params: Promise<{ userId: string }>;
@@ -234,6 +235,15 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       };
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
+
+      // Create notification for the user (recipient of this message)
+      if (otherUserProfile) {
+        const notificationTitle = `Pesan Baru dari Admin`;
+        const notificationMessage = `Anda memiliki pesan baru dari Admin di chat.`;
+        const notificationLink = orderIdFromUrl ? `/my-orders/${orderIdFromUrl}` : `/notifications`; // Link to user's order or general notifications
+
+        await createNotification(userId, 'new_message', notificationTitle, notificationMessage, notificationLink);
+      }
     }
     setIsSending(false);
   };
