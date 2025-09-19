@@ -5,7 +5,6 @@ import { FeaturedBrands } from "@/components/featured-brands";
 import { ProductCarouselSection } from "@/components/product-carousel-section";
 import { HeroBannerCarousel } from "@/components/hero-banner-carousel";
 import { UsedProductsCarousel } from "@/components/used-products-carousel";
-import { HomeProductShowcase } from "@/components/home-product-showcase"; // Import new component
 import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase/products";
 
 export default async function Home() {
@@ -26,7 +25,11 @@ export default async function Home() {
         />
       )}
       <FeaturedBrands />
-      <HomeProductShowcase products={products} title="Produk Pilihan Untukmu" /> {/* Use the new component here */}
+      <ProductGrid 
+        products={products} 
+        title="Produk Pilihan Untukmu" 
+        leadingComponent={<UsedProductsCarousel />} // Pass the carousel here
+      />
     </div>
   );
 }
