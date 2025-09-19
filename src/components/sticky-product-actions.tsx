@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, MessageSquare } from "lucide-react";
+import { ShoppingCart, MessageSquare, ShoppingBag } from "lucide-react"; // Import ShoppingBag
 import { formatRupiah } from "@/lib/utils";
 import { Product } from "@/lib/supabase/products";
 import { ChatWidget } from "./chat-widget";
@@ -44,9 +44,11 @@ export function StickyProductActions({ product, onAddToCart }: StickyProductActi
           <span className="sr-only">Chat Penjual</span>
         </Button>
         <Button variant="outline" size="lg" className="flex-1 h-12 text-base" onClick={handleBuyNow}>
+          <ShoppingBag className="h-5 w-5 mr-2" /> {/* Added ShoppingBag icon */}
           Beli
         </Button>
         <Button size="lg" className="flex-1 h-12 text-base" onClick={onAddToCart}>
+          <ShoppingCart className="h-5 w-5 mr-2" /> {/* Added ShoppingCart icon */}
           Keranjang
         </Button>
       </div>
