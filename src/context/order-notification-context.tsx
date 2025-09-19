@@ -106,7 +106,7 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
               const message = `Pesanan Anda sekarang ${getOrderStatusMessage(newRecord.order_status)}.`;
               const link = `/my-orders/${newRecord.id}`;
               
-              await createNotification(userId, 'order_status_update', title, message, link);
+              await createNotification(userId, 'order_status_update', title, message, link, null, newRecord.id); // Pass order_id
               toast.info(message, {
                 icon: getStatusIcon(newRecord.order_status, newRecord.payment_status),
                 action: {
@@ -121,7 +121,7 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
               const message = `Pembayaran pesanan Anda telah dikonfirmasi!`;
               const link = `/my-orders/${newRecord.id}`;
 
-              await createNotification(userId, 'payment_status_update', title, message, link);
+              await createNotification(userId, 'payment_status_update', title, message, link, null, newRecord.id); // Pass order_id
               toast.success(message, {
                 icon: getStatusIcon(newRecord.order_status, newRecord.payment_status),
                 action: {
@@ -140,13 +140,13 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
             table: "orders",
             filter: `user_id=eq.${userId}`,
           },
-          async (payload) => {
+          async (payload) => { // Make async to use await createNotification
             const newRecord = payload.new as Order;
             const title = `Pesanan Baru #${newRecord.id.substring(0, 8)}`;
             const message = `Pesanan Anda berhasil dibuat! Total: ${formatRupiah(newRecord.total_amount + newRecord.payment_unique_code)}.`;
             const link = `/my-orders/${newRecord.id}`;
 
-            await createNotification(userId, 'order_status_update', title, message, link);
+            await createNotification(userId, 'order_status_update', title, message, link, null, newRecord.id); // Pass order_id
             toast.success(message, {
               icon: <ShoppingBag className="h-4 w-4" />,
               action: {
@@ -182,7 +182,7 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
             const link = `/admin/orders/${newRecord.id}`;
 
             // Create persistent notification for admin
-            await createNotification(adminUserId, 'order_status_update', title, message, link);
+            await createNotification(adminUserId, 'order_status_update', title, message, link, null, newRecord.id); // Pass order_id
 
             toast.info(message, {
               icon: <BellRing className="h-4 w-4" />,
@@ -213,7 +213,7 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
               const link = `/admin/orders/${newRecord.id}`;
 
               // Create persistent notification for admin
-              await createNotification(adminUserId, 'payment_status_update', title, message, link);
+              await createNotification(adminUserId, 'payment_status_update', title, message, link, null, newRecord.id); // Pass order_id
 
               toast.warning(message, {
                 icon: <ReceiptText className="h-4 w-4" />,

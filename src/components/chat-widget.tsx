@@ -228,7 +228,15 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
         const notificationMessage = `Anda memiliki pesan baru dari ${senderName} di chat.`;
         const notificationLink = `/chats/${user.id}`; // Link to admin's chat with this user
 
-        await createNotification(targetAdminId, 'new_message', notificationTitle, notificationMessage, notificationLink);
+        await createNotification(
+          targetAdminId, 
+          'new_message', 
+          notificationTitle, 
+          notificationMessage, 
+          notificationLink,
+          productId || null, // Pass product_id
+          orderId || null    // Pass order_id
+        );
       }
     }
     setIsSending(false);

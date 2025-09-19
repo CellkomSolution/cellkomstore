@@ -23,7 +23,7 @@ import { toast } from "sonner";
 interface NotificationSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onOpenChatWidget?: () => void; // New: Optional prop to open the chat widget
+  onOpenChatWidget?: (productId: string | null, orderId: string | null) => void; // New: Optional prop to open the chat widget
 }
 
 export function NotificationSheet({ open, onOpenChange, onOpenChatWidget }: NotificationSheetProps) {

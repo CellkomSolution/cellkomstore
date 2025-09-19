@@ -9,6 +9,8 @@ export interface Notification {
   link: string | null;
   is_read: boolean;
   created_at: string;
+  product_id: string | null; // New field
+  order_id: string | null;    // New field
 }
 
 export async function createNotification(
@@ -16,11 +18,13 @@ export async function createNotification(
   type: Notification['type'],
   title: string,
   message: string,
-  link: string | null = null
+  link: string | null = null,
+  productId: string | null = null, // New parameter
+  orderId: string | null = null    // New parameter
 ): Promise<Notification | null> {
   const { data, error } = await supabase
     .from("notifications")
-    .insert({ user_id: userId, type, title, message, link })
+    .insert({ user_id: userId, type, title, message, link, product_id: productId, order_id: orderId })
     .select()
     .single();
 

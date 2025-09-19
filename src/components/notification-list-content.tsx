@@ -17,7 +17,7 @@ interface NotificationItemProps {
   notification: SupabaseNotification;
   onMarkAsRead: (id: string) => void;
   onCloseSheet?: () => void; // Optional prop to close the sheet/drawer
-  onOpenChatWidget?: () => void; // New: Optional prop to open the chat widget
+  onOpenChatWidget?: (productId: string | null, orderId: string | null) => void; // New: Optional prop to open the chat widget
 }
 
 function NotificationItem({ notification, onMarkAsRead, onCloseSheet, onOpenChatWidget }: NotificationItemProps) {
@@ -46,7 +46,8 @@ function NotificationItem({ notification, onMarkAsRead, onCloseSheet, onOpenChat
       window.location.href = notification.link; // Navigate to specific link
     } else if (notification.type === 'new_message' && onOpenChatWidget) {
       // If it's a general chat notification without a specific link, open the chat widget
-      onOpenChatWidget();
+      // Pass product_id and order_id from the notification itself
+      onOpenChatWidget(notification.product_id || null, notification.order_id || null);
     }
   };
 
@@ -88,7 +89,7 @@ interface NotificationListContentProps {
   onMarkAsRead: (id: string) => void;
   isLoading: boolean;
   onCloseSheet?: () => void; // Optional prop to close the sheet/drawer
-  onOpenChatWidget?: () => void; // New: Optional prop to open the chat widget
+  onOpenChatWidget?: (productId: string | null, orderId: string | null) => void; // New: Optional prop to open the chat widget
 }
 
 export const NotificationListContent = ({

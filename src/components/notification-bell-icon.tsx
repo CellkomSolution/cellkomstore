@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { useAdmin } from "@/hooks/use-admin";
 import { NotificationSheet } from "./notification-sheet"; // Import NotificationSheet
 import { ChatWidget } from "./chat-widget"; // Import ChatWidget
+import { getProductById } from "@/lib/supabase/products"; // Import getProductById
+import { getOrderById } from "@/lib/supabase/orders"; // Import getOrderById
 
 export function NotificationBellIcon() {
   const { user, isLoading: isSessionLoading } = useSession();
@@ -18,7 +20,14 @@ export function NotificationBellIcon() {
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [isLoadingCount, setIsLoadingCount] = React.useState(true);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false); // State to control the sheet
-  const [isGeneralChatOpen, setIsGeneralChatOpen] = React.useState(false); // State to control the general chat widget
+  
+  // State for ChatWidget context
+  const [isChatWidgetOpen, setIsChatWidgetOpen] = React.useState(false);
+  const [chatProductId, setChatProductId] = React.useState<string | null>(null);
+  const [chatProductName, setChatProductName] = React.useState<string | null>(null);
+  const [chatOrderId, setChatOrderId] = React.useState<string | null>(null);
+  const [chatOrderName, setChatOrderName] = React.useState<string | null>(null);
+
   const router = useRouter();
 
   const fetchUnreadCount = React.useCallback(async () => {
@@ -60,6 +69,24 @@ export function NotificationBellIcon() {
     }
   }, [isSessionLoading, isAdminLoading, user, isAdmin, fetchUnreadCount]);
 
+  const handleOpenChatWidget = React.useCallback(async (productId: string | null, orderId: string | null) => {
+    setChatProductId(productId);
+    setChatOrderId(orderId);
+    setChatProductName(null); // Reset product name
+    setChatOrderName(null); // Reset order name
+
+    if (productId) {
+      const product = await getProductById(productId);
+      if (product) setChatProductName(product.name);
+    }
+    if (orderId) {
+      const order = await getOrderById(orderId);
+      if (order) setChatOrderName(`Pesanan #${order.id.substring(0, 8)}`);
+    }
+
+    setIsChatWidgetOpen(true);
+  }, []);
+
   if (isSessionLoading || isLoadingCount || !user || isAdmin) {
     return null; // Only render for logged-in regular users
   }
@@ -90,15 +117,15 @@ export function NotificationBellIcon() {
       <NotificationSheet 
         open={isSheetOpen} 
         onOpenChange={setIsSheetOpen} 
-        onOpenChatWidget={() => setIsGeneralChatOpen(true)} // Pass handler to open chat widget
+        onOpenChatWidget={handleOpenChatWidget} // Pass handler to open chat widget
       />
       <ChatWidget 
-        productId={null} 
-        productName={null} 
-        orderId={null}
-        orderName={null}
-        open={isGeneralChatOpen} 
-        onOpenChange={setIsGeneralChatOpen} 
+        productId={chatProductId} 
+        productName={chatProductName} 
+        orderId={chatOrderId}
+        orderName={chatOrderName}
+        open={isChatWidgetOpen} 
+        onOpenChange={setIsChatWidgetOpen} 
       />
     </>
   );

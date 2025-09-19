@@ -243,7 +243,15 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
         // Link to user's order page if chat is order-related, otherwise null for general chat
         const notificationLink = orderIdFromUrl ? `/my-orders/${orderIdFromUrl}` : null; 
 
-        await createNotification(userId, 'new_message', notificationTitle, notificationMessage, notificationLink);
+        await createNotification(
+          userId, 
+          'new_message', 
+          notificationTitle, 
+          notificationMessage, 
+          notificationLink,
+          null, // product_id is null for admin-initiated chat from admin panel
+          orderIdFromUrl // Pass order_id if available
+        );
       }
     }
     setIsSending(false);
@@ -310,7 +318,7 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                             {msg.products[0].imageUrl ? (
                               <Image src={msg.products[0].imageUrl} alt={msg.products[0].name} width={32} height={32} className="rounded-sm object-cover" />
                             ) : (
-                              <div className="h-8 w-8 bg-gray-200 rounded-sm flex items-center justify-center text-xs">No Img</div>
+                                <div className="h-8 w-8 bg-gray-200 rounded-sm flex items-center justify-center text-xs">No Img</div>
                             )}
                             <span>
                               Percakapan tentang: <Link href={`/product/${msg.product_id}`} className="underline hover:text-primary">{msg.products[0].name}</Link>
