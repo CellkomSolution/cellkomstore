@@ -131,10 +131,10 @@ export default function AdminPaymentMethodsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[60px]">Logo</TableHead> {/* New TableHead */}
+                  <TableHead className="w-[60px]">Logo</TableHead>
                   <TableHead>Nama Metode</TableHead>
                   <TableHead>Tipe</TableHead>
-                  <TableHead>Detail</TableHead> {/* Changed to Detail */}
+                  <TableHead>Detail</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Urutan</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
@@ -144,10 +144,10 @@ export default function AdminPaymentMethodsPage() {
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, index) => (
                     <TableRow key={index}>
-                      <TableCell><Skeleton className="h-10 w-10 rounded-md" /></TableCell> {/* Skeleton for logo */}
+                      <TableCell><Skeleton className="h-10 w-10 rounded-md" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell> {/* Skeleton for details */}
+                      <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-[70px]" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-[50px]" /></TableCell>
                       <TableCell className="text-right">
@@ -167,12 +167,10 @@ export default function AdminPaymentMethodsPage() {
                 ) : (
                   paymentMethods.map((method) => (
                     <TableRow key={method.id}>
-                      <TableCell className="text-center">
-                        {getMethodDisplay(method)}
-                      </TableCell>
+                      <TableCell className="text-center">{getMethodDisplay(method)}</TableCell>
                       <TableCell className="font-medium">{method.name}</TableCell>
                       <TableCell>{method.type.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}</TableCell>
-                      <TableCell>{getDetailsDisplay(method)}</TableCell> {/* Display structured details */}
+                      <TableCell>{getDetailsDisplay(method)}</TableCell>
                       <TableCell>
                         <Badge variant={method.is_active ? "success" : "secondary"}>
                           {method.is_active ? "Aktif" : "Tidak Aktif"}
