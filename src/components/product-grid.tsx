@@ -1,9 +1,8 @@
 "use client";
 
 import { ProductCard } from "./product-card";
-import { Product } from "@/lib/supabase/products";
+import { Product } from "@/lib/supabase/products"; // Import Product interface dari modul yang benar
 import { ProductCardSkeleton } from "./product-card-skeleton";
-import React from "react"; // Import React
 
 interface ProductGridProps {
   products: Product[];
@@ -11,7 +10,6 @@ interface ProductGridProps {
   isLoading?: boolean;
   emptyStateMessage?: string;
   emptyStateDescription?: string;
-  leadingComponent?: React.ReactNode; // New prop for a component to render first
 }
 
 export function ProductGrid({ 
@@ -19,8 +17,7 @@ export function ProductGrid({
   title, 
   isLoading = false,
   emptyStateMessage = "Oops! Produk tidak ditemukan.",
-  emptyStateDescription = "Coba gunakan kata kunci lain.",
-  leadingComponent, // Destructure the new prop
+  emptyStateDescription = "Coba gunakan kata kunci lain."
 }: ProductGridProps) {
   return (
     <section>
@@ -31,13 +28,8 @@ export function ProductGrid({
             <ProductCardSkeleton key={index} />
           ))}
         </div>
-      ) : products.length > 0 || leadingComponent ? ( // Render grid if products or leadingComponent exists
+      ) : products.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {leadingComponent && (
-            <div className="col-span-full sm:col-span-1 md:col-span-1 lg:col-span-1 xl:col-span-1"> {/* Ensure it takes full width on small screens, then 1 column */}
-              {leadingComponent}
-            </div>
-          )}
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

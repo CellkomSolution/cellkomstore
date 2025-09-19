@@ -3,8 +3,7 @@ import { FlashSale } from "@/components/flash-sale";
 import { ProductGrid } from "@/components/product-grid";
 import { FeaturedBrands } from "@/components/featured-brands";
 import { ProductCarouselSection } from "@/components/product-carousel-section";
-import { HeroBannerCarousel } from "@/components/hero-banner-carousel";
-import { UsedProductsCarousel } from "@/components/used-products-carousel";
+import { HeroBannerCarousel } from "@/components/hero-banner-carousel"; // Import HeroBannerCarousel
 import { getFlashSaleProducts, getProducts, getProductsByCategory } from "@/lib/supabase/products";
 
 export default async function Home() {
@@ -14,7 +13,7 @@ export default async function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <HeroBannerCarousel />
+      <HeroBannerCarousel /> {/* Tambahkan HeroBannerCarousel di sini */}
       <CategoryIcons />
       <ProductCarouselSection />
       <FlashSale initialProducts={flashSaleProducts} />
@@ -25,11 +24,7 @@ export default async function Home() {
         />
       )}
       <FeaturedBrands />
-      <ProductGrid 
-        products={products} 
-        title="Produk Pilihan Untukmu" 
-        leadingComponent={<UsedProductsCarousel />} // Pass the carousel here
-      />
+      <ProductGrid products={products} title="Produk Pilihan Untukmu" />
     </div>
   );
 }
