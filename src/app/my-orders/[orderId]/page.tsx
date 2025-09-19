@@ -21,11 +21,11 @@ import { Label } from "@/components/ui/label";
 import { useCart } from "@/context/cart-context";
 
 interface UserOrderDetailPageProps {
-  params: { orderId: string };
+  params: Promise<{ orderId: string }>;
 }
 
 export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps) {
-  const { orderId } = params;
+  const { orderId } = React.use(params); // Corrected: Using React.use() to unwrap the Promise
   const router = useRouter();
   const { user, isLoading: isSessionLoading } = useSession();
   const { clearCart } = useCart();
