@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { SettingsFormValues } from "@/app/admin/settings/page"; // Import the main form values type
+import { SettingsFormValues } from "@/lib/types/app-settings"; // Import the main form values type
 
 interface FeaturedBrandsSettingsFormProps {
   isSubmitting: boolean;

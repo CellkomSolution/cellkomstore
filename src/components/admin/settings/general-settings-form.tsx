@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ImageUploader } from "@/components/image-uploader";
-import { SettingsFormValues } from "@/app/admin/settings/page"; // Import the main form values type
+import { SettingsFormValues } from "@/lib/types/app-settings"; // Import the main form values type
 
 interface GeneralSettingsFormProps {
   isSubmitting: boolean;
