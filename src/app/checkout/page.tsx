@@ -55,10 +55,6 @@ export default function CheckoutPage() {
       router.replace("/auth");
       return;
     }
-    // This check should only prevent direct access to an empty checkout,
-    // not interfere with post-order redirects.
-    // The `totalItems === 0` check here is fine for initial load,
-    // but `clearCart()` should happen after the redirect to avoid race conditions.
     if (!isSessionLoading && user && totalItems === 0) {
       toast.info("Keranjang Anda kosong. Silakan tambahkan produk untuk checkout.");
       router.replace("/");
@@ -113,145 +109,144 @@ export default function CheckoutPage() {
     );
   }
 
-  // Render content based on totalItems
+  if (totalItems === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold">Keranjang Anda Kosong</h1>
+        <p className="text-muted-foreground mt-2">Sepertinya Anda belum menambahkan produk apapun.</p>
+        <Button asChild className="mt-4">
+          <Link href="/">Kembali Belanja</Link>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
-      {totalItems === 0 ? (
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Keranjang Anda Kosong</h1>
-          <p className="text-muted-foreground mt-2">Sepertinya Anda belum menambahkan produk apapun.</p>
-          <Button asChild className="mt-4">
-            <Link href="/">Kembali Belanja</Link>
-          </Button>
+      <h1 className="text-3xl font-bold mb-6">Checkout</h1>
+      <div className="grid md:grid-cols-3 gap-8">
+        <div className="md:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Alamat Pengiriman</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nama Lengkap Penerima</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="fullAddress"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Alamat Lengkap</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Jl. Jenderal Sudirman No. 52-53" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Pastikan alamat sudah benar dan lengkap.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="nagari"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nagari</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Contoh: Koto Gadang" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="kecamatan"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Kecamatan</Label>
+                        <FormControl>
+                          <Input placeholder="Contoh: IV Koto" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nomor Telepon</FormLabel>
+                        <FormControl>
+                          <Input type="tel" placeholder="081234567890" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <Button type="submit" size="lg" className="w-full mt-6" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting ? "Membuat Pesanan..." : "Buat Pesanan"}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
         </div>
-      ) : (
-        <>
-          <h1 className="text-3xl font-bold mb-6">Checkout</h1>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Alamat Pengiriman</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nama Lengkap Penerima</FormLabel>
-                            <FormControl>
-                              <Input placeholder="John Doe" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="fullAddress"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Alamat Lengkap</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Jl. Jenderal Sudirman No. 52-53" {...field} />
-                            </FormControl>
-                            <FormDescription>
-                              Pastikan alamat sudah benar dan lengkap.
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="nagari"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nagari</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Contoh: Koto Gadang" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="kecamatan"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Kecamatan</Label>
-                            <FormControl>
-                              <Input placeholder="Contoh: IV Koto" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nomor Telepon</FormLabel>
-                            <FormControl>
-                              <Input type="tel" placeholder="081234567890" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button type="submit" size="lg" className="w-full mt-6" disabled={form.formState.isSubmitting}>
-                        {form.formState.isSubmitting ? "Membuat Pesanan..." : "Buat Pesanan"}
-                      </Button>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-            </div>
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Ringkasan Pesanan</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {items.map((item) => (
-                      <div key={item.id} className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-sm line-clamp-1">{item.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {item.quantity} x {formatRupiah(item.price)}
-                          </p>
-                        </div>
-                        <p className="font-semibold text-sm text-right shrink-0 ml-4">
-                          {formatRupiah(item.price * item.quantity)}
-                        </p>
-                      </div>
-                    ))}
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Ringkasan Pesanan</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {items.map((item) => (
+                  <div key={item.id} className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium text-sm line-clamp-1">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.quantity} x {formatRupiah(item.price)}
+                      </p>
+                    </div>
+                    <p className="font-semibold text-sm text-right shrink-0 ml-4">
+                      {formatRupiah(item.price * item.quantity)}
+                    </p>
                   </div>
-                  <Separator className="my-4" />
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span>{formatRupiah(totalPrice)}</span>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex flex-col gap-2">
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/">Tambah Pesanan</Link>
-                  </Button>
-                  <Button variant="destructive" className="w-full" onClick={handleCancelOrder}>
-                    Batalkan Pesanan
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-          </div>
-        </>
-      )}
+                ))}
+              </div>
+              <Separator className="my-4" />
+              <div className="flex justify-between font-bold text-lg">
+                <span>Total</span>
+                <span>{formatRupiah(totalPrice)}</span>
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-2">
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/">Tambah Pesanan</Link>
+              </Button>
+              <Button variant="destructive" className="w-full" onClick={handleCancelOrder}>
+                Batalkan Pesanan
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
