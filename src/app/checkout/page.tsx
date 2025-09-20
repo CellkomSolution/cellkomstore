@@ -180,7 +180,7 @@ export default function CheckoutPage() {
                     name="kecamatan"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Kecamatan</Label>
+                        <FormLabel>Kecamatan</FormLabel>
                         <FormControl>
                           <Input placeholder="Contoh: IV Koto" {...field} />
                         </FormControl>
