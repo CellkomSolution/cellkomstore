@@ -42,7 +42,8 @@ export default function AdminSettingsPage() {
       featured_brands_title: null,
       store_status_enabled: false,
       store_status_content: null,
-    },
+    } as SettingsFormValues, // Explicitly cast defaultValues
+
   });
 
   React.useEffect(() => {
@@ -72,7 +73,7 @@ export default function AdminSettingsPage() {
           featured_brands_title: settings.featured_brands_title ?? null,
           store_status_enabled: settings.store_status_enabled ?? false,
           store_status_content: settings.store_status_content ?? null,
-        });
+        } as SettingsFormValues); // Explicitly cast reset values
       } else {
         // If no settings, ensure form is reset to schema defaults
         form.reset({
@@ -96,7 +97,7 @@ export default function AdminSettingsPage() {
           featured_brands_title: null,
           store_status_enabled: false,
           store_status_content: null,
-        });
+        } as SettingsFormValues); // Explicitly cast reset values
       }
       setIsLoading(false);
     }
