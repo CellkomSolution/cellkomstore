@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, MapPin, Phone, User as UserIcon, CalendarDays, ArrowLeft, MessageSquare, Banknote, Wallet, CreditCard, Package, ReceiptText } from "lucide-react";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
-import { getOrderById, updateOrderPaymentMethodAndStatus, updateOrderStatus, Order } from "@/lib/supabase/orders";
+import { getOrderById, updateOrderPaymentMethodAndStatus, updateOrderStatus, confirmPaymentByUser, Order } from "@/lib/supabase/orders";
 import { getPaymentMethods, PaymentMethod } from "@/lib/supabase/payment-methods";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -49,6 +49,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
   const [selectedPaymentMethodId, setSelectedPaymentMethodId] = React.useState<string | null>(null);
   const [isConfirmingPayment, setIsConfirmingPayment] = React.useState(false);
   const [isCancellingOrder, setIsCancellingOrder] = React.useState(false);
+  const [isUserConfirmingPayment, setIsUserConfirmingPayment] = React.useState(false); // New state for user payment confirmation
 
   const fetchData = React.useCallback(async () => {
     setIsLoading(true);
@@ -66,7 +67,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     }
     setOrder(fetchedOrder);
 
-    if (fetchedOrder.payment_status === 'unpaid') {
+    if (fetchedOrder.payment_status === 'unpaid' || fetchedOrder.payment_status === 'awaiting_confirmation') {
       const activeMethods = await getPaymentMethods(true);
       setPaymentMethods(activeMethods);
       if (activeMethods.length === 1) {
@@ -110,6 +111,21 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
       toast.error(error.message || "Gagal mengonfirmasi metode pembayaran.");
     } finally {
       setIsConfirmingPayment(false);
+    }
+  };
+
+  const handleUserConfirmPayment = async () => {
+    if (!order || !user) return;
+    setIsUserConfirmingPayment(true);
+    try {
+      await confirmPaymentByUser(order.id, user.id);
+      toast.success("Pembayaran Anda telah dikonfirmasi. Pesanan Anda sedang diproses.");
+      await fetchData(); // Refetch to update UI
+    } catch (error: any) {
+      console.error("Error user confirming payment:", error);
+      toast.error(error.message || "Gagal mengonfirmasi pembayaran.");
+    } finally {
+      setIsUserConfirmingPayment(false);
     }
   };
 
@@ -376,7 +392,42 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
               </Card>
             )}
 
-            {(order.payment_status === 'awaiting_confirmation' || order.payment_status === 'paid') && order.payment_method && (
+            {order.payment_status === 'awaiting_confirmation' && order.payment_method && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Detail Pembayaran</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3 mb-3">
+                    {order.payment_method.image_url && (
+                      <Image
+                        src={order.payment_method.image_url}
+                        alt={order.payment_method.name}
+                        width={40}
+                        height={40}
+                        className="object-contain rounded"
+                      />
+                    )}
+                    <p className="font-semibold text-lg">{order.payment_method.name}</p>
+                  </div>
+                  <div className="p-3 bg-muted/50 rounded-md border">
+                    <h4 className="font-semibold mb-2">Instruksi Pembayaran</h4>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Total yang harus dibayar: <span className="font-bold text-primary">{formatRupiah(order.total_amount + order.payment_unique_code)}</span> (termasuk kode unik <span className="font-bold text-primary">{order.payment_unique_code}</span>).
+                    </p>
+                    {getDetailsDisplay(order.payment_method)}
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full" onClick={handleUserConfirmPayment} disabled={isUserConfirmingPayment}>
+                    {isUserConfirmingPayment ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Saya Sudah Membayar
+                  </Button>
+                </CardFooter>
+              </Card>
+            )}
+
+            {(order.payment_status === 'paid' || order.payment_status === 'refunded') && order.payment_method && (
               <Card>
                 <CardHeader>
                   <CardTitle>Detail Pembayaran</CardTitle>

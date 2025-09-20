@@ -3,6 +3,8 @@ import { CartItem } from "@/context/cart-context";
 import { Profile } from "./profiles";
 import { Product, mapProductData } from "./products";
 import { PaymentMethod } from "./payment-methods"; // Import PaymentMethod type
+import { createNotification } from "./notifications"; // Import createNotification
+import { getAdminUserId } from "./profiles"; // Import getAdminUserId
 
 // Define a type for the raw product data as it comes from Supabase
 interface RawProductData {
@@ -50,7 +52,7 @@ export interface Order {
   id: string;
   user_id: string;
   total_amount: number;
-  order_status: 'pending' | 'processing' | 'completed' | 'cancelled'; // Renamed from 'status'
+  order_status: 'pending' | 'processing' | 'completed' | 'cancelled' | 'awaiting_confirmation'; // Renamed from 'status'
   payment_status: 'unpaid' | 'awaiting_confirmation' | 'paid' | 'refunded'; // New payment status
   payment_unique_code: number; // New: Unique code for payment identification
   shipping_address_name: string;
@@ -199,6 +201,41 @@ export async function updateOrderStatus(orderId: string, newOrderStatus: Order['
     throw new Error("Gagal memperbarui status pesanan.");
   }
   return data as Order;
+}
+
+export async function confirmPaymentByUser(orderId: string, userId: string): Promise<Order | null> {
+  const { data: updatedOrder, error } = await supabase
+    .from("orders")
+    .update({
+      payment_status: 'paid',
+      order_status: 'processing', // Automatically move to processing after user confirms payment
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", orderId)
+    .eq("user_id", userId) // Ensure only the order owner can confirm
+    .select()
+    .single();
+
+  if (error) {
+    console.error(`Error confirming payment for order ${orderId}:`, error.message);
+    throw new Error("Gagal mengonfirmasi pembayaran.");
+  }
+
+  if (updatedOrder) {
+    // Send notification to admin
+    const adminId = await getAdminUserId();
+    if (adminId) {
+      await createNotification({
+        user_id: adminId,
+        title: "Pembayaran Dikonfirmasi Pengguna",
+        message: `Pengguna ${userId.substring(0, 8)} telah mengonfirmasi pembayaran untuk pesanan #${updatedOrder.id.substring(0, 8)}. Mohon verifikasi.`,
+        link: `/admin/orders/${updatedOrder.id}`,
+        is_read: false,
+      });
+    }
+  }
+
+  return updatedOrder as Order;
 }
 
 export async function getOrders(orderStatus?: Order['order_status'], paymentStatus?: Order['payment_status']): Promise<Order[]> {
