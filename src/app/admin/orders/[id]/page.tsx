@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { createNotification } from "@/lib/supabase/notifications"; // Import createNotification
+
 
 interface AdminOrderDetailPageProps {
   params: Promise<{ id: string }>;
@@ -57,7 +57,6 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
       case 'processing': return 'Diproses';
       case 'completed': return 'Selesai';
       case 'cancelled': return 'Dibatalkan';
-      case 'awaiting_confirmation': return 'Menunggu Konfirmasi'; // Should not happen for order status, but for completeness
       default: return 'Tidak Diketahui';
     }
   };
@@ -77,35 +76,18 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
     setIsUpdatingStatus(true);
     try {
       let updatedOrder: Order | null = null;
-      let notificationTitle = "";
-      let notificationMessage = "";
 
       if (order.payment_status === 'awaiting_confirmation' && newStatus === 'processing') {
         // Admin confirms payment
         updatedOrder = await updateOrderStatus(order.id, newStatus, 'paid');
-        notificationTitle = "Pembayaran Dikonfirmasi!";
-        notificationMessage = `Pembayaran untuk pesanan #${order.id.substring(0, 8)} Anda telah dikonfirmasi. Pesanan Anda sekarang sedang diproses.`;
         toast.success(`Pembayaran dikonfirmasi! Status pesanan diubah menjadi ${getOrderStatusDisplayText(newStatus)}.`);
       } else {
         // Regular order status update
         updatedOrder = await updateOrderStatus(order.id, newStatus);
-        notificationTitle = "Status Pesanan Diperbarui";
-        notificationMessage = `Status pesanan #${order.id.substring(0, 8)} Anda telah diperbarui menjadi ${getOrderStatusDisplayText(newStatus)}.`;
         toast.success(`Status pesanan berhasil diperbarui menjadi ${getOrderStatusDisplayText(newStatus)}.`);
       }
       
       setOrder(updatedOrder);
-
-      // Send notification to the buyer
-      if (updatedOrder && updatedOrder.user_id) {
-        await createNotification({
-          user_id: updatedOrder.user_id,
-          title: notificationTitle,
-          message: notificationMessage,
-          link: `/my-orders/${updatedOrder.id}`,
-          is_read: false,
-        });
-      }
 
     } catch (error: any) {
       console.error("Error updating order status:", error);
@@ -122,17 +104,6 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
       const updatedOrder = await updateOrderStatus(order.id, order.order_status, newPaymentStatus);
       setOrder(updatedOrder);
       toast.success(`Status pembayaran berhasil diperbarui menjadi ${getPaymentStatusDisplayText(newPaymentStatus)}.`);
-
-      // Send notification to the buyer
-      if (updatedOrder && updatedOrder.user_id) {
-        await createNotification({
-          user_id: updatedOrder.user_id,
-          title: "Status Pembayaran Diperbarui",
-          message: `Status pembayaran untuk pesanan #${order.id.substring(0, 8)} Anda telah diperbarui menjadi ${getPaymentStatusDisplayText(newPaymentStatus)}.`,
-          link: `/my-orders/${updatedOrder.id}`,
-          is_read: false,
-        });
-      }
 
     } catch (error: any) {
       console.error("Error updating payment status:", error);
