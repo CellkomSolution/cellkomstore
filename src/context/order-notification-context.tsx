@@ -173,7 +173,7 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
             event: "INSERT",
             schema: "public",
             table: "orders",
-            // Tidak perlu filter, admin harus melihat semua pesanan baru
+            // Admin harus melihat semua pesanan baru
           },
           async (payload) => { // Make async to use await createNotification
             const newRecord = payload.new as Order;
