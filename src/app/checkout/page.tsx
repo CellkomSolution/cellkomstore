@@ -38,6 +38,8 @@ export default function CheckoutPage() {
   const { user, isLoading: isSessionLoading } = useSession();
   const router = useRouter();
 
+  const [hasOrderBeenPlaced, setHasOrderBeenPlaced] = React.useState(false); // New state to track order placement
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,11 +57,12 @@ export default function CheckoutPage() {
       router.replace("/auth");
       return;
     }
-    if (!isSessionLoading && user && totalItems === 0) {
+    // Only redirect to home if cart is empty AND no order was just placed
+    if (!isSessionLoading && user && totalItems === 0 && !hasOrderBeenPlaced) {
       toast.info("Keranjang Anda kosong. Silakan tambahkan produk untuk checkout.");
       router.replace("/");
     }
-  }, [totalItems, router, user, isSessionLoading]);
+  }, [totalItems, router, user, isSessionLoading, hasOrderBeenPlaced]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
@@ -83,9 +86,10 @@ export default function CheckoutPage() {
       });
 
       if (newOrder) {
+        setHasOrderBeenPlaced(true); // Set flag before clearing cart and redirecting
+        clearCart(); // Clear cart
         toast.success("Pesanan berhasil dibuat! Silakan lanjutkan ke pembayaran.");
         router.push(`/my-orders/${newOrder.id}`); // Redirect to the new order detail page
-        clearCart(); // Clear cart AFTER redirect is initiated
       } else {
         toast.error("Gagal membuat pesanan. Silakan coba lagi.");
       }
@@ -109,7 +113,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (totalItems === 0) {
+  if (totalItems === 0 && !hasOrderBeenPlaced) { // Also check hasOrderBeenPlaced here
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold">Keranjang Anda Kosong</h1>
