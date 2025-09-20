@@ -145,21 +145,21 @@ export default function AuthPage() {
            {authMode === 'signin' && (
              <p className="text-sm text-center text-gray-500 mt-4">
                Belum punya akun?{" "}
-               <Button variant="link" onClick={() => setAuthMode('signup_otp')} className="p-0 h-auto">
+               <Button variant="link" onClick={() => setAuthMode('signup_otp')} className="p-0 h-auto dark:hover:text-blue-400">
                  Daftar, yuk!
                </Button>
              </p>
            )}
            {authMode === 'signin' && (
              <p className="text-sm text-center text-gray-500 mt-2">
-               <Button variant="link" onClick={() => setAuthMode('forgot_password')} className="p-0 h-auto">
+               <Button variant="link" onClick={() => setAuthMode('forgot_password')} className="p-0 h-auto dark:hover:text-blue-400">
                  Lupa kata sandi?
                </Button>
              </p>
            )}
            {(authMode === 'signup_otp' || authMode === 'forgot_password') && (
              <p className="text-sm text-center text-gray-500 mt-4">
-               <Button variant="link" onClick={() => setAuthMode('signin')} className="p-0 h-auto">
+               <Button variant="link" onClick={() => setAuthMode('signin')} className="p-0 h-auto dark:hover:text-blue-400">
                  Kembali ke Masuk
                </Button>
              </p>
