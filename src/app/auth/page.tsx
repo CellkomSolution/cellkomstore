@@ -12,13 +12,13 @@ import { useTheme } from "next-themes";
 import { OtpSignupForm } from "@/components/auth/otp-signup-form"; // Import the new OTP signup form
 import { Button } from "@/components/ui/button"; // Import Button for custom links
 
-type AuthMode = 'signin' | 'signup_otp' | 'forgot_password';
+type AuthMode = 'signin' | 'signup_otp'; // Dihapus 'forgot_password'
 
 export default function AuthPage() {
   const router = useRouter();
   const { session, isLoading } = useSession();
   const { theme } = useTheme();
-  const [authMode, setAuthMode] = useState<AuthMode>('signin'); // State to switch between sign-in and OTP sign-up
+  const [authMode, setAuthMode] = useState<AuthMode>('signin'); // Default ke signin
 
   useEffect(() => {
     if (!isLoading && session) {
@@ -29,7 +29,7 @@ export default function AuthPage() {
   if (isLoading || session) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-        <p>Loading...</p>
+        <p>Memuat...</p>
       </div>
     );
   }
@@ -63,21 +63,22 @@ export default function AuthPage() {
       localization={{
         variables: {
           sign_in: {
-            email_label: 'Nomor HP atau email',
+            email_label: 'Email',
             password_label: 'Kata Sandi',
             button_label: 'Masuk',
             social_provider_text: 'Masuk lebih cepat dengan',
-            link_text: 'Belum punya akun? Daftar, yuk!',
+            link_text: '', // Dihapus untuk menghindari duplikasi dengan tombol kustom di bawah
+            forgot_password_link_text: '', // Dihapus tautan 'Lupa kata sandi?' internal
           },
-          sign_up: {
-            email_label: 'Nomor HP atau email',
+          sign_up: { // Tampilan ini tidak digunakan secara langsung, tetapi tetap konsisten
+            email_label: 'Email',
             password_label: 'Buat Kata Sandi',
             button_label: 'Daftar',
-            link_text: 'Sudah punya akun? Masuk',
+            link_text: '', // Dihapus untuk menghindari duplikasi
             social_provider_text: 'Daftar lebih cepat dengan',
           },
-          forgot_password: {
-            email_label: 'Nomor HP atau email',
+          forgot_password: { // Tetap ada jika ada navigasi internal ke tampilan ini
+            email_label: 'Email',
             button_label: 'Kirim instruksi reset',
             link_text: 'Ingat kata sandi? Masuk',
           },
@@ -133,37 +134,31 @@ export default function AuthPage() {
            </div>
            <h2 className="text-2xl font-bold text-center mb-1 text-gray-900 dark:text-white">Selamat Datang</h2>
            <p className="text-sm text-center text-gray-500 mb-8">
-             {authMode === 'signin' && 'Masuk atau daftar untuk melanjutkan'}
+             {authMode === 'signin' && 'Masuk untuk melanjutkan'}
              {authMode === 'signup_otp' && 'Daftar akun baru dengan email'}
-             {authMode === 'forgot_password' && 'Masukkan email Anda untuk mereset kata sandi'}
            </p>
 
            {authMode === 'signin' && renderAuthComponent('sign_in')}
            {authMode === 'signup_otp' && <OtpSignupForm onSwitchToSignIn={() => setAuthMode('signin')} />}
-           {authMode === 'forgot_password' && renderAuthComponent('forgot_password')}
 
-           {authMode === 'signin' && (
-             <p className="text-sm text-center text-gray-500 mt-4">
-               Belum punya akun?{" "}
-               <Button variant="link" onClick={() => setAuthMode('signup_otp')} className="p-0 h-auto dark:hover:text-blue-400">
-                 Daftar, yuk!
-               </Button>
-             </p>
-           )}
-           {authMode === 'signin' && (
-             <p className="text-sm text-center text-gray-500 mt-2">
-               <Button variant="link" onClick={() => setAuthMode('forgot_password')} className="p-0 h-auto dark:hover:text-blue-400">
-                 Lupa kata sandi?
-               </Button>
-             </p>
-           )}
-           {(authMode === 'signup_otp' || authMode === 'forgot_password') && (
-             <p className="text-sm text-center text-gray-500 mt-4">
-               <Button variant="link" onClick={() => setAuthMode('signin')} className="p-0 h-auto dark:hover:text-blue-400">
-                 Kembali ke Masuk
-               </Button>
-             </p>
-           )}
+           {/* Tautan switch yang dikonsolidasikan */}
+           <p className="text-sm text-center text-gray-500 mt-4">
+             {authMode === 'signin' ? (
+               <>
+                 Belum punya akun?{" "}
+                 <Button variant="link" onClick={() => setAuthMode('signup_otp')} className="p-0 h-auto dark:hover:text-blue-400">
+                   Daftar, yuk!
+                 </Button>
+               </>
+             ) : (
+               <>
+                 Sudah punya akun?{" "}
+                 <Button variant="link" onClick={() => setAuthMode('signin')} className="p-0 h-auto dark:hover:text-blue-400">
+                   Masuk
+                 </Button>
+               </>
+             )}
+           </p>
 
            <p className="text-xs text-center text-gray-500 mt-8">
              Dengan log in, kamu menyetujui{' '}
