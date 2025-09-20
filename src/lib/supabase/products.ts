@@ -110,11 +110,15 @@ export async function getProductById(id: string): Promise<Product | null> {
   return mapProductData(data);
 }
 
-export async function searchProducts(query: string, sort: SortOption = 'newest'): Promise<Product[]> {
+export async function searchProducts(query: string, sort: SortOption = 'newest', categorySlug?: string | null): Promise<Product[]> {
   let dbQuery = supabase
     .from("products")
     .select("*")
     .ilike("name", `%${query}%`);
+
+  if (categorySlug) {
+    dbQuery = dbQuery.eq("category", categorySlug);
+  }
 
   dbQuery = applySorting(dbQuery, sort);
 
