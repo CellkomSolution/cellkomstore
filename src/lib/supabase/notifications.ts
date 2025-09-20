@@ -18,7 +18,7 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
     .from("notifications")
     .select(`
       *,
-      user_profile:profiles!user_id(id, first_name, last_name, avatar_url, email)
+      user_profile:profiles!id(id, first_name, last_name, avatar_url, email)
     `)
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
@@ -36,7 +36,7 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
 export async function getUnreadNotificationCount(userId: string): Promise<number> {
   const { count, error } = await supabase
     .from("notifications")
-    .select("id", { count: "exact", head: true })
+    .select("id", { count: "exact" })
     .eq("user_id", userId)
     .eq("is_read", false);
 
@@ -78,7 +78,7 @@ export async function createNotification(notificationData: Omit<Notification, 'i
     .insert(notificationData)
     .select(`
       *,
-      user_profile:profiles!user_id(id, first_name, last_name, avatar_url, email)
+      user_profile:profiles!id(id, first_name, last_name, avatar_url, email)
     `)
     .single();
 
@@ -99,7 +99,7 @@ export async function updateNotification(id: string, notificationData: Partial<O
     .eq("id", id)
     .select(`
       *,
-      user_profile:profiles!user_id(id, first_name, last_name, avatar_url, email)
+      user_profile:profiles!id(id, first_name, last_name, avatar_url, email)
     `)
     .single();
 
