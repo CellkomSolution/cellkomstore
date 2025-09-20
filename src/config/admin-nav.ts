@@ -10,7 +10,6 @@ import {
   BookOpen,
   MessageSquare,
   Images,
-  BellRing, // Import BellRing icon
 } from "lucide-react";
 
 export const adminNavItems = [
@@ -63,11 +62,6 @@ export const adminNavItems = [
     title: "Chat Admin",
     href: "/chats",
     icon: MessageSquare,
-  },
-  {
-    title: "Kirim Notifikasi", // New item
-    href: "/admin/notifications",
-    icon: BellRing, // Using BellRing icon
   },
   {
     title: "Pengaturan",

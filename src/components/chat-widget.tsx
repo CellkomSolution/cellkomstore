@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageSquare, Send, Loader2, User as UserIcon, Package, ReceiptText } from "lucide-react"; // Added ReceiptText icon
+import { MessageSquare, Send, Loader2, User as UserIcon, Package, ReceiptText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
@@ -28,16 +28,15 @@ import {
 } from "@/components/ui/sheet";
 import Image from "next/image";
 import { getProductById, mapProductData } from "@/lib/supabase/products";
-import { getOrderById, Order } from "@/lib/supabase/orders"; // Import getOrderById and Order
+import { getOrderById, Order } from "@/lib/supabase/orders";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/utils";
-import { createNotification } from "@/lib/supabase/notifications"; // Import createNotification
 
 interface ChatWidgetProps {
   productId?: string | null;
   productName?: string | null;
-  orderId?: string | null; // New: Add orderId prop
-  orderName?: string | null; // New: Add orderName prop
+  orderId?: string | null;
+  orderName?: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -220,24 +219,6 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
       };
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
-
-      // // Create notification for the admin - REMOVED as per user request
-      // if (targetAdminId) {
-      //   const senderName = profile?.first_name || user.email?.split('@')[0] || "Pengguna";
-      //   const notificationTitle = `Pesan Baru dari ${senderName}`;
-      //   const notificationMessage = `Anda memiliki pesan baru dari ${senderName} di chat.`;
-      //   const notificationLink = `/chats/${user.id}`; // Link to admin's chat with this user
-
-      //   await createNotification(
-      //     targetAdminId, 
-      //     'new_message', 
-      //     notificationTitle, 
-      //     notificationMessage, 
-      //     notificationLink,
-      //     productId || null, // Pass product_id
-      //     orderId || null    // Pass order_id
-      //   );
-      // }
     }
     setIsSending(false);
   };

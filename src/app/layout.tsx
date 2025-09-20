@@ -8,7 +8,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "@/context/session-context";
 import { getAppSettings } from "@/lib/supabase/app-settings";
-import { OrderNotificationProvider } from "@/context/order-notification-context"; // Import the new provider
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,14 +44,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SessionProvider>
-            <OrderNotificationProvider> {/* Wrap with OrderNotificationProvider */}
-              <CartProvider>
-                <Header />
-                <main className="flex-grow">{children}</main>
-                <Footer />
-                <Toaster richColors />
-              </CartProvider>
-            </OrderNotificationProvider>
+            <CartProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <Toaster richColors />
+            </CartProvider>
           </SessionProvider>
         </ThemeProvider>
       </body>

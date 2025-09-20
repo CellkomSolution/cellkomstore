@@ -26,8 +26,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { formatRupiah } from "@/lib/utils"; // Import formatRupiah
-import { createNotification } from "@/lib/supabase/notifications"; // Import createNotification
+import { formatRupiah } from "@/lib/utils";
 
 interface AdminChatDetailPageProps {
   params: Promise<{ userId: string }>;
@@ -235,24 +234,6 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
       };
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
-
-      // // Create notification for the user (recipient of this message) - REMOVED as per user request
-      // if (otherUserProfile) {
-      //   const notificationTitle = `Pesan Baru dari Admin`;
-      //   const notificationMessage = `Anda memiliki pesan baru dari Admin di chat.`;
-      //   // Link to user's order page if chat is order-related, otherwise null for general chat
-      //   const notificationLink = orderIdFromUrl ? `/my-orders/${orderIdFromUrl}` : null; 
-
-      //   await createNotification(
-      //     userId, 
-      //     'new_message', 
-      //     notificationTitle, 
-      //     notificationMessage, 
-      //     notificationLink,
-      //     null, // product_id is null for admin-initiated chat from admin panel
-      //     orderIdFromUrl // Pass order_id if available
-      //   );
-      // }
     }
     setIsSending(false);
   };

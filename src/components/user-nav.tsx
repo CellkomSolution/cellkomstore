@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Bell } from "lucide-react"; // Import Bell icon
+import { LogOut } from "lucide-react"; // Removed Bell
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -70,9 +70,6 @@ export function UserNav() {
             <>
               <DropdownMenuItem asChild>
                 <Link href="/my-orders">Pesanan Saya</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/notifications">Notifikasi</Link>
               </DropdownMenuItem>
             </>
           )}

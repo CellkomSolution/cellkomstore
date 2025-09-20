@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Search, User, Download, MessageSquare, Bell } from "lucide-react"; // Added Bell, Removed Heart
+import { ShoppingCart, Search, User, Download, MessageSquare } from "lucide-react"; // Removed Bell
 import { MainNav } from "./main-nav";
 import { MobileNav } from "./mobile-nav";
 import { UserNav } from "./user-nav";
@@ -14,8 +14,6 @@ import { AppSettings } from "@/lib/supabase/app-settings";
 import { useCart } from "@/context/cart-context";
 import { ChatNotificationIcon } from "./chat-notification-icon";
 import { AdminChatNotificationIcon } from "./admin-chat-notification-icon";
-import { NotificationBellIcon } from "./notification-bell-icon"; // Import NotificationBellIcon
-import { AdminNotificationBellIcon } from "./admin-notification-bell-icon"; // Import AdminNotificationBellIcon
 import { useAdmin } from "@/hooks/use-admin";
 import { useRouter } from "next/navigation";
 import { CartSheet } from "./cart-sheet";
@@ -28,7 +26,6 @@ export function Header() {
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  // isGeneralChatOpen removed from here, now managed by NotificationBellIcon
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false); // State for MobileNav
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false); // State for CategorySheet
   const router = useRouter();
@@ -160,26 +157,20 @@ export function Header() {
             </form>
           </div>
 
-          {/* Right side: Conditional Icons (Chat, Notification), Cart, UserNav/Auth */}
+          {/* Right side: Conditional Icons (Chat), Cart, UserNav/Auth */}
           <div className="flex items-center space-x-4">
             {isAuthLoading ? (
               <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
             ) : session ? (
-              // Logged in: Show Chat and Notification icons
+              // Logged in: Show Chat icon
               <>
                 {isAdmin ? (
-                  <>
-                    <AdminChatNotificationIcon />
-                    <AdminNotificationBellIcon /> {/* Admin Notification Bell Icon */}
-                  </>
+                  <AdminChatNotificationIcon />
                 ) : (
-                  <>
-                    <ChatNotificationIcon />
-                    <NotificationBellIcon /> {/* Notification Bell Icon for non-admins */}
-                  </>
+                  <ChatNotificationIcon />
                 )}
               </>
-            ) : null} {/* No notification/chat icons if not logged in */}
+            ) : null} {/* No chat icons if not logged in */}
 
             <CartSheet /> {/* Cart is always visible */}
 
