@@ -4,16 +4,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "@/context/session-context";
 import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import { OtpSignupForm } from "@/components/auth/otp-signup-form"; // Import the new OTP signup form
+
+type AuthMode = 'signin' | 'signup_otp';
 
 export default function AuthPage() {
   const router = useRouter();
   const { session, isLoading } = useSession();
   const { theme } = useTheme();
+  const [authMode, setAuthMode] = useState<AuthMode>('signin'); // State to switch between sign-in and OTP sign-up
 
   useEffect(() => {
     if (!isLoading && session) {
@@ -68,51 +72,67 @@ export default function AuthPage() {
            </div>
            <h2 className="text-2xl font-bold text-center mb-1 text-gray-900 dark:text-white">Selamat Datang</h2>
            <p className="text-sm text-center text-gray-500 mb-8">Masuk atau daftar untuk melanjutkan</p>
-           <Auth
-            supabaseClient={supabase}
-            providers={['google', 'apple']}
-            socialLayout="horizontal"
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: 'hsl(var(--primary))',
-                    brandAccent: 'hsl(var(--primary-foreground))',
+           
+           {authMode === 'signin' ? (
+             <Auth
+              supabaseClient={supabase}
+              providers={['google', 'apple']}
+              socialLayout="horizontal"
+              appearance={{
+                theme: ThemeSupa,
+                variables: {
+                  default: {
+                    colors: {
+                      brand: 'hsl(var(--primary))',
+                      brandAccent: 'hsl(var(--primary-foreground))',
+                    },
+                     radii: {
+                      buttonBorderRadius: 'var(--radius)',
+                    },
                   },
-                   radii: {
-                    buttonBorderRadius: 'var(--radius)',
+                },
+                 className: {
+                  button: 'py-2.5 text-sm',
+                  input: 'py-2.5 text-sm',
+                  label: 'text-sm',
+                  anchor: 'text-sm'
+                },
+              }}
+              theme={theme === "dark" ? "dark" : "light"}
+              localization={{
+                variables: {
+                  sign_in: {
+                    email_label: 'Nomor HP atau email',
+                    password_label: 'Kata Sandi',
+                    button_label: 'Masuk',
+                    social_provider_text: 'Masuk lebih cepat dengan',
+                    link_text: 'Belum punya akun? Daftar, yuk!',
+                  },
+                  sign_up: { // This will be hidden by view="sign_in" but kept for localization consistency
+                    email_label: 'Nomor HP atau email',
+                    password_label: 'Buat Kata Sandi',
+                    button_label: 'Daftar',
+                    link_text: 'Sudah punya akun? Masuk',
+                    social_provider_text: 'Daftar lebih cepat dengan',
                   },
                 },
-              },
-               className: {
-                button: 'py-2.5 text-sm',
-                input: 'py-2.5 text-sm',
-                label: 'text-sm',
-                anchor: 'text-sm'
-              },
-            }}
-            theme={theme === "dark" ? "dark" : "light"}
-            localization={{
-              variables: {
-                sign_in: {
-                  email_label: 'Nomor HP atau email',
-                  password_label: 'Kata Sandi',
-                  button_label: 'Masuk',
-                  social_provider_text: 'Masuk lebih cepat dengan',
-                  link_text: 'Belum punya akun? Daftar, yuk!',
-                },
-                sign_up: {
-                  email_label: 'Nomor HP atau email',
-                  password_label: 'Buat Kata Sandi',
-                  button_label: 'Daftar',
-                  link_text: 'Sudah punya akun? Masuk',
-                  social_provider_text: 'Daftar lebih cepat dengan',
-                },
-              },
-            }}
-            redirectTo={typeof window !== 'undefined' ? window.location.origin : undefined}
-          />
+              }}
+              view="sign_in" // Only show sign-in view
+              redirectTo={typeof window !== 'undefined' ? window.location.origin : undefined}
+            />
+           ) : (
+             <OtpSignupForm onSwitchToSignIn={() => setAuthMode('signin')} />
+           )}
+
+           {authMode === 'signin' && (
+             <p className="text-sm text-center text-gray-500 mt-4">
+               Belum punya akun?{" "}
+               <Button variant="link" onClick={() => setAuthMode('signup_otp')} className="p-0 h-auto">
+                 Daftar, yuk!
+               </Button>
+             </p>
+           )}
+
            <p className="text-xs text-center text-gray-500 mt-8">
              Dengan log in, kamu menyetujui{' '}
              <Link href="#" className="underline hover:text-primary">
