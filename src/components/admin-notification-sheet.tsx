@@ -108,7 +108,7 @@ export function AdminNotificationSheet({ open, onOpenChange }: AdminNotification
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="flex flex-col w-full sm:max-w-md p-0">
+      <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-0">
         {Content}
       </SheetContent>
     </Sheet>
