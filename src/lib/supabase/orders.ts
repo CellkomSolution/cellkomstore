@@ -3,7 +3,6 @@ import { CartItem } from "@/context/cart-context";
 import { Profile } from "./profiles";
 import { Product, mapProductData } from "./products";
 import { PaymentMethod } from "./payment-methods"; // Import PaymentMethod type
-import { createNotification } from "./notifications"; // Import createNotification
 import { getAdminUserId } from "./profiles"; // Import getAdminUserId
 
 // Define a type for the raw product data as it comes from Supabase
@@ -219,20 +218,6 @@ export async function confirmPaymentByUser(orderId: string, userId: string): Pro
   if (error) {
     console.error(`Error confirming payment for order ${orderId}:`, error.message);
     throw new Error("Gagal mengonfirmasi pembayaran.");
-  }
-
-  if (updatedOrder) {
-    // Send notification to admin
-    const adminId = await getAdminUserId();
-    if (adminId) {
-      await createNotification({
-        user_id: adminId,
-        title: "Pembayaran Dikonfirmasi Pengguna",
-        message: `Pengguna ${userId.substring(0, 8)} telah mengonfirmasi pembayaran untuk pesanan #${updatedOrder.id.substring(0, 8)}. Mohon verifikasi.`,
-        link: `/admin/orders/${updatedOrder.id}`,
-        is_read: false,
-      });
-    }
   }
 
   return updatedOrder as Order;

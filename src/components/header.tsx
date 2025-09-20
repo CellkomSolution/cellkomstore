@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Search, User, Download, MessageSquare } from "lucide-react"; // Removed Bell
+import { ShoppingCart, Search, User, Download, MessageSquare } from "lucide-react";
 import { MainNav } from "./main-nav";
 import { MobileNav } from "./mobile-nav";
 import { UserNav } from "./user-nav";
@@ -18,7 +18,6 @@ import { useAdmin } from "@/hooks/use-admin";
 import { useRouter } from "next/navigation";
 import { CartSheet } from "./cart-sheet";
 import { CategorySheet } from "./category-sheet";
-import { NotificationBellIcon } from "./notification-bell-icon"; // Import NotificationBellIcon
 
 export function Header() {
   const { session, isLoading: isAuthLoading, user } = useAuth();
@@ -162,7 +161,6 @@ export function Header() {
               <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
             ) : session ? (
               <>
-                <NotificationBellIcon /> {/* New: Notification Bell Icon */}
                 {isAdmin ? (
                   <AdminChatNotificationIcon />
                 ) : (

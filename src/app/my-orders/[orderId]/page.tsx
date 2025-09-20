@@ -30,7 +30,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { createNotification } from "@/lib/supabase/notifications"; // Import createNotification
 
 interface UserOrderDetailPageProps {
   params: Promise<{ orderId: string }>;
@@ -94,17 +93,6 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
       clearCart(); // Clear cart after payment method is selected and confirmed
       toast.success("Metode pembayaran berhasil dipilih! Mohon lakukan pembayaran.");
       
-      // Send notification to the buyer
-      if (order.user_id) {
-        await createNotification({
-          user_id: order.user_id,
-          title: "Metode Pembayaran Dipilih",
-          message: `Anda telah memilih metode pembayaran untuk pesanan #${order.id.substring(0, 8)}. Menunggu konfirmasi dari penjual.`,
-          link: `/my-orders/${order.id}`,
-          is_read: false,
-        });
-      }
-
       await fetchData(); // Refetch to update UI with new payment status
     } catch (error: any) {
       console.error("Error confirming payment method:", error);
@@ -143,16 +131,6 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
         await updateOrderStatus(order.id, 'cancelled', 'refunded');
         toast.success("Pesanan berhasil dibatalkan.");
 
-        // Send notification to the buyer
-        if (order.user_id) {
-          await createNotification({
-            user_id: order.user_id,
-            title: "Pesanan Dibatalkan",
-            message: `Pesanan #${order.id.substring(0, 8)} Anda telah berhasil dibatalkan.`,
-            link: `/my-orders/${order.id}`,
-            is_read: false,
-          });
-        }
         await fetchData(); // Refetch to update UI
       }
     } catch (error: any) {
