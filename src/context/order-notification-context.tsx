@@ -118,7 +118,8 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
             // Notify on payment_status change (e.g., admin confirmed payment)
             if (newRecord.payment_status !== oldRecord.payment_status && newRecord.payment_status === 'paid') {
               const title = `Pembayaran Pesanan #${newRecord.id.substring(0, 8)} Dikonfirmasi`;
-              const message = `Pembayaran pesanan Anda telah dikonfirmasi!`;
+              // Updated message as per user request
+              const message = `Pembayaran Anda sudah diterima, pesanan Anda sedang diproses.`; 
               const link = `/my-orders/${newRecord.id}`;
 
               await createNotification(userId, 'payment_status_update', title, message, link, null, newRecord.id); // Pass order_id
