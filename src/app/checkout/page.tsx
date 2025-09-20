@@ -55,6 +55,10 @@ export default function CheckoutPage() {
       router.replace("/auth");
       return;
     }
+    // This check should only prevent direct access to an empty checkout,
+    // not interfere with post-order redirects.
+    // The `totalItems === 0` check here is fine for initial load,
+    // but `clearCart()` should happen after the redirect to avoid race conditions.
     if (!isSessionLoading && user && totalItems === 0) {
       toast.info("Keranjang Anda kosong. Silakan tambahkan produk untuk checkout.");
       router.replace("/");
@@ -83,9 +87,9 @@ export default function CheckoutPage() {
       });
 
       if (newOrder) {
-        clearCart(); // Clear cart immediately after order creation
         toast.success("Pesanan berhasil dibuat! Silakan lanjutkan ke pembayaran.");
         router.push(`/my-orders/${newOrder.id}`); // Redirect to the new order detail page
+        clearCart(); // Clear cart AFTER redirect is initiated
       } else {
         toast.error("Gagal membuat pesanan. Silakan coba lagi.");
       }
@@ -110,6 +114,8 @@ export default function CheckoutPage() {
   }
 
   if (totalItems === 0) {
+    // This block is for initial load with empty cart, or if user navigates back to checkout after clearing cart.
+    // It should not be hit after a successful order submission.
     return (
        <div className="container mx-auto px-4 py-8 text-center">
          <h1 className="text-2xl font-bold">Keranjang Anda Kosong</h1>
@@ -180,7 +186,7 @@ export default function CheckoutPage() {
                     name="kecamatan"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Kecamatan</FormLabel>
+                        <FormLabel>Kecamatan</Label>
                         <FormControl>
                           <Input placeholder="Contoh: IV Koto" {...field} />
                         </FormControl>
