@@ -125,9 +125,12 @@ const formSchema = z.object({
 // Derive the form values type directly from the schema
 export type PaymentMethodFormValues = z.infer<typeof formSchema>;
 
+// Define a type that includes the dynamically constructed 'details'
+export type PaymentMethodSubmitValues = PaymentMethodFormValues & { details: any };
+
 interface PaymentMethodFormProps {
   initialData?: PaymentMethod | null;
-  onSubmit: (values: PaymentMethodFormValues) => Promise<void>;
+  onSubmit: (values: PaymentMethodSubmitValues) => Promise<void>;
   loading?: boolean;
 }
 

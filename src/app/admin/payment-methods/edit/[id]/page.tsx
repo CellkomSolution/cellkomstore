@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PaymentMethodForm, PaymentMethodFormValues } from "@/components/payment-method-form";
+import { PaymentMethodForm, PaymentMethodFormValues, PaymentMethodSubmitValues } from "@/components/payment-method-form";
 import { toast } from "sonner";
 import { getPaymentMethodById, updatePaymentMethod, PaymentMethod } from "@/lib/supabase/payment-methods";
 import { ProductDetailPageSkeleton } from "@/components/product-detail-page-skeleton"; // Reusing skeleton
@@ -31,7 +31,7 @@ export default function EditPaymentMethodPage({ params }: { params: Promise<{ id
     fetchPaymentMethod();
   }, [id, router]);
 
-  const onSubmit = async (values: PaymentMethodFormValues) => {
+  const onSubmit = async (values: PaymentMethodSubmitValues) => {
     setIsSubmitting(true);
     try {
       if (!initialData) {
@@ -42,9 +42,10 @@ export default function EditPaymentMethodPage({ params }: { params: Promise<{ id
       const methodData = {
         name: values.name,
         type: values.type,
-        details: values.details, // Removed JSON.parse
+        details: values.details,
         is_active: values.is_active || false, // Ensure it's boolean
         order: values.order,
+        image_url: values.image_url, // Include image_url
       };
 
       await updatePaymentMethod(initialData.id, methodData);
