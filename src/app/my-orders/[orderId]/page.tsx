@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, MapPin, Phone, User as UserIcon, CalendarDays, ArrowLeft, MessageSquare, Banknote, Wallet, CreditCard, Package, ReceiptText } from "lucide-react";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
-import { getOrderById, updateOrderPaymentMethodAndStatus, updateOrderStatus, Order } from "@/lib/supabase/orders"; // Import updateOrderStatus
+import { getOrderById, updateOrderPaymentMethodAndStatus, updateOrderStatus, Order } from "@/lib/supabase/orders";
 import { getPaymentMethods, PaymentMethod } from "@/lib/supabase/payment-methods";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -29,7 +29,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"; // Import AlertDialog components
+} from "@/components/ui/alert-dialog";
+import { createNotification } from "@/lib/supabase/notifications"; // Import createNotification
 
 interface UserOrderDetailPageProps {
   params: Promise<{ orderId: string }>;
@@ -47,7 +48,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
   const [paymentMethods, setPaymentMethods] = React.useState<PaymentMethod[]>([]);
   const [selectedPaymentMethodId, setSelectedPaymentMethodId] = React.useState<string | null>(null);
   const [isConfirmingPayment, setIsConfirmingPayment] = React.useState(false);
-  const [isCancellingOrder, setIsCancellingOrder] = React.useState(false); // New state for cancellation
+  const [isCancellingOrder, setIsCancellingOrder] = React.useState(false);
 
   const fetchData = React.useCallback(async () => {
     setIsLoading(true);
@@ -91,6 +92,18 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
       await updateOrderPaymentMethodAndStatus(order.id, selectedPaymentMethodId);
       clearCart(); // Clear cart after payment method is selected and confirmed
       toast.success("Metode pembayaran berhasil dipilih! Mohon lakukan pembayaran.");
+      
+      // Send notification to the buyer
+      if (order.user_id) {
+        await createNotification({
+          user_id: order.user_id,
+          title: "Metode Pembayaran Dipilih",
+          message: `Anda telah memilih metode pembayaran untuk pesanan #${order.id.substring(0, 8)}. Menunggu konfirmasi dari penjual.`,
+          link: `/my-orders/${order.id}`,
+          is_read: false,
+        });
+      }
+
       await fetchData(); // Refetch to update UI with new payment status
     } catch (error: any) {
       console.error("Error confirming payment method:", error);
@@ -100,7 +113,6 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     }
   };
 
-  // New function to handle order cancellation
   const handleCancelOrder = async () => {
     if (!order) return;
     setIsCancellingOrder(true);
@@ -108,6 +120,18 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
       // Update order status to 'cancelled' and payment status to 'refunded'
       await updateOrderStatus(order.id, 'cancelled', 'refunded');
       toast.success("Pesanan berhasil dibatalkan.");
+
+      // Send notification to the buyer
+      if (order.user_id) {
+        await createNotification({
+          user_id: order.user_id,
+          title: "Pesanan Dibatalkan",
+          message: `Pesanan #${order.id.substring(0, 8)} Anda telah berhasil dibatalkan.`,
+          link: `/my-orders/${order.id}`,
+          is_read: false,
+        });
+      }
+
       await fetchData(); // Refetch to update UI
     } catch (error: any) {
       console.error("Error cancelling order:", error);
@@ -117,7 +141,6 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     }
   };
 
-  // New function to handle "Tambah Pesanan"
   const handleContinueShopping = () => {
     clearCart(); // Clear cart before redirecting to shopping
     router.push("/");
@@ -125,7 +148,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
 
   const getStatusBadgeVariant = (orderStatus: Order['order_status'], paymentStatus: Order['payment_status']) => {
     if (paymentStatus === 'unpaid') return 'secondary';
-    if (paymentStatus === 'awaiting_confirmation') return 'info'; // Assuming 'info' variant exists or can be added
+    if (paymentStatus === 'awaiting_confirmation') return 'info';
     if (paymentStatus === 'paid') return 'success';
     if (paymentStatus === 'refunded') return 'destructive';
 
@@ -306,7 +329,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
                 </div>
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total Pembayaran</span>
-                  <span>{formatRupiah(order.total_amount + order.payment_unique_code)}</span> {/* Display total with unique code */}
+                  <span>{formatRupiah(order.total_amount + order.payment_unique_code)}</span>
                 </div>
                 {order.payment_status === 'unpaid' && (
                   <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
@@ -387,12 +410,10 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
               Hubungi Penjual
             </Button>
 
-            {/* New: "Tambah Pesanan" button */}
             <Button variant="secondary" className="w-full" onClick={handleContinueShopping}>
               Tambah Pesanan
             </Button>
 
-            {/* New: "Batalkan Pesanan" button with AlertDialog */}
             {isCancellable && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, MapPin, Phone, User as UserIcon, Package, CalendarDays, MessageSquare, ReceiptText } from "lucide-react"; // Added ReceiptText icon
+import { Loader2, MapPin, Phone, User as UserIcon, Package, CalendarDays, MessageSquare, ReceiptText } from "lucide-react";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
 import { getOrderById, updateOrderStatus, Order } from "@/lib/supabase/orders";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { createNotification } from "@/lib/supabase/notifications"; // Import createNotification
 
 interface AdminOrderDetailPageProps {
   params: Promise<{ id: string }>;
@@ -49,22 +50,51 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
     fetchData();
   }, [orderId, router]);
 
-  const handleStatusChange = async (newStatus: Order['order_status'] | Order['payment_status']) => {
+  const getOrderStatusDisplayText = (status: Order['order_status']) => {
+    switch (status) {
+      case 'pending': return 'Menunggu';
+      case 'processing': return 'Diproses';
+      case 'completed': return 'Selesai';
+      case 'cancelled': return 'Dibatalkan';
+      default: return 'Tidak Diketahui';
+    }
+  };
+
+  const handleStatusChange = async (newStatus: Order['order_status']) => {
     if (!order) return;
     setIsUpdatingStatus(true);
     try {
       let updatedOrder: Order | null = null;
+      let notificationTitle = "";
+      let notificationMessage = "";
+
       if (order.payment_status === 'awaiting_confirmation' && newStatus === 'processing') {
         // Admin confirms payment
-        updatedOrder = await updateOrderStatus(order.id, newStatus as Order['order_status'], 'paid');
-        toast.success(`Pembayaran dikonfirmasi! Status pesanan diubah menjadi ${newStatus}.`);
+        updatedOrder = await updateOrderStatus(order.id, newStatus, 'paid');
+        notificationTitle = "Pembayaran Dikonfirmasi!";
+        notificationMessage = `Pembayaran untuk pesanan #${order.id.substring(0, 8)} Anda telah dikonfirmasi. Pesanan Anda sekarang sedang diproses.`;
+        toast.success(`Pembayaran dikonfirmasi! Status pesanan diubah menjadi ${getOrderStatusDisplayText(newStatus)}.`);
       } else {
         // Regular order status update
-        updatedOrder = await updateOrderStatus(order.id, newStatus as Order['order_status']);
-        toast.success(`Status pesanan berhasil diperbarui menjadi ${newStatus}.`);
+        updatedOrder = await updateOrderStatus(order.id, newStatus);
+        notificationTitle = "Status Pesanan Diperbarui";
+        notificationMessage = `Status pesanan #${order.id.substring(0, 8)} Anda telah diperbarui menjadi ${getOrderStatusDisplayText(newStatus)}.`;
+        toast.success(`Status pesanan berhasil diperbarui menjadi ${getOrderStatusDisplayText(newStatus)}.`);
       }
       
       setOrder(updatedOrder);
+
+      // Send notification to the buyer
+      if (updatedOrder && updatedOrder.user_id) {
+        await createNotification({
+          user_id: updatedOrder.user_id,
+          title: notificationTitle,
+          message: notificationMessage,
+          link: `/my-orders/${updatedOrder.id}`,
+          is_read: false,
+        });
+      }
+
     } catch (error: any) {
       console.error("Error updating order status:", error);
       toast.error(error.message || "Gagal memperbarui status pesanan.");
@@ -211,7 +241,7 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
               <div className="flex items-center gap-2">
                 <span className="font-medium">Status Pesanan:</span>
                 <Badge variant={getOrderStatusBadgeVariant(order.order_status)}>
-                  {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
+                  {getOrderStatusDisplayText(order.order_status)}
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
