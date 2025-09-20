@@ -81,7 +81,7 @@ export async function getUnreadMessageCount(userId: string): Promise<number> {
   return data?.length || 0;
 }
 
-export async function getChatParticipants(adminId: string) {
+export async function getChatParticipants(adminId: string): Promise<ChatConversation[]> {
   const { data, error } = await supabase
     .from('chats')
     .select(`
