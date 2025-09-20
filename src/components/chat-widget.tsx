@@ -221,23 +221,23 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
       setMessages((prev) => [...prev, mappedData as ChatMessage]);
       setNewMessage("");
 
-      // Create notification for the admin
-      if (targetAdminId) {
-        const senderName = profile?.first_name || user.email?.split('@')[0] || "Pengguna";
-        const notificationTitle = `Pesan Baru dari ${senderName}`;
-        const notificationMessage = `Anda memiliki pesan baru dari ${senderName} di chat.`;
-        const notificationLink = `/chats/${user.id}`; // Link to admin's chat with this user
+      // // Create notification for the admin - REMOVED as per user request
+      // if (targetAdminId) {
+      //   const senderName = profile?.first_name || user.email?.split('@')[0] || "Pengguna";
+      //   const notificationTitle = `Pesan Baru dari ${senderName}`;
+      //   const notificationMessage = `Anda memiliki pesan baru dari ${senderName} di chat.`;
+      //   const notificationLink = `/chats/${user.id}`; // Link to admin's chat with this user
 
-        await createNotification(
-          targetAdminId, 
-          'new_message', 
-          notificationTitle, 
-          notificationMessage, 
-          notificationLink,
-          productId || null, // Pass product_id
-          orderId || null    // Pass order_id
-        );
-      }
+      //   await createNotification(
+      //     targetAdminId, 
+      //     'new_message', 
+      //     notificationTitle, 
+      //     notificationMessage, 
+      //     notificationLink,
+      //     productId || null, // Pass product_id
+      //     orderId || null    // Pass order_id
+      //   );
+      // }
     }
     setIsSending(false);
   };
