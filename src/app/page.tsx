@@ -1,3 +1,11 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const schema = z.object({
+  site_name: z.string().optional(),
+});
+
+const resolver = zodResolver(schema);
 
 
 import { CategoryIcons } from "@/components/category-icons";
