@@ -69,6 +69,8 @@ export function Header() {
     }, 100); // 100ms delay
   };
 
+  const showScrollingText = (appSettings?.scrolling_text_enabled && appSettings?.scrolling_text_content) || (appSettings?.store_status_enabled && appSettings?.store_status_content);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300 hidden md:block">
@@ -199,10 +201,18 @@ export function Header() {
           </div>
         </div>
       </div>
-      {appSettings?.scrolling_text_enabled && appSettings?.scrolling_text_content && (
+      {showScrollingText && (
         <div className="bg-primary text-primary-foreground text-sm py-1 overflow-hidden whitespace-nowrap">
-          <div className="animate-marquee">
-            {appSettings.scrolling_text_content}
+          <div className="animate-marquee flex items-center">
+            {appSettings?.scrolling_text_enabled && appSettings?.scrolling_text_content && (
+              <span>{appSettings.scrolling_text_content}</span>
+            )}
+            {(appSettings?.scrolling_text_enabled && appSettings?.scrolling_text_content && appSettings?.store_status_enabled && appSettings?.store_status_content) && (
+              <span className="mx-8">|</span>
+            )}
+            {appSettings?.store_status_enabled && appSettings?.store_status_content && (
+              <span>{appSettings.store_status_content}</span>
+            )}
           </div>
         </div>
       )}

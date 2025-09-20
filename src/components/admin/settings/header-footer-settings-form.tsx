@@ -67,6 +67,47 @@ export function HeaderFooterSettingsForm({ isSubmitting }: HeaderFooterSettingsF
 
       <FormField
         control={form.control}
+        name="store_status_enabled" // New field
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <FormLabel className="text-base">Aktifkan Status Toko Offline</FormLabel>
+              <FormDescription>
+                Tampilkan status buka/tutup toko offline di teks berjalan header.
+              </FormDescription>
+            </div>
+            <FormControl>
+              <Switch
+                checked={field.value ?? false}
+                onCheckedChange={field.onChange}
+                disabled={isSubmitting}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      {form.watch("store_status_enabled") && (
+        <FormField
+          control={form.control}
+          name="store_status_content" // New field
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Konten Status Toko Offline</FormLabel>
+              <FormControl>
+                <Input placeholder="Contoh: Toko Buka (09:00 - 21:00)" {...field} value={field.value ?? ""} />
+              </FormControl>
+              <FormDescription>
+                Teks yang akan ditampilkan sebagai status toko offline.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      <FormField
+        control={form.control}
         name="right_header_text_enabled"
         render={({ field }) => (
           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">

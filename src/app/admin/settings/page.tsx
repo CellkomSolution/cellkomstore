@@ -25,14 +25,16 @@ const formSchema = z.object({
   twitter_url: z.string().url({ message: "URL Twitter tidak valid." }).nullable().default(null),
   youtube_url: z.string().url({ message: "URL YouTube tidak valid." }).nullable().default(null),
   linkedin_url: z.string().url({ message: "URL LinkedIn tidak valid." }).nullable().default(null),
-  scrolling_text_enabled: z.boolean().default(false), // Changed to default(false)
+  scrolling_text_enabled: z.boolean().default(false),
   scrolling_text_content: z.string().nullable().default(null),
-  right_header_text_enabled: z.boolean().default(false), // Changed to default(false)
+  right_header_text_enabled: z.boolean().default(false),
   right_header_text_content: z.string().nullable().default(null),
   right_header_text_link: z.string().url({ message: "URL tautan tidak valid." }).nullable().default(null),
   download_app_url: z.string().url({ message: "URL unduhan aplikasi tidak valid." }).nullable().default(null),
   download_app_text: z.string().nullable().default(null),
   featured_brands_title: z.string().nullable().default(null),
+  store_status_enabled: z.boolean().default(false), // New field
+  store_status_content: z.string().nullable().default(null), // New field
 }).superRefine((data, ctx) => {
   if (data.scrolling_text_enabled && (!data.scrolling_text_content || data.scrolling_text_content.trim() === '')) {
     ctx.addIssue({
@@ -53,6 +55,14 @@ const formSchema = z.object({
       code: z.ZodIssueCode.custom,
       message: "Teks unduhan aplikasi tidak boleh kosong jika URL diaktifkan.",
       path: ['download_app_text'],
+    });
+  }
+  // New validation for store status
+  if (data.store_status_enabled && (!data.store_status_content || data.store_status_content.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Konten status toko tidak boleh kosong jika diaktifkan.",
+      path: ['store_status_content'],
     });
   }
 });
@@ -86,6 +96,8 @@ export default function AdminSettingsPage() {
       download_app_url: null,
       download_app_text: null,
       featured_brands_title: null,
+      store_status_enabled: false, // New default
+      store_status_content: null, // New default
     },
   });
 
@@ -114,6 +126,8 @@ export default function AdminSettingsPage() {
           download_app_url: settings.download_app_url ?? null,
           download_app_text: settings.download_app_text ?? null,
           featured_brands_title: settings.featured_brands_title ?? null,
+          store_status_enabled: settings.store_status_enabled ?? false, // New field
+          store_status_content: settings.store_status_content ?? null, // New field
         });
       } else {
         // If no settings, ensure form is reset to schema defaults
@@ -136,6 +150,8 @@ export default function AdminSettingsPage() {
           download_app_url: null,
           download_app_text: null,
           featured_brands_title: null,
+          store_status_enabled: false,
+          store_status_content: null,
         });
       }
       setIsLoading(false);

@@ -18,9 +18,11 @@ export interface AppSettings {
   right_header_text_enabled: boolean | null;
   right_header_text_content: string | null;
   right_header_text_link: string | null;
-  featured_brands_title: string | null; // New field added
+  featured_brands_title: string | null;
   download_app_url: string | null;
-  download_app_text: string | null; // New field
+  download_app_text: string | null;
+  store_status_enabled: boolean | null; // New field
+  store_status_content: string | null; // New field
 }
 
 export async function getAppSettings(): Promise<AppSettings | null> {
