@@ -90,7 +90,7 @@ export default function AuthPage() {
         },
       }}
       view={view}
-      redirectTo={typeof window !== 'undefined' ? window.location.origin : undefined}
+      redirectTo="/auth/confirm" // Changed this line
     />
   );
 

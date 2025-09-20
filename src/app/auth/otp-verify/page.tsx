@@ -92,6 +92,7 @@ export default function OtpVerifyPage() {
         options: {
           shouldCreateUser: true,
           channel: "email",
+          emailRedirectTo: `${window.location.origin}/auth/confirm`, // Added this line
         },
       });
 
