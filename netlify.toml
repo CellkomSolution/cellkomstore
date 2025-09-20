@@ -4,3 +4,7 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  # Enable Next.js build cache
+  NEXT_BUILD_CACHE_DIR = ".next/cache"
