@@ -34,6 +34,7 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
   const [order, setOrder] = React.useState<Order | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isUpdatingStatus, setIsUpdatingStatus] = React.useState(false);
+  const [isUpdatingPaymentStatus, setIsUpdatingPaymentStatus] = React.useState(false); // New state for payment status update
 
   React.useEffect(() => {
     async function fetchData() {
@@ -56,11 +57,22 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
       case 'processing': return 'Diproses';
       case 'completed': return 'Selesai';
       case 'cancelled': return 'Dibatalkan';
+      case 'awaiting_confirmation': return 'Menunggu Konfirmasi'; // Should not happen for order status, but for completeness
       default: return 'Tidak Diketahui';
     }
   };
 
-  const handleStatusChange = async (newStatus: Order['order_status']) => {
+  const getPaymentStatusDisplayText = (status: Order['payment_status']) => {
+    switch (status) {
+      case 'unpaid': return 'Belum Dibayar';
+      case 'awaiting_confirmation': return 'Menunggu Konfirmasi';
+      case 'paid': return 'Sudah Dibayar';
+      case 'refunded': return 'Dikembalikan';
+      default: return 'Tidak Diketahui';
+    }
+  };
+
+  const handleOrderStatusChange = async (newStatus: Order['order_status']) => {
     if (!order) return;
     setIsUpdatingStatus(true);
     try {
@@ -100,6 +112,33 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
       toast.error(error.message || "Gagal memperbarui status pesanan.");
     } finally {
       setIsUpdatingStatus(false);
+    }
+  };
+
+  const handlePaymentStatusChange = async (newPaymentStatus: Order['payment_status']) => {
+    if (!order) return;
+    setIsUpdatingPaymentStatus(true);
+    try {
+      const updatedOrder = await updateOrderStatus(order.id, order.order_status, newPaymentStatus);
+      setOrder(updatedOrder);
+      toast.success(`Status pembayaran berhasil diperbarui menjadi ${getPaymentStatusDisplayText(newPaymentStatus)}.`);
+
+      // Send notification to the buyer
+      if (updatedOrder && updatedOrder.user_id) {
+        await createNotification({
+          user_id: updatedOrder.user_id,
+          title: "Status Pembayaran Diperbarui",
+          message: `Status pembayaran untuk pesanan #${order.id.substring(0, 8)} Anda telah diperbarui menjadi ${getPaymentStatusDisplayText(newPaymentStatus)}.`,
+          link: `/my-orders/${updatedOrder.id}`,
+          is_read: false,
+        });
+      }
+
+    } catch (error: any) {
+      console.error("Error updating payment status:", error);
+      toast.error(error.message || "Gagal memperbarui status pembayaran.");
+    } finally {
+      setIsUpdatingPaymentStatus(false);
     }
   };
 
@@ -238,69 +277,55 @@ export default function AdminOrderDetailPage({ params }: AdminOrderDetailPagePro
               <CardTitle>Status Pesanan & Pembayaran</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-2">
                 <span className="font-medium">Status Pesanan:</span>
                 <Badge variant={getOrderStatusBadgeVariant(order.order_status)}>
                   {getOrderStatusDisplayText(order.order_status)}
                 </Badge>
+                <Select
+                  value={order.order_status}
+                  onValueChange={(value: Order['order_status']) => handleOrderStatusChange(value)}
+                  disabled={isUpdatingStatus}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Ubah Status Pesanan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+                {isUpdatingStatus && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mt-2" />}
               </div>
-              <div className="flex items-center gap-2">
+              <Separator />
+              <div className="flex flex-col gap-2">
                 <span className="font-medium">Status Pembayaran:</span>
                 <Badge variant={getPaymentStatusBadgeVariant(order.payment_status)}>
                   {getPaymentStatusText(order.payment_status)}
                 </Badge>
+                <Select
+                  value={order.payment_status}
+                  onValueChange={(value: Order['payment_status']) => handlePaymentStatusChange(value)}
+                  disabled={isUpdatingPaymentStatus}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Ubah Status Pembayaran" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unpaid">Unpaid</SelectItem>
+                    <SelectItem value="awaiting_confirmation">Awaiting Confirmation</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="refunded">Refunded</SelectItem>
+                  </SelectContent>
+                </Select>
+                {isUpdatingPaymentStatus && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mt-2" />}
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-4">
                 <ReceiptText className="h-4 w-4" />
                 <span>Kode Unik Pembayaran: <span className="font-semibold text-primary">{order.payment_unique_code}</span></span>
               </div>
-              
-              {order.payment_status === 'awaiting_confirmation' && (
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Pembeli telah memilih metode pembayaran dan menunggu konfirmasi Anda.
-                  </p>
-                  <Button 
-                    className="w-full" 
-                    onClick={() => handleStatusChange('processing')} 
-                    disabled={isUpdatingStatus}
-                  >
-                    {isUpdatingStatus ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Konfirmasi Pembayaran & Proses Pesanan
-                  </Button>
-                </div>
-              )}
-
-              {order.payment_status === 'paid' && (
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Pembayaran telah dikonfirmasi. Anda dapat mengubah status pesanan.
-                  </p>
-                  <Select
-                    value={order.order_status}
-                    onValueChange={(value: Order['order_status']) => handleStatusChange(value)}
-                    disabled={isUpdatingStatus}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Ubah Status Pesanan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="processing">Processing</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {isUpdatingStatus && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mt-2" />}
-                </div>
-              )}
-
-              {order.payment_status === 'unpaid' && (
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground">
-                    Pembeli belum memilih metode pembayaran.
-                  </p>
-                </div>
-              )}
             </CardContent>
           </Card>
 
