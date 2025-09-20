@@ -71,7 +71,7 @@ export function UserNav() {
               <DropdownMenuItem asChild>
                 <Link href="/my-orders">Pesanan Saya</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild> {/* New: Link to notifications page */}
+              <DropdownMenuItem asChild>
                 <Link href="/notifications">Notifikasi</Link>
               </DropdownMenuItem>
             </>
