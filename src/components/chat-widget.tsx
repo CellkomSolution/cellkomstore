@@ -248,110 +248,8 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
     return <p>Chat Admin</p>;
   };
 
-  if (isSessionLoading || isLoadingAdminId) {
-    const Content = () => (
-      <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
-        <p className="text-muted-foreground">Memuat informasi chat...</p>
-      </div>
-    );
-    if (isMobile) {
-      return (
-        <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="h-[300px] flex flex-col p-4">
-            <DrawerHeader className="text-center">
-              <DrawerTitle><Title /></DrawerTitle>
-            </DrawerHeader>
-            <Content />
-          </DrawerContent>
-        </Drawer>
-      );
-    } else {
-      return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-          <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
-            <SheetHeader>
-              <SheetTitle><Title /></SheetTitle>
-            </SheetHeader>
-            <Content />
-          </SheetContent>
-        </Sheet>
-      );
-    }
-  }
-
-  if (!user) {
-    const Content = () => (
-      <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
-        <MessageSquare className="h-16 w-16 text-muted-foreground" />
-        <p className="text-muted-foreground">Anda harus masuk untuk memulai chat.</p>
-        <Button asChild>
-          <a href="/auth">Masuk / Daftar</a>
-        </Button>
-      </div>
-    );
-
-    if (isMobile) {
-      return (
-        <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="h-[300px] flex flex-col p-4">
-            <DrawerHeader className="text-center">
-              <DrawerTitle><Title /></DrawerTitle>
-            </DrawerHeader>
-            <Content />
-          </DrawerContent>
-        </Drawer>
-      );
-    } else {
-      return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-          <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
-            <SheetHeader>
-              <SheetTitle><Title /></SheetTitle>
-            </SheetHeader>
-            <Content />
-          </SheetContent>
-        </Sheet>
-      );
-    }
-  }
-
-  if (!targetAdminId) {
-    const Content = () => (
-      <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
-        <MessageSquare className="h-16 w-16 text-muted-foreground" />
-        <p className="font-semibold">Admin tidak tersedia untuk chat.</p>
-        <p className="text-sm text-muted-foreground">
-          Silakan coba lagi nanti atau hubungi dukungan.
-        </p>
-      </div>
-    );
-    if (isMobile) {
-      return (
-        <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="h-[300px] flex flex-col p-4">
-            <DrawerHeader className="text-center">
-              <DrawerTitle><Title /></DrawerTitle>
-            </DrawerHeader>
-            <Content />
-          </DrawerContent>
-        </Drawer>
-      );
-    } else {
-      return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-          <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
-            <SheetHeader>
-              <SheetTitle><Title /></SheetTitle>
-            </SheetHeader>
-            <Content />
-          </SheetContent>
-        </Sheet>
-      );
-    }
-  }
-
-  const ChatContent = (
+  // This block will contain the scrollable messages and input form
+  const ChatBody = (
     <>
       <div className="flex-1 flex flex-col overflow-hidden border rounded-md bg-muted/20">
         {isLoadingMessages ? (
@@ -479,11 +377,118 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
     </>
   );
 
+  if (isSessionLoading || isLoadingAdminId) {
+    const LoadingContent = () => (
+      <div className="flex-1 flex flex-col items-center justify-center text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
+        <p className="text-muted-foreground">Memuat informasi chat...</p>
+      </div>
+    );
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="h-[300px] flex flex-col p-4">
+            <DrawerHeader className="text-center">
+              <DrawerTitle><Title /></DrawerTitle>
+            </DrawerHeader>
+            <LoadingContent />
+          </DrawerContent>
+        </Drawer>
+      );
+    } else {
+      return (
+        <Sheet open={open} onOpenChange={onOpenChange}>
+          <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
+            <SheetHeader>
+              <SheetTitle><Title /></SheetTitle>
+            </SheetHeader>
+            <LoadingContent />
+          </SheetContent>
+        </Sheet>
+      );
+    }
+  }
+
+  if (!user) {
+    const NotLoggedInContent = () => (
+      <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
+        <MessageSquare className="h-16 w-16 text-muted-foreground" />
+        <p className="text-muted-foreground">Anda harus masuk untuk memulai chat.</p>
+        <Button asChild>
+          <a href="/auth">Masuk / Daftar</a>
+        </Button>
+      </div>
+    );
+
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="h-[300px] flex flex-col p-4">
+            <DrawerHeader className="text-center">
+              <DrawerTitle><Title /></DrawerTitle>
+            </DrawerHeader>
+            <NotLoggedInContent />
+          </DrawerContent>
+        </Drawer>
+      );
+    } else {
+      return (
+        <Sheet open={open} onOpenChange={onOpenChange}>
+          <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
+            <SheetHeader>
+              <SheetTitle><Title /></SheetTitle>
+            </SheetHeader>
+            <NotLoggedInContent />
+          </SheetContent>
+        </Sheet>
+      );
+    }
+  }
+
+  if (!targetAdminId) {
+    const NoAdminContent = () => (
+      <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
+        <MessageSquare className="h-16 w-16 text-muted-foreground" />
+        <p className="font-semibold">Admin tidak tersedia untuk chat.</p>
+        <p className="text-sm text-muted-foreground">
+          Silakan coba lagi nanti atau hubungi dukungan.
+        </p>
+      </div>
+    );
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="h-[300px] flex flex-col p-4">
+            <DrawerHeader className="text-center">
+              <DrawerTitle><Title /></DrawerTitle>
+            </DrawerHeader>
+            <NoAdminContent />
+          </DrawerContent>
+        </Drawer>
+      );
+    } else {
+      return (
+        <Sheet open={open} onOpenChange={onOpenChange}>
+          <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-6">
+            <SheetHeader>
+              <SheetTitle><Title /></SheetTitle>
+            </SheetHeader>
+            <NoAdminContent />
+          </SheetContent>
+        </Sheet>
+      );
+    }
+  }
+
+  // This is the main active chat rendering block
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="h-[90vh] flex flex-col">
-          {ChatContent}
+          <DrawerHeader className="p-4 border-b">
+            <DrawerTitle><Title /></DrawerTitle>
+          </DrawerHeader>
+          {ChatBody}
         </DrawerContent>
       </Drawer>
     );
@@ -494,7 +499,7 @@ export function ChatWidget({ productId, productName, orderId, orderName, open, o
           <SheetHeader>
             <SheetTitle><Title /></SheetTitle>
           </SheetHeader>
-          {ChatContent}
+          {ChatBody}
         </SheetContent>
       </Sheet>
     );
