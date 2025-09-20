@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, MapPin, Phone, User as UserIcon, CalendarDays, ArrowLeft, MessageSquare, Banknote, Wallet, CreditCard, Package, ReceiptText } from "lucide-react";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
-import { getOrderById, updateOrderPaymentMethodAndStatus, updateOrderStatus, confirmPaymentByUser, Order } from "@/lib/supabase/orders";
+import { getOrderById, updateOrderPaymentMethodAndStatus, updateOrderStatus, confirmPaymentByUser, deleteOrderWithItems, Order } from "@/lib/supabase/orders";
 import { getPaymentMethods, PaymentMethod } from "@/lib/supabase/payment-methods";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -133,22 +133,28 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     if (!order) return;
     setIsCancellingOrder(true);
     try {
-      // Update order status to 'cancelled' and payment status to 'refunded'
-      await updateOrderStatus(order.id, 'cancelled', 'refunded');
-      toast.success("Pesanan berhasil dibatalkan.");
+      if (order.payment_status === 'unpaid') {
+        // If unpaid, delete the order and its items
+        await deleteOrderWithItems(order.id);
+        toast.success("Pesanan berhasil dibatalkan dan dihapus.");
+        router.replace("/my-orders"); // Redirect to orders list
+      } else {
+        // If not unpaid, update order status to 'cancelled' and payment status to 'refunded'
+        await updateOrderStatus(order.id, 'cancelled', 'refunded');
+        toast.success("Pesanan berhasil dibatalkan.");
 
-      // Send notification to the buyer
-      if (order.user_id) {
-        await createNotification({
-          user_id: order.user_id,
-          title: "Pesanan Dibatalkan",
-          message: `Pesanan #${order.id.substring(0, 8)} Anda telah berhasil dibatalkan.`,
-          link: `/my-orders/${order.id}`,
-          is_read: false,
-        });
+        // Send notification to the buyer
+        if (order.user_id) {
+          await createNotification({
+            user_id: order.user_id,
+            title: "Pesanan Dibatalkan",
+            message: `Pesanan #${order.id.substring(0, 8)} Anda telah berhasil dibatalkan.`,
+            link: `/my-orders/${order.id}`,
+            is_read: false,
+          });
+        }
+        await fetchData(); // Refetch to update UI
       }
-
-      await fetchData(); // Refetch to update UI
     } catch (error: any) {
       console.error("Error cancelling order:", error);
       toast.error(error.message || "Gagal membatalkan pesanan.");
@@ -242,7 +248,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
   const selectedPaymentMethod = paymentMethods.find(pm => pm.id === selectedPaymentMethodId);
 
   // Determine if the order is cancellable
-  const isCancellable = order && (order.order_status === 'pending' || order.order_status === 'awaiting_confirmation');
+  const isCancellable = order && (order.order_status === 'pending' || order.payment_status === 'unpaid' || order.payment_status === 'awaiting_confirmation');
 
   if (isLoading || isSessionLoading) {
     return (
@@ -477,7 +483,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
                   <AlertDialogHeader>
                     <AlertDialogTitle>Apakah Anda yakin ingin membatalkan pesanan ini?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Tindakan ini tidak dapat dibatalkan. Pesanan Anda akan dibatalkan dan pembayaran (jika sudah dilakukan) akan diproses untuk pengembalian dana.
+                      Tindakan ini tidak dapat dibatalkan. {order.payment_status === 'unpaid' ? "Pesanan Anda akan dihapus secara permanen." : "Pesanan Anda akan dibatalkan dan pembayaran (jika sudah dilakukan) akan diproses untuk pengembalian dana."}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

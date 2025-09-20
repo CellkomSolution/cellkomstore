@@ -52,7 +52,7 @@ export interface Order {
   id: string;
   user_id: string;
   total_amount: number;
-  order_status: 'pending' | 'processing' | 'completed' | 'cancelled' | 'awaiting_confirmation'; // Renamed from 'status'
+  order_status: 'pending' | 'processing' | 'completed' | 'cancelled'; // Removed 'awaiting_confirmation' from order_status as it's a payment status
   payment_status: 'unpaid' | 'awaiting_confirmation' | 'paid' | 'refunded'; // New payment status
   payment_unique_code: number; // New: Unique code for payment identification
   shipping_address_name: string;
@@ -304,4 +304,28 @@ export async function getTotalOrdersCount(): Promise<number> {
     return 0;
   }
   return count || 0;
+}
+
+export async function deleteOrderWithItems(orderId: string): Promise<void> {
+  // First, delete all associated order items
+  const { error: itemsError } = await supabase
+    .from("order_items")
+    .delete()
+    .eq("order_id", orderId);
+
+  if (itemsError) {
+    console.error(`Error deleting order items for order ${orderId}:`, itemsError.message);
+    throw new Error("Gagal menghapus item pesanan.");
+  }
+
+  // Then, delete the order itself
+  const { error: orderError } = await supabase
+    .from("orders")
+    .delete()
+    .eq("id", orderId);
+
+  if (orderError) {
+    console.error(`Error deleting order ${orderId}:`, orderError.message);
+    throw new Error("Gagal menghapus pesanan.");
+  }
 }
