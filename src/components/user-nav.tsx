@@ -71,7 +71,9 @@ export function UserNav() {
               <DropdownMenuItem asChild>
                 <Link href="/my-orders">Pesanan Saya</Link>
               </DropdownMenuItem>
-              {/* NotificationBellIcon handles opening the sheet, no direct link needed here */}
+              <DropdownMenuItem asChild> {/* New: Link to notifications page */}
+                <Link href="/notifications">Notifikasi</Link>
+              </DropdownMenuItem>
             </>
           )}
           {profile.role === 'admin' && (

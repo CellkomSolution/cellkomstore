@@ -6,12 +6,14 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetFooter, // Import SheetFooter
 } from "@/components/ui/sheet";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
+  DrawerFooter, // Import DrawerFooter
 } from "@/components/ui/drawer";
 import { Bell, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -19,6 +21,8 @@ import { NotificationListContent } from "./notification-list-content";
 import { Notification as SupabaseNotification, getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/supabase/notifications";
 import { useSession } from "@/context/session-context";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button"; // Import Button
+import Link from "next/link"; // Import Link
 
 interface NotificationSheetProps {
   open: boolean;
@@ -93,6 +97,11 @@ export function NotificationSheet({ open, onOpenChange, onOpenChatWidget }: Noti
           onOpenChatWidget={onOpenChatWidget} // New: Pass down
         />
       </div>
+      <SheetFooter className="p-4 border-t">
+        <Button asChild className="w-full" onClick={() => onOpenChange(false)}>
+          <Link href="/notifications">Lihat Semua Notifikasi</Link>
+        </Button>
+      </SheetFooter>
     </>
   );
 
