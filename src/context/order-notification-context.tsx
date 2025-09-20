@@ -80,14 +80,12 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
 
   useEffect(() => {
     if (isSessionLoading || isAdminLoading || (isAdmin && !adminUserId)) { // Wait for adminUserId if current user is admin
-      console.log("OrderNotificationProvider: Skipping setup due to loading or admin status.");
       return;
     }
 
     // --- Notifikasi pesanan khusus pengguna (perubahan status & pesanan baru oleh pengguna ini) ---
     if (user && !isAdmin) { // Hanya untuk pengguna biasa
       const userId = user.id;
-      console.log(`OrderNotificationProvider: Subscribing user ${userId} to order updates.`);
       const userOrderChannel = supabase
         .channel(`user_order_updates_${userId}`)
         .on(
@@ -101,7 +99,6 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
           async (payload) => {
             const oldRecord = payload.old as Order;
             const newRecord = payload.new as Order;
-            console.log(`OrderNotificationProvider (User ${userId}): Order UPDATE received. Old:`, oldRecord, "New:", newRecord);
 
             // Notify on order_status change
             if (newRecord.order_status !== oldRecord.order_status) {
@@ -109,7 +106,6 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
               const message = `Pesanan Anda sekarang ${getOrderStatusMessage(newRecord.order_status)}.`;
               const link = `/my-orders/${newRecord.id}`;
               
-              console.log(`OrderNotificationProvider (User ${userId}): Creating order_status_update notification.`);
               await createNotification(userId, 'order_status_update', title, message, link, null, newRecord.id); // Pass order_id
               toast.info(message, {
                 icon: getStatusIcon(newRecord.order_status, newRecord.payment_status),
@@ -125,7 +121,6 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
               const message = `Pembayaran Anda sudah diterima, pesanan Anda sedang diproses.`; 
               const link = `/my-orders/${newRecord.id}`;
 
-              console.log(`OrderNotificationProvider (User ${userId}): Creating payment_status_update notification.`);
               await createNotification(userId, 'payment_status_update', title, message, link, null, newRecord.id); // Pass order_id
               toast.success(message, {
                 icon: getStatusIcon(newRecord.order_status, newRecord.payment_status),
@@ -147,12 +142,10 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
           },
           async (payload) => { // Make async to use await createNotification
             const newRecord = payload.new as Order;
-            console.log(`OrderNotificationProvider (User ${userId}): Order INSERT received. New:`, newRecord);
             const title = `Pesanan Baru #${newRecord.id.substring(0, 8)}`;
             const message = `Pesanan Anda berhasil dibuat! Total: ${formatRupiah(newRecord.total_amount + newRecord.payment_unique_code)}.`;
             const link = `/my-orders/${newRecord.id}`;
 
-            console.log(`OrderNotificationProvider (User ${userId}): Creating new order notification.`);
             await createNotification(userId, 'order_status_update', title, message, link, null, newRecord.id); // Pass order_id
             toast.success(message, {
               icon: <ShoppingBag className="h-4 w-4" />,
@@ -166,14 +159,12 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
         .subscribe();
 
       return () => {
-        console.log(`OrderNotificationProvider: Unsubscribing user ${userId} from order updates.`);
         supabase.removeChannel(userOrderChannel);
       };
     }
 
     // --- Notifikasi khusus admin (pesanan baru dari pengguna mana pun & perubahan status pembayaran) ---
     if (user && isAdmin && adminUserId) { // Hanya untuk pengguna admin
-      console.log(`OrderNotificationProvider: Subscribing admin ${adminUserId} to all order notifications.`);
       const adminOrderChannel = supabase
         .channel(`admin_order_notifications`)
         .on(
@@ -186,13 +177,11 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
           },
           async (payload) => { // Make async to use await createNotification
             const newRecord = payload.new as Order;
-            console.log(`OrderNotificationProvider (Admin ${adminUserId}): Order INSERT received. New:`, newRecord);
             const title = `Pesanan Baru #${newRecord.id.substring(0, 8)}`;
             const message = `Pesanan baru masuk! Total: ${formatRupiah(newRecord.total_amount + newRecord.payment_unique_code)}.`;
             const link = `/admin/orders/${newRecord.id}`;
 
             // Create persistent notification for admin
-            console.log(`OrderNotificationProvider (Admin ${adminUserId}): Creating new order notification for admin.`);
             await createNotification(adminUserId, 'order_status_update', title, message, link, null, newRecord.id); // Pass order_id
 
             toast.info(message, {
@@ -217,7 +206,6 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
           async (payload) => { // Make async
             const oldRecord = payload.old as Order;
             const newRecord = payload.new as Order;
-            console.log(`OrderNotificationProvider (Admin ${adminUserId}): Order UPDATE (awaiting_confirmation) received. Old:`, oldRecord, "New:", newRecord);
 
             if (newRecord.payment_status === 'awaiting_confirmation' && oldRecord.payment_status === 'unpaid') {
               const title = `Konfirmasi Pembayaran Pesanan #${newRecord.id.substring(0, 8)}`;
@@ -225,7 +213,6 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
               const link = `/admin/orders/${newRecord.id}`;
 
               // Create persistent notification for admin
-              console.log(`OrderNotificationProvider (Admin ${adminUserId}): Creating payment_status_update notification for admin.`);
               await createNotification(adminUserId, 'payment_status_update', title, message, link, null, newRecord.id); // Pass order_id
 
               toast.warning(message, {
@@ -242,7 +229,6 @@ export function OrderNotificationProvider({ children }: OrderNotificationProvide
         .subscribe();
 
       return () => {
-        console.log(`OrderNotificationProvider: Unsubscribing admin ${adminUserId} from order notifications.`);
         supabase.removeChannel(adminOrderChannel);
       };
     }

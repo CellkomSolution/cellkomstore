@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, MapPin, Phone, User as UserIcon, CalendarDays, ArrowLeft, MessageSquare, Banknote, Wallet, CreditCard, Package, ReceiptText } from "lucide-react"; // Added ReceiptText icon
+import { Loader2, MapPin, Phone, User as UserIcon, CalendarDays, ArrowLeft, MessageSquare, Banknote, Wallet, CreditCard, Package, ReceiptText } from "lucide-react";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/utils";
-import { getOrderById, updateOrderPaymentMethodAndStatus, Order } from "@/lib/supabase/orders";
+import { getOrderById, updateOrderPaymentMethodAndStatus, updateOrderStatus, Order } from "@/lib/supabase/orders"; // Import updateOrderStatus
 import { getPaymentMethods, PaymentMethod } from "@/lib/supabase/payment-methods";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -19,6 +19,17 @@ import { ChatWidget } from "@/components/chat-widget";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/context/cart-context";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // Import AlertDialog components
 
 interface UserOrderDetailPageProps {
   params: Promise<{ orderId: string }>;
@@ -36,6 +47,7 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
   const [paymentMethods, setPaymentMethods] = React.useState<PaymentMethod[]>([]);
   const [selectedPaymentMethodId, setSelectedPaymentMethodId] = React.useState<string | null>(null);
   const [isConfirmingPayment, setIsConfirmingPayment] = React.useState(false);
+  const [isCancellingOrder, setIsCancellingOrder] = React.useState(false); // New state for cancellation
 
   const fetchData = React.useCallback(async () => {
     setIsLoading(true);
@@ -86,6 +98,29 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
     } finally {
       setIsConfirmingPayment(false);
     }
+  };
+
+  // New function to handle order cancellation
+  const handleCancelOrder = async () => {
+    if (!order) return;
+    setIsCancellingOrder(true);
+    try {
+      // Update order status to 'cancelled' and payment status to 'refunded'
+      await updateOrderStatus(order.id, 'cancelled', 'refunded');
+      toast.success("Pesanan berhasil dibatalkan.");
+      await fetchData(); // Refetch to update UI
+    } catch (error: any) {
+      console.error("Error cancelling order:", error);
+      toast.error(error.message || "Gagal membatalkan pesanan.");
+    } finally {
+      setIsCancellingOrder(false);
+    }
+  };
+
+  // New function to handle "Tambah Pesanan"
+  const handleContinueShopping = () => {
+    clearCart(); // Clear cart before redirecting to shopping
+    router.push("/");
   };
 
   const getStatusBadgeVariant = (orderStatus: Order['order_status'], paymentStatus: Order['payment_status']) => {
@@ -166,6 +201,9 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
   };
 
   const selectedPaymentMethod = paymentMethods.find(pm => pm.id === selectedPaymentMethodId);
+
+  // Determine if the order is cancellable
+  const isCancellable = order && (order.order_status === 'pending' || order.order_status === 'awaiting_confirmation');
 
   if (isLoading || isSessionLoading) {
     return (
@@ -348,6 +386,38 @@ export default function UserOrderDetailPage({ params }: UserOrderDetailPageProps
               <MessageSquare className="mr-2 h-4 w-4" />
               Hubungi Penjual
             </Button>
+
+            {/* New: "Tambah Pesanan" button */}
+            <Button variant="secondary" className="w-full" onClick={handleContinueShopping}>
+              Tambah Pesanan
+            </Button>
+
+            {/* New: "Batalkan Pesanan" button with AlertDialog */}
+            {isCancellable && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="w-full" disabled={isCancellingOrder}>
+                    {isCancellingOrder ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Batalkan Pesanan
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Apakah Anda yakin ingin membatalkan pesanan ini?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tindakan ini tidak dapat dibatalkan. Pesanan Anda akan dibatalkan dan pembayaran (jika sudah dilakukan) akan diproses untuk pengembalian dana.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isCancellingOrder}>Tidak</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleCancelOrder} disabled={isCancellingOrder}>
+                      {isCancellingOrder ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      Ya, Batalkan
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         </div>
       </div>
