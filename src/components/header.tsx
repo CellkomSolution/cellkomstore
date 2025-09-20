@@ -17,7 +17,8 @@ import { AdminChatNotificationIcon } from "./admin-chat-notification-icon";
 import { useAdmin } from "@/hooks/use-admin";
 import { useRouter } from "next/navigation";
 import { CartSheet } from "./cart-sheet";
-import { CategorySheet } from "./category-sheet"; // Import CategorySheet
+import { CategorySheet } from "./category-sheet";
+import { NotificationBellIcon } from "./notification-bell-icon"; // Import NotificationBellIcon
 
 export function Header() {
   const { session, isLoading: isAuthLoading, user } = useAuth();
@@ -26,8 +27,8 @@ export function Header() {
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false); // State for MobileNav
-  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false); // State for CategorySheet
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -59,11 +60,10 @@ export function Header() {
   };
 
   const handleOpenCategorySheet = () => {
-    setIsMobileNavOpen(false); // Close MobileNav first
-    // Introduce a small delay before opening CategorySheet
+    setIsMobileNavOpen(false);
     setTimeout(() => {
-      setIsCategorySheetOpen(true); // Then open CategorySheet
-    }, 100); // 100ms delay
+      setIsCategorySheetOpen(true);
+    }, 100);
   };
 
   const showScrollingText = (appSettings?.scrolling_text_enabled && appSettings?.scrolling_text_content) || (appSettings?.store_status_enabled && appSettings?.store_status_content);
@@ -128,16 +128,15 @@ export function Header() {
               open={isMobileNavOpen} 
               onOpenChange={setIsMobileNavOpen} 
               onOpenCategorySheet={handleOpenCategorySheet} 
-            /> {/* Mobile menu button */}
+            />
             <Link href="/" className="hidden md:flex items-center space-x-2">
-              {/* Desktop Logo */}
               {appSettings?.site_logo_url ? (
                 <img src={appSettings.site_logo_url} alt={appSettings.site_name || "Logo"} className="h-8 w-auto" />
               ) : (
                 <span className="inline-block font-bold text-lg">{appSettings?.site_name || "Cellkom"}</span>
               )}
             </Link>
-            <MainNav /> {/* Desktop navigation links */}
+            <MainNav />
           </div>
 
           {/* Center: Desktop Search (hidden on mobile) */}
@@ -157,29 +156,28 @@ export function Header() {
             </form>
           </div>
 
-          {/* Right side: Conditional Icons (Chat), Cart, UserNav/Auth */}
+          {/* Right side: Conditional Icons (Notification, Chat), Cart, UserNav/Auth */}
           <div className="flex items-center space-x-4">
             {isAuthLoading ? (
               <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
             ) : session ? (
-              // Logged in: Show Chat icon
               <>
+                <NotificationBellIcon /> {/* New: Notification Bell Icon */}
                 {isAdmin ? (
                   <AdminChatNotificationIcon />
                 ) : (
                   <ChatNotificationIcon />
                 )}
               </>
-            ) : null} {/* No chat icons if not logged in */}
+            ) : null}
 
-            <CartSheet /> {/* Cart is always visible */}
+            <CartSheet />
 
             {isAuthLoading ? (
               <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
             ) : session ? (
               <UserNav />
             ) : (
-              // Not logged in: Show Masuk/Daftar buttons
               <div className="flex items-center space-x-2">
                 <Button variant="outline" asChild>
                   <Link href="/auth">Masuk</Link>
@@ -207,7 +205,6 @@ export function Header() {
           </div>
         </div>
       )}
-      {/* Render CategorySheet here, controlled by Header's state */}
       <CategorySheet open={isCategorySheetOpen} onOpenChange={setIsCategorySheetOpen} />
     </header>
   );

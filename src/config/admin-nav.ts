@@ -10,6 +10,7 @@ import {
   BookOpen,
   MessageSquare,
   Images,
+  Bell, // Import Bell icon
 } from "lucide-react";
 
 export const adminNavItems = [
@@ -57,6 +58,11 @@ export const adminNavItems = [
     title: "Metode Pembayaran",
     href: "/admin/payment-methods",
     icon: CreditCard,
+  },
+  {
+    title: "Notifikasi", // New: Notifikasi
+    href: "/admin/notifications",
+    icon: Bell,
   },
   {
     title: "Chat Admin",
